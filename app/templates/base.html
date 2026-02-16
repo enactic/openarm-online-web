@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>
+      {% block title %}{{ site_name }}{% endblock %}
+    </title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">TOP</a>
+    </nav>
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>

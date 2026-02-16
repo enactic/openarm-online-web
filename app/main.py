@@ -12,11 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 
 app = FastAPI()
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World!"}
+@app.get("/", response_class=HTMLResponse)
+def top(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "top.html",
+        {"site_name": "OpenEval"},
+    )
