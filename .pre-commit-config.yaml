@@ -22,4 +22,5 @@ repos:
     hooks:
       - id: djlint-reformat
         args: ["--profile=jinja", "--indent=2"]
-        files: ^app\/templates\/.+\.html$
+        types_or:
+          - html
