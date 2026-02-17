@@ -52,8 +52,6 @@ def logout(user: CurrentUserRequired):
 
 @app.get("/me", response_class=HTMLResponse)
 def me_page(request: Request, user: CurrentUserRequired):
-    if not user:
-        RedirectResponse(url="/login", status_code=303)
     return templates.TemplateResponse(request, "me.html", {
         "site_name": settings.SITE_NAME,
         "user": user,
