@@ -1,5 +1,5 @@
 [project]
-name = "OpenEval-website"
+name = "openeval-website"
 version = "0.1.0"
 description = "This is the OpenEval website."
 readme = "README.md"
