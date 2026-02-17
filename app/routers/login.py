@@ -103,7 +103,7 @@ def login_github_callback(
     login_name = github_user.get("login")
     name = github_user.get("name")
     # Create user
-    user = crud.get_user_by_github_id(
+    user = crud.find_user_by_github_id(
         session=session, github_id=github_id
     )
     if not user:

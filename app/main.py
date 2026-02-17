@@ -17,7 +17,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app.deps import CurrentUser, CurrentUserRequired, NotLoggedIn
+from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
 from app.routers import login
 from app.settings import settings
 from app.templates import templates
@@ -32,7 +32,7 @@ async def requires_login_handler(request: Request, exc: NotLoggedIn):
 
 
 @app.get("/", response_class=HTMLResponse)
-def top_page(request: Request, user: CurrentUser):
+def top_page(request: Request, user: CurrentUserOptional):
     return templates.TemplateResponse(
         request,
         "top.html",
@@ -44,14 +44,14 @@ def top_page(request: Request, user: CurrentUser):
 
 
 @app.get("/logout")
-def logout(user: CurrentUserRequired):
+def logout(user: CurrentUser):
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="access_token", path="/")
     return response
 
 
 @app.get("/me", response_class=HTMLResponse)
-def me_page(request: Request, user: CurrentUserRequired):
+def me_page(request: Request, user: CurrentUser):
     return templates.TemplateResponse(request, "me.html", {
         "site_name": settings.SITE_NAME,
         "user": user,

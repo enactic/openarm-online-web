@@ -13,12 +13,12 @@
 # limitations under the License.
 
 from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import Depends, Request
 from sqlmodel import Session
 
-from app.crud import get_user
+from app.crud import find_user
 from app.db import engine
 from app.models import User
 from app.token import get_sub
@@ -36,23 +36,24 @@ def get_db() -> Generator[Session, None, None]:
 SessionDep = Annotated[Session, Depends(get_db)]
 
 
-def get_current_user(
+def find_current_user_optional(
     request: Request, session: SessionDep
-) -> User | None:
+) -> Optional[User]:
     token = request.cookies.get("access_token")
     user_id = get_sub(token)
     if user_id is None:
         return None
-    return get_user(session=session, user_id=user_id)
+    return find_user(session=session, user_id=user_id)
 
 
-CurrentUser = Annotated[User | None, Depends(get_current_user)]
+CurrentUserOptional = Annotated[Optional[User],
+                                Depends(find_current_user_optional)]
 
 
-def get_current_user_login_required(user: CurrentUser) -> User:
+def find_current_user(user: CurrentUserOptional) -> User:
     if user is None:
         raise NotLoggedIn()
     return user
 
 
-CurrentUserRequired = Annotated[User, Depends(get_current_user_login_required)]
+CurrentUser = Annotated[User, Depends(find_current_user)]

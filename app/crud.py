@@ -17,11 +17,11 @@ from sqlmodel import Session, select
 from app.models import User, UserGitHub
 
 
-def get_user(*, session, user_id: int) -> User | None:
+def find_user(*, session, user_id: int) -> User | None:
     return session.get(User, user_id)
 
 
-def get_user_by_github_id(*, session: Session, github_id: int) -> User | None:
+def find_user_by_github_id(*, session: Session, github_id: int) -> User | None:
     return session.exec(
         select(User).join(UserGitHub).where(UserGitHub.github_id == github_id)
     ).first()
