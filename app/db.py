@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-POSTGRES_SERVER=db
-POSTGRES_DB=openeval
-POSTGRES_USER=openeval
-POSTGRES_PASSWORD=openeval
+from sqlmodel import create_engine
 
-# You need to create an OAuth app.
-# https://docs.github.com/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
-GITHUB_CLIENT_ID=xxx
-GITHUB_CLIENT_SECRET=xxx
+from app.settings import settings
+
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))

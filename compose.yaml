@@ -21,6 +21,8 @@ services:
       - 127.0.0.1:8000:8000
     volumes:
       - ./app:/app
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy

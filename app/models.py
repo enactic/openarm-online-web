@@ -38,7 +38,7 @@ class UserGitHub(SQLModel, table=True):
     __tablename__ = "user_github"
 
     id: int = Field(primary_key=True)
-    user_id: int = Field(unique=True, index=True)
+    user_id: int = Field(foreign_key="user.id", unique=True, index=True)
     github_id: int = Field(unique=True, index=True)
     login_name: str | None = Field(default=None, max_length=255)
     name: str | None = Field(default=None, max_length=255)

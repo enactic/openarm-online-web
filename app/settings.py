@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import secrets
+
 from pydantic import PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -25,11 +27,22 @@ class Settings(BaseSettings):
 
     # These are the default values.
     # They are overridden by the values of environment variables.
+    SITE_NAME: str = "OpenEval"
+
     POSTGRES_SERVER: str = "db"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "openeval"
     POSTGRES_USER: str = "openeval"
     POSTGRES_PASSWORD: str = "openeval"
+
+    GITHUB_AUTHORIZE_URL: str = "https://github.com/login/oauth/authorize"
+    GITHUB_TOKEN_URL: str = "https://github.com/login/oauth/access_token"
+    GITHUB_USER_URL: str = "https://api.github.com/user"
+
+    GITHUB_CLIENT_ID: str
+    GITHUB_CLIENT_SECRET: str
+
+    SECRET_KEY: str = secrets.token_urlsafe(32)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
