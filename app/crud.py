@@ -57,5 +57,3 @@ def update_user_github(
     user.github.name = name
     session.add(user)
     session.commit()
-    session.refresh(user)
-    return user
