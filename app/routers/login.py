@@ -114,8 +114,12 @@ def login_github_callback(
             name=name,
         )
     else:
-        # todo: Update user data?
-        pass
+        user = crud.update_user_github(
+            session=session,
+            user=user,
+            login_name=login_name,
+            name=name,
+        )
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="oauth_state", path="/")
     access_token = create_access_token(str(user.id))

@@ -44,3 +44,18 @@ def create_user(
     session.commit()
     session.refresh(user)
     return user
+
+
+def update_user_github(
+    *,
+    session: Session,
+    user: User,
+    login_name: str | None = None,
+    name: str | None = None,
+) -> User:
+    user.github.login_name = login_name
+    user.github.name = name
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
