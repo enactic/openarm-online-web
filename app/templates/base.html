@@ -8,12 +8,12 @@
   </head>
   <body>
     <nav>
-      <a href="/">TOP</a>
+      <a href="{{ url_for('top_page') }}">TOP</a>
       {% if user %}
-        <a href="/me">Profile</a>
-        <a href="/logout">Logout</a>
+        <a href="{{ url_for('me_page') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
-        <a href="/login">Login</a>
+        <a href="{{ url_for('login_page') }}">Login</a>
       {% endif %}
     </nav>
     <div class="container">
