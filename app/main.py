@@ -15,17 +15,45 @@
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, RedirectResponse
+
+from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
+from app.routers import login
+from app.settings import settings
+from app.templates import templates
 
 app = FastAPI()
-templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+app.include_router(login.router)
+
+
+@app.exception_handler(NotLoggedIn)
+async def requires_login_handler(request: Request, exc: NotLoggedIn):
+    return RedirectResponse(url="/login", status_code=303)
 
 
 @app.get("/", response_class=HTMLResponse)
-def top(request: Request):
+def top_page(request: Request, user: CurrentUserOptional):
     return templates.TemplateResponse(
         request,
         "top.html",
-        {"site_name": "OpenEval"},
+        {"site_name": settings.SITE_NAME, "user": user},
+    )
+
+
+@app.get("/logout")
+def logout(user: CurrentUser):
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="access_token", path="/")
+    return response
+
+
+@app.get("/me", response_class=HTMLResponse)
+def me_page(request: Request, user: CurrentUser):
+    return templates.TemplateResponse(
+        request,
+        "me.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "user": user,
+        },
     )

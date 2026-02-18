@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Profile - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Profile</h1>
+  <table>
+    <tr>
+      <th>GitHub login name</th>
+      <td>{{ user.github.login_name or '-' }}</td>
+    </tr>
+    <tr>
+      <th>Name</th>
+      <td>{{ user.github.name or '-' }}</td>
+    </tr>
+  </table>
+{% endblock %}

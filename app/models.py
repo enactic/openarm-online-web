@@ -15,17 +15,17 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime
-from sqlmodel import Field, Relationship, SQLModel
-
-
-def get_datetime_utc() -> datetime:
-    return datetime.now(timezone.utc)
+from sqlmodel import Column, Field, Relationship, SQLModel, func
 
 
 class User(SQLModel, table=True):
     id: int = Field(primary_key=True)
     created_at: datetime = Field(
-        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
     )
 
     github: "UserGitHub" = Relationship(
@@ -38,9 +38,24 @@ class UserGitHub(SQLModel, table=True):
     __tablename__ = "user_github"
 
     id: int = Field(primary_key=True)
-    user_id: int = Field(unique=True, index=True)
+    user_id: int = Field(foreign_key="user.id", unique=True, index=True)
     github_id: int = Field(unique=True, index=True)
     login_name: str | None = Field(default=None, max_length=255)
     name: str | None = Field(default=None, max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+            onupdate=func.now(),
+        )
+    )
 
     user: User = Relationship(back_populates="github")
