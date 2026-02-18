@@ -36,9 +36,7 @@ def get_db() -> Generator[Session, None, None]:
 SessionDep = Annotated[Session, Depends(get_db)]
 
 
-def find_current_user_optional(
-    request: Request, session: SessionDep
-) -> Optional[User]:
+def find_current_user_optional(request: Request, session: SessionDep) -> Optional[User]:
     token = request.cookies.get("access_token")
     user_id = get_sub(token)
     if user_id is None:
@@ -46,8 +44,7 @@ def find_current_user_optional(
     return find_user(session=session, user_id=user_id)
 
 
-CurrentUserOptional = Annotated[Optional[User],
-                                Depends(find_current_user_optional)]
+CurrentUserOptional = Annotated[Optional[User], Depends(find_current_user_optional)]
 
 
 def find_current_user(user: CurrentUserOptional) -> User:

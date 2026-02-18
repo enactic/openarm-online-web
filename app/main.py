@@ -36,10 +36,7 @@ def top_page(request: Request, user: CurrentUserOptional):
     return templates.TemplateResponse(
         request,
         "top.html",
-        {
-            "site_name": settings.SITE_NAME,
-            "user": user
-        },
+        {"site_name": settings.SITE_NAME, "user": user},
     )
 
 
@@ -52,7 +49,11 @@ def logout(user: CurrentUser):
 
 @app.get("/me", response_class=HTMLResponse)
 def me_page(request: Request, user: CurrentUser):
-    return templates.TemplateResponse(request, "me.html", {
-        "site_name": settings.SITE_NAME,
-        "user": user,
-    })
+    return templates.TemplateResponse(
+        request,
+        "me.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "user": user,
+        },
+    )

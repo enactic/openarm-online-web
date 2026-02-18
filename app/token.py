@@ -33,8 +33,7 @@ def get_sub(token: str) -> str:
     if token is None:
         return None
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY,
-                             algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("sub")
     except (InvalidTokenError, ValidationError) as e:
         return None

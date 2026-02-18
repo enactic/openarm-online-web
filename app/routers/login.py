@@ -26,15 +26,18 @@ from app.settings import settings
 from app.templates import templates
 from app.token import create_access_token
 
-
 router = APIRouter(prefix="/login")
 
 
 @router.get("/", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html", {
-        "site_name": settings.SITE_NAME,
-    })
+    return templates.TemplateResponse(
+        request,
+        "login.html",
+        {
+            "site_name": settings.SITE_NAME,
+        },
+    )
 
 
 @router.get("/github")
@@ -42,7 +45,7 @@ def login_github(request: Request):
     state = secrets.token_urlsafe(32)
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
-        "scope": 'read:user',
+        "scope": "read:user",
         "state": state,
     }
     response = RedirectResponse(
@@ -70,9 +73,13 @@ def login_github_callback(
     saved_state = request.cookies.get("oauth_state")
     if not saved_state or saved_state != state:
         # todo: error message
-        return templates.TemplateResponse(request, "login.html", {
-            "site_name": settings.SITE_NAME,
-        })
+        return templates.TemplateResponse(
+            request,
+            "login.html",
+            {
+                "site_name": settings.SITE_NAME,
+            },
+        )
     # Exchange code for access token
     token_response = httpx.post(
         settings.GITHUB_TOKEN_URL,
@@ -87,9 +94,13 @@ def login_github_callback(
     access_token = token_data.get("access_token")
     if not access_token:
         # todo: error message
-        return templates.TemplateResponse(request, "login.html", {
-            "site_name": settings.SITE_NAME,
-        })
+        return templates.TemplateResponse(
+            request,
+            "login.html",
+            {
+                "site_name": settings.SITE_NAME,
+            },
+        )
     # Fetch GitHub user info
     github_user_response = httpx.get(
         settings.GITHUB_USER_URL,
@@ -103,9 +114,7 @@ def login_github_callback(
     login_name = github_user.get("login")
     name = github_user.get("name")
     # Create user
-    user = crud.find_user_by_github_id(
-        session=session, github_id=github_id
-    )
+    user = crud.find_user_by_github_id(session=session, github_id=github_id)
     if user:
         crud.update_user_github(
             session=session,
