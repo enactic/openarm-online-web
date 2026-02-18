@@ -32,6 +32,7 @@ class User(SQLModel, table=True):
         back_populates="user",
         sa_relationship_kwargs={"uselist": False, "lazy": "joined"},
     )
+    jobs: list["Job"] = Relationship(back_populates="user")
 
 
 class UserGitHub(SQLModel, table=True):
@@ -59,3 +60,36 @@ class UserGitHub(SQLModel, table=True):
     )
 
     user: User = Relationship(back_populates="github")
+
+
+class Job(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    docker_tag: str = Field(max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    user: User = Relationship(back_populates="jobs")
+    job_results: list["JobResult"] = Relationship(back_populates="job")
+
+
+class JobResult(SQLModel, table=True):
+    __tablename__ = "job_result"
+
+    id: int = Field(primary_key=True)
+    job_id: int = Field(foreign_key="job.id", index=True)
+    success: bool = Field(default=False)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    job: Job = Relationship(back_populates="job_results")
