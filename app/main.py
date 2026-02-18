@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
-from app.routers import login
+from app.deps import CurrentUserOptional, NotLoggedIn
+from app.routers import api, login, me
 from app.settings import settings
 from app.templates import templates
 
 app = FastAPI()
+app.include_router(api.router)
 app.include_router(login.router)
+app.include_router(me.router)
 
 
 @app.exception_handler(NotLoggedIn)
@@ -37,23 +37,4 @@ def top_page(request: Request, user: CurrentUserOptional):
         request,
         "top.html",
         {"site_name": settings.SITE_NAME, "user": user},
-    )
-
-
-@app.get("/logout")
-def logout(user: CurrentUser):
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie(key="access_token", path="/")
-    return response
-
-
-@app.get("/me", response_class=HTMLResponse)
-def me_page(request: Request, user: CurrentUser):
-    return templates.TemplateResponse(
-        request,
-        "me.html",
-        {
-            "site_name": settings.SITE_NAME,
-            "user": user,
-        },
     )

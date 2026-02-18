@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}API Keys - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>API Keys</h1>
+  {% if new_key %}
+    <strong>Your new API key (copy it now — it won't be shown again):</strong>
+    <div>{{ new_key }}</div>
+  {% endif %}
+  <h2>Create new key</h2>
+  <form method="post" action="{{ url_for('create_api_key_page') }}">
+    <label>
+      Name
+      <input type="text" name="name" required>
+    </label>
+    <button type="submit">Create</button>
+  </form>
+  <h2>Your keys</h2>
+  {% if api_keys %}
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Created (UTC)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key in api_keys %}
+          <tr>
+            <td>{{ key.name }}</td>
+            <td>{{ key.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+            <td>
+              <form method="post"
+                    action="{{ url_for('delete_api_key_page', api_key_id=key.id) }}"
+                    style="margin:0">
+                <button type="submit" onclick="return confirm('Delete this API key?')">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No API keys yet.</p>
+  {% endif %}
+{% endblock %}

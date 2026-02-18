@@ -15,13 +15,14 @@
 from collections.abc import Generator
 from typing import Annotated, Optional
 
-from fastapi import Depends, Request
+from fastapi import Depends, Header, Request, HTTPException
 from sqlmodel import Session
 
-from app.crud import find_user
+from app.crud import find_api_key_by_hash, find_user
 from app.db import engine
 from app.models import User
-from app.token import get_sub
+from app.settings import settings
+from app.token import get_sub, get_hex_digest
 
 
 class NotLoggedIn(Exception):
@@ -54,3 +55,25 @@ def find_current_user(user: CurrentUserOptional) -> User:
 
 
 CurrentUser = Annotated[User, Depends(find_current_user)]
+
+
+def find_api_user(
+    session: SessionDep,
+    authorization: str = Header(),
+) -> User:
+    if not authorization.startswith("Bearer " + settings.API_KEY_PREFIX):
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    key = authorization.removeprefix("Bearer ")
+    hashed_key = get_hex_digest(key)
+    api_key = find_api_key_by_hash(session=session, hashed_key=hashed_key)
+    if api_key is None:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    user = find_user(session=session, user_id=api_key.user_id)
+    if user is None or user.github is None:
+        raise HTTPException(status_code=401, detail="Invalid user")
+    return user
+
+
+ApiUser = Annotated[User, Depends(find_api_user)]

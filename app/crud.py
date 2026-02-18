@@ -14,7 +14,8 @@
 
 from sqlmodel import Session, select
 
-from app.models import User, UserGitHub
+from app.models import ApiKey, User, UserGitHub
+from app.token import generate_api_key, get_hex_digest
 
 
 def find_user(*, session, user_id: int) -> User | None:
@@ -57,3 +58,30 @@ def update_user_github(
     user.github.name = name
     session.add(user)
     session.commit()
+
+
+def create_api_key(*, session: Session, user_id: int, name: str) -> str:
+    key = generate_api_key()
+    api_key = ApiKey(user_id=user_id, hashed_key=get_hex_digest(key), name=name)
+    session.add(api_key)
+    session.commit()
+    return key
+
+
+def get_api_keys_by_user(*, session: Session, user: User) -> list[ApiKey]:
+    return session.exec(select(ApiKey).where(ApiKey.user_id == user.id)).all()
+
+
+def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:
+    return session.exec(select(ApiKey).where(ApiKey.hashed_key == hashed_key)).first()
+
+
+def delete_api_key(*, session: Session, api_key_id: int, user: User) -> bool:
+    api_key = session.exec(
+        select(ApiKey).where(ApiKey.id == api_key_id, ApiKey.user_id == user.id)
+    ).first()
+    if api_key is None:
+        return False
+    session.delete(api_key)
+    session.commit()
+    return True
