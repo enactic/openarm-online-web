@@ -25,7 +25,8 @@ def get_datetime_utc() -> datetime:
 class User(SQLModel, table=True):
     id: int = Field(primary_key=True)
     created_at: datetime = Field(
-        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True))
+        default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
+    )
 
     github: "UserGitHub" = Relationship(
         back_populates="user",
