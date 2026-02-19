@@ -62,6 +62,21 @@ class UserGitHub(SQLModel, table=True):
     user: User = Relationship(back_populates="github")
 
 
+class ApiKey(SQLModel, table=True):
+    __tablename__ = "api_key"
+
+    id: int = Field(primary_key=True)
+    hashed_key: str = Field(unique=True, index=True)
+    name: str = Field(max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+
 class Job(SQLModel, table=True):
     id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
