@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hmac
+import hashlib
 import jwt
-from jwt.exceptions import InvalidTokenError
-from pydantic import ValidationError
+import secrets
 
 from datetime import datetime, timedelta, timezone
+from jwt.exceptions import InvalidTokenError
+from pydantic import ValidationError
 
 from app.settings import settings
 
@@ -37,3 +40,14 @@ def get_sub(token: str) -> str:
         return payload.get("sub")
     except (InvalidTokenError, ValidationError) as e:
         return None
+
+
+def get_hex_digest(text: str) -> str:
+    signature = hmac.new(
+        settings.HMAC_KEY.encode("utf-8"), text.encode("utf-8"), hashlib.sha256
+    )
+    return signature.hexdigest()
+
+
+def generate_api_key() -> str:
+    return settings.API_KEY_PREFIX + secrets.token_urlsafe(32)
