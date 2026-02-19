@@ -14,7 +14,7 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
 
 
@@ -77,9 +77,25 @@ class ApiKey(SQLModel, table=True):
     )
 
 
+class Task(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    name: str | None = Field(default=None, max_length=255)
+    prompt: str = Field(sa_type=Text)
+    reset_docker_tag: str = Field(max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+    jobs: list["Job"] = Relationship(back_populates="task")
+
+
 class Job(SQLModel, table=True):
     id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
+    task_id: int = Field(foreign_key="task.id", index=True)
     docker_tag: str = Field(max_length=255)
     created_at: datetime = Field(
         sa_column=Column(
@@ -90,6 +106,7 @@ class Job(SQLModel, table=True):
     )
 
     user: User = Relationship(back_populates="jobs")
+    task: Task = Relationship(back_populates="jobs")
     job_results: list["JobResult"] = Relationship(back_populates="job")
 
 
