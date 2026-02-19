@@ -24,7 +24,7 @@ from app import crud
 from app.deps import SessionDep
 from app.settings import settings
 from app.templates import templates
-from app.token import create_access_token
+from app.security import create_access_token
 
 router = APIRouter(prefix="/login")
 

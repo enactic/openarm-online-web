@@ -21,7 +21,7 @@ from sqlmodel import Session
 from app.crud import find_user
 from app.db import engine
 from app.models import User
-from app.token import get_sub
+from app.security import get_sub
 
 
 class NotLoggedIn(Exception):
