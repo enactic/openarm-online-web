@@ -96,6 +96,16 @@ def create_job(
     return job
 
 
+def find_job(*, session, job_id: int) -> Job | None:
+    statement = (
+        select(Job)
+        .where(Job.id == job_id)
+        .options(selectinload(Job.job_results))
+        .options(selectinload(Job.task))
+    )
+    return session.exec(statement).first()
+
+
 def _get_jobs_with_statistics_statement() -> Select[Row]:
     success_func_avg = func.avg(case((JobResult.success == True, 1), else_=0))
     return (
@@ -126,13 +136,3 @@ def get_jobs_with_statistics_by_task_id(*, session: Session, task_id: int) -> li
 def get_job_with_statistics_by_job(*, session: Session, job: Job) -> Row:
     statement = _get_jobs_with_statistics_statement()
     return session.exec(statement.where(Job.id == job.id)).first()
-
-
-def find_job_full_data(*, session, job_id: int) -> Job | None:
-    statement = (
-        select(Job)
-        .where(Job.id == job_id)
-        .options(selectinload(Job.job_results))
-        .options(selectinload(Job.task))
-    )
-    return session.exec(statement).first()

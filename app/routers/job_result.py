@@ -30,7 +30,7 @@ def list_job_results_page(
     current_user: CurrentUser,
     job_id: int = Query(),
 ):
-    job = crud.find_job_full_data(session=session, job_id=job_id)
+    job = crud.find_job(session=session, job_id=job_id)
     statistics = crud.get_job_with_statistics_by_job(session=session, job=job)
     return templates.TemplateResponse(
         request,
