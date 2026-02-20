@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import secrets
-
 from pydantic import PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -42,7 +40,7 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_ID: str
     GITHUB_CLIENT_SECRET: str
 
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str
 
     API_KEY_PREFIX: str = "openeval-key-"
     HMAC_KEY: str
