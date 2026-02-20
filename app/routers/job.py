@@ -27,16 +27,17 @@ router = APIRouter(prefix="/jobs")
 def create_job_page(
     request: Request,
     session: SessionDep,
-    user: CurrentUser,
+    current_user: CurrentUser,
     task_id: int = Form(),
     docker_tag: str = Form(),
 ):
     crud.create_job(
         session=session,
-        user=user,
+        user=current_user,
         task_id=task_id,
         docker_tag=docker_tag,
     )
     return RedirectResponse(
-        url=request.url_for("list_jobs_by_user_page", user_id=user.id), status_code=303
+        url=request.url_for("list_jobs_by_user_page", user_id=current_user.id),
+        status_code=303,
     )

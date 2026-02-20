@@ -25,10 +25,14 @@ router = APIRouter(prefix="/users")
 
 @router.get("/{user_id}/jobs", response_class=HTMLResponse)
 def list_jobs_by_user_page(
-    user_id: int, request: Request, session: SessionDep, user: CurrentUserOptional
+    user_id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
 ):
     jobs = crud.get_jobs_with_statistics_by_user_id(session=session, user_id=user_id)
-    if user and user_id == user.id:
+    user = crud.find_user(session=session, user_id=user_id)
+    if current_user and user_id == current_user.id:
         tasks = crud.get_tasks(session=session)
     else:
         tasks = None
@@ -38,6 +42,7 @@ def list_jobs_by_user_page(
         "jobs.html",
         {
             "site_name": settings.SITE_NAME,
+            "current_user": current_user,
             "user": user,
             "tasks": tasks,
             "jobs": jobs,

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Jobs - {{ site_name }}{% endblock %}
+{% block title %}
+  Jobs - {{ '[anonymous]' if user is none else user.github and user.github.name }} - {{ site_name }}
+{% endblock %}
 {% block content %}
-  <h1>Job</h1>
+  <h1>Jobs</h1>
   {% if tasks %}
     <h2>New Job</h2>
     <form method="post" action="{{ url_for('create_job_page') }}">
