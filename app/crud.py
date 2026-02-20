@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlmodel import Session, select
+from sqlalchemy.engine.row import Row
+from sqlmodel import Session, select, func, case, cast, Float
 
-from app.models import ApiKey, User, UserGitHub
+from app.models import ApiKey, Job, JobResult, Task, User, UserGitHub
 from app.security import generate_api_key, get_hex_digest
 
 
@@ -66,3 +67,7 @@ def update_user_github(
     user.github.name = name
     session.add(user)
     session.commit()
+
+
+def get_tasks(*, session: Session) -> list[Task]:
+    return session.exec(select(Task)).all()

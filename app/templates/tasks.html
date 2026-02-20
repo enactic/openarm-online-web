@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Tasks - {{ site_name }}{% endblock %}
+{% block content %}
+  <h2>Tasks</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Prompt</th>
+        <th>Created (UTC)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+        <tr>
+          <td>{{ task.id }}</td>
+          <td>{{ task.name }}</td>
+          <td>{{ task.prompt }}</td>
+          <td>{{ task.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+          <td>
+            <!-- todo: Link to the job list. -->
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
