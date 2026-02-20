@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}
+  Jobs - {{ '[anonymous]' if user is none else user.github and user.github.name }} - {{ site_name }}
+{% endblock %}
+{% block content %}
+  <h1>Jobs</h1>
+  {% if tasks %}
+    <h2>New Job</h2>
+    <form method="post" action="{{ url_for('create_job_page') }}">
+      <label>
+        Task
+        <select name="task_id" required>
+          <option value=""></option>
+          {% for task in tasks %}<option value="{{ task.id }}">{{ task.name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>
+        Docker tag
+        <input type="text" name="docker_tag" required>
+      </label>
+      <button type="submit">Create</button>
+    </form>
+  {% endif %}
+  <h2>Jobs</h2>
+  {% if jobs %}
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Job ID</th>
+          <th>Task name</th>
+          <th>Docker tag</th>
+          <th>Created (UTC)</th>
+          <th>Number of results</th>
+          <th>Success rate</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+          <tr>
+            <td>{{ job.id }}</td>
+            <td>{{ job.task_name }}</td>
+            <td>{{ job.docker_tag }}</td>
+            <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+            <td>{{ job.count }}</td>
+            <td>{{ '-' if job.success_rate is none else job.success_rate }}</td>
+            <td>
+              <!-- todo: Link to the job_result list. -->
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No jobs yet.</p>
+  {% endif %}
+{% endblock %}

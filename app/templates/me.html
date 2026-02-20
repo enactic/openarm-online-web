@@ -5,11 +5,11 @@
   <table>
     <tr>
       <th>GitHub login name</th>
-      <td>{{ user.github.login_name or '-' }}</td>
+      <td>{{ current_user.github.login_name or '-' }}</td>
     </tr>
     <tr>
       <th>Name</th>
-      <td>{{ user.github.name or '-' }}</td>
+      <td>{{ current_user.github.name or '-' }}</td>
     </tr>
   </table>
 {% endblock %}

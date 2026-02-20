@@ -12,24 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import crud
-from app.deps import CurrentUserOptional, SessionDep
+from app.deps import SessionDep, CurrentUser
 from app.settings import settings
 from app.templates import templates
 
-router = APIRouter(prefix="/tasks")
+router = APIRouter(prefix="/jobs")
 
 
-@router.get("/", response_class=HTMLResponse)
-def list_tasks_page(
-    request: Request, session: SessionDep, current_user: CurrentUserOptional
+@router.post("/", response_class=HTMLResponse)
+def create_job_page(
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: int = Form(),
+    docker_tag: str = Form(),
 ):
-    tasks = crud.get_tasks(session=session)
-    return templates.TemplateResponse(
-        request,
-        "tasks.html",
-        {"site_name": settings.SITE_NAME, "current_user": current_user, "tasks": tasks},
+    crud.create_job(
+        session=session,
+        user=current_user,
+        task_id=task_id,
+        docker_tag=docker_tag,
+    )
+    return RedirectResponse(
+        url=request.url_for("list_jobs_by_user_page", user_id=current_user.id),
+        status_code=303,
     )
