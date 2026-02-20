@@ -49,7 +49,7 @@
             <td>{{ job.count }}</td>
             <td>{{ '-' if job.success_rate is none else job.success_rate }}</td>
             <td>
-              <!-- todo: Link to the job_result list. -->
+              <a href="{{ url_for('list_job_results_page').include_query_params(job_id=job.id) }}">Results</a>
             </td>
           </tr>
         {% endfor %}
