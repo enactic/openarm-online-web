@@ -24,10 +24,12 @@ router = APIRouter(prefix="/tasks")
 
 
 @router.get("/", response_class=HTMLResponse)
-def list_tasks_page(request: Request, session: SessionDep, user: CurrentUserOptional):
+def list_tasks_page(
+    request: Request, session: SessionDep, current_user: CurrentUserOptional
+):
     tasks = crud.get_tasks(session=session)
     return templates.TemplateResponse(
         request,
         "tasks.html",
-        {"site_name": settings.SITE_NAME, "user": user, "tasks": tasks},
+        {"site_name": settings.SITE_NAME, "current_user": current_user, "tasks": tasks},
     )
