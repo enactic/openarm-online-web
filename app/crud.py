@@ -110,4 +110,4 @@ def _get_jobs_with_statistics_statement() -> Select[Row]:
 
 def get_jobs_with_statistics_by_user_id(*, session: Session, user_id: int) -> list[Row]:
     statement = _get_jobs_with_statistics_statement()
-    return session.exec(statement.where(Job.user_id == user_id)).unique().all()
+    return session.exec(statement.where(Job.user_id == user_id)).all()
