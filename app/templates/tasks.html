@@ -20,7 +20,7 @@
           <td>{{ task.prompt }}</td>
           <td>{{ task.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
           <td>
-            <!-- todo: Link to the job list. -->
+            <a href="{{ url_for('list_jobs_page').include_query_params(task_id=task.id) }}">Jobs</a>
           </td>
         </tr>
       {% endfor %}

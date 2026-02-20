@@ -69,6 +69,10 @@ def update_user_github(
     session.commit()
 
 
+def find_task(*, session, task_id: int) -> Task | None:
+    return session.get(Task, task_id)
+
+
 def get_tasks(*, session: Session) -> list[Task]:
     return session.exec(select(Task)).all()
 
@@ -111,3 +115,8 @@ def _get_jobs_with_statistics_statement() -> Select[Row]:
 def get_jobs_with_statistics_by_user_id(*, session: Session, user_id: int) -> list[Row]:
     statement = _get_jobs_with_statistics_statement()
     return session.exec(statement.where(Job.user_id == user_id)).all()
+
+
+def get_jobs_with_statistics_by_task_id(*, session: Session, task_id: int) -> list[Row]:
+    statement = _get_jobs_with_statistics_statement()
+    return session.exec(statement.where(Job.task_id == task_id)).all()

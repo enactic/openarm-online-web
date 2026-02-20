@@ -12,15 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import crud
-from app.deps import SessionDep, CurrentUser
+from app.deps import CurrentUser, CurrentUserOptional, SessionDep
 from app.settings import settings
 from app.templates import templates
 
 router = APIRouter(prefix="/jobs")
+
+
+@router.get("/", response_class=HTMLResponse)
+def list_jobs_page(
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+    task_id: int = Query(),
+):
+    task = crud.find_task(session=session, task_id=task_id)
+    if task is None:
+        return RedirectResponse(url=request.url_for("list_tasks_page"), status_code=303)
+    jobs = crud.get_jobs_with_statistics_by_task_id(session=session, task_id=task_id)
+    return templates.TemplateResponse(
+        request,
+        "jobs.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "jobs": jobs,
+            "task": task,
+        },
+    )
 
 
 @router.post("/", response_class=HTMLResponse)

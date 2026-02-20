@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}
-  Jobs - {{ '[anonymous]' if user is none else user.github and user.github.name }} - {{ site_name }}
+  {% if task %}
+    Jobs - {{ task.name }} - {{ site_name }}
+  {% else %}
+    Jobs - {{ '[anonymous]' if user is none else user.github and user.github.name }} - {{ site_name }}
+  {% endif %}
 {% endblock %}
 {% block content %}
   <h1>Jobs</h1>
