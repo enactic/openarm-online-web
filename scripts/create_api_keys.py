@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # Copyright 2026 Enactic, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-POSTGRES_SERVER=db
-POSTGRES_DB=openeval
-POSTGRES_USER=openeval
-POSTGRES_PASSWORD=openeval
+import sys
 
-# You need to create an OAuth app.
-# https://docs.github.com/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
-GITHUB_CLIENT_ID=xxx
-GITHUB_CLIENT_SECRET=xxx
+from sqlmodel import Session
 
-# This is the HMAC key used for hashing API keys.
-# For security reasons, please configure this individually.
-# A long random string of 32 characters or more is recommended.
-HMAC_KEY=please_configure
+from app.db import engine
+from app.crud import create_api_key
+
+with Session(engine) as session:
+    print(create_api_key(session=session, name=sys.argv[1]))

@@ -44,6 +44,9 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str = secrets.token_urlsafe(32)
 
+    API_KEY_PREFIX: str = "openeval-key-"
+    HMAC_KEY: str
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:

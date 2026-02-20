@@ -14,7 +14,16 @@
 
 from sqlmodel import Session, select
 
-from app.models import User, UserGitHub
+from app.models import ApiKey, User, UserGitHub
+from app.security import generate_api_key, get_hex_digest
+
+
+def create_api_key(*, session: Session, name: str) -> str:
+    key = generate_api_key()
+    api_key = ApiKey(hashed_key=get_hex_digest(key), name=name)
+    session.add(api_key)
+    session.commit()
+    return key
 
 
 def find_user(*, session, user_id: int) -> User | None:

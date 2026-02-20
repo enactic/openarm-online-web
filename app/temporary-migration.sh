@@ -4,6 +4,8 @@
 
 set -eux
 
+cd "$(dirname "$0")"
+
 alembic downgrade base
 
 rm -f alembic/versions/*.py

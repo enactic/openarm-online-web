@@ -16,7 +16,7 @@ FROM python:3.14
 
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /src
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
@@ -32,7 +32,7 @@ ENV UV_LINK_MODE=copy
 
 # Place executables in the environment at the front of the path
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/src/.venv/bin:$PATH"
 
 # Install dependencies
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
@@ -41,4 +41,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=app/pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-workspace
 
-CMD ["uv", "run", "fastapi", "dev", "/app/main.py", "--host", "0.0.0.0"]
+CMD ["uv", "run", "fastapi", "dev", "/src/app/main.py", "--host", "0.0.0.0"]
