@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Jobs - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Job Results</h1>
+  <div>Number of results: {{ count }}</div>
+  <div>Success rate: {{ '-' if rate is none else rate }}</div>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Job ID</th>
+        <th>Task name</th>
+        <th>Created (UTC)</th>
+        <th>success</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for result in job.job_results %}
+        <tr>
+          <td>{{ job.id }}</td>
+          <td>{{ job.task.name }}</td>
+          <td>{{ result.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+          <td>{{ result.success }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
