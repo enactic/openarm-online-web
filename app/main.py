@@ -16,13 +16,15 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
-from app.routers import login, task
+from app.routers import job, login, task, user
 from app.settings import settings
 from app.templates import templates
 
 app = FastAPI()
+app.include_router(job.router)
 app.include_router(login.router)
 app.include_router(task.router)
+app.include_router(user.router)
 
 
 @app.exception_handler(NotLoggedIn)

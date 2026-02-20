@@ -71,3 +71,43 @@ def update_user_github(
 
 def get_tasks(*, session: Session) -> list[Task]:
     return session.exec(select(Task)).all()
+
+
+def create_job(
+    *,
+    session: Session,
+    user: User,
+    task_id: int,
+    docker_tag: str,
+) -> User:
+    job = Job(
+        user=user,
+        task_id=task_id,
+        docker_tag=docker_tag,
+    )
+    session.add(job)
+    session.commit()
+    session.refresh(job)
+    return job
+
+
+def _get_jobs_with_statistics_statement() -> Select[Row]:
+    success_func_avg = func.avg(case((JobResult.success == True, 1), else_=0))
+    return (
+        select(
+            Job.id,
+            Task.name.label("task_name"),
+            Job.docker_tag,
+            Job.created_at,
+            func.count(JobResult.id).label("count"),
+            cast(success_func_avg, Float).label("success_rate"),
+        )
+        .join(Task, Job.task_id == Task.id)
+        .outerjoin(JobResult, JobResult.job_id == Job.id)
+        .group_by(Job.id, Task.name)
+    )
+
+
+def get_jobs_with_statistics_by_user_id(*, session: Session, user_id: int) -> list[Row]:
+    statement = _get_jobs_with_statistics_statement()
+    return session.exec(statement.where(Job.user_id == user_id)).unique().all()

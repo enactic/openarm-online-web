@@ -11,6 +11,7 @@
       <a href="{{ url_for('top_page') }}">TOP</a>
       {% if user %}
         <a href="{{ url_for('me_page') }}">Profile</a>
+        <a href="{{ url_for('list_jobs_by_user_page', user_id=user.id) }}">My Jobs</a>
         <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
         <a href="{{ url_for('login_page') }}">Login</a>
