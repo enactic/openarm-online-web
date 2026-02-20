@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
 
     API_KEY_PREFIX: str = "openeval-key-"
-    HMAC_KEY: str = "0a107abe9abb879e4ac2bd96c32f44f1691f07429050fea776692cf8e72bc12b"
+    HMAC_KEY: str
 
     @computed_field  # type: ignore[prop-decorator]
     @property
