@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import Path
-
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
-from app.routers import login
+from app.routers import login, task
 from app.settings import settings
 from app.templates import templates
 
 app = FastAPI()
 app.include_router(login.router)
+app.include_router(task.router)
 
 
 @app.exception_handler(NotLoggedIn)
