@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Request
+from typing import Optional
+
+from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse
 
 from app import crud
@@ -25,11 +27,23 @@ router = APIRouter(prefix="/tasks")
 
 @router.get("/", response_class=HTMLResponse)
 def list_tasks_page(
-    request: Request, session: SessionDep, current_user: CurrentUserOptional
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+    page: Optional[int] = Query(default=1),
 ):
-    tasks = crud.get_tasks(session=session)
+    offset = (page - 1) * settings.PAGE_LIMIT
+    tasks = crud.get_tasks(session=session, offset=offset, limit=settings.PAGE_LIMIT)
+    total = crud.get_tasks_count(session=session)
+    have_next_page = (page * settings.PAGE_LIMIT) < total
     return templates.TemplateResponse(
         request,
         "tasks.html",
-        {"site_name": settings.SITE_NAME, "current_user": current_user, "tasks": tasks},
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "tasks": tasks,
+            "page": page,
+            "have_next_page": have_next_page,
+        },
     )

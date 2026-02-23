@@ -1,3 +1,4 @@
+{% import "macros.html" as macro with context %}
 {% extends "base.html" %}
 {% block title %}Tasks - {{ site_name }}{% endblock %}
 {% block content %}
@@ -26,4 +27,5 @@
       {% endfor %}
     </tbody>
   </table>
+  {{ macro.pagination(page, have_next_page) }}
 {% endblock %}

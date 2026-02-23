@@ -14,10 +14,25 @@
 
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, select, func, case, cast, Float
+from sqlmodel import SQLModel, Session, select, func, case, cast, Float
+
+from typing import Type, TypeVar
 
 from app.models import ApiKey, Job, JobResult, Task, User, UserGitHub
 from app.security import generate_api_key, get_hex_digest
+from app.settings import settings
+
+Model = TypeVar("Model", bound=SQLModel)
+
+
+def _offset_limit(
+    statement: Select[Row], offset: int = 0, limit: int = settings.PAGE_LIMIT
+) -> Select[Row]:
+    return statement.offset(offset).limit(limit)
+
+
+def _total_count(*, session: Session, model: Type[Model]) -> int:
+    return session.exec(select(func.count()).select_from(model)).one()
 
 
 def create_api_key(*, session: Session, name: str) -> str:
@@ -74,8 +89,16 @@ def find_task(*, session, task_id: int) -> Task | None:
     return session.get(Task, task_id)
 
 
-def get_tasks(*, session: Session) -> list[Task]:
-    return session.exec(select(Task)).all()
+def get_tasks(
+    *, session: Session, offset: int = 0, limit: int = settings.PAGE_LIMIT
+) -> list[Task]:
+    return session.exec(
+        _offset_limit(select(Task).order_by(Task.id), offset, limit)
+    ).all()
+
+
+def get_tasks_count(*, session: Session) -> int:
+    return _total_count(session=session, model=Task)
 
 
 def create_job(

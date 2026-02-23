@@ -1,0 +1,15 @@
+{% macro pagination(page, have_next_page) %}
+  {% set endpoint = request.scope.get("endpoint").__name__ %}
+  <div>
+    {% if page > 1 %}
+      <span>
+        <a href="{{ url_for(endpoint).include_query_params(page=page - 1) }}">Prev</a>
+      </span>
+    {% endif %}
+    {% if have_next_page %}
+      <span>
+        <a href="{{ url_for(endpoint).include_query_params(page=page + 1) }}">Next</a>
+      </span>
+    {% endif %}
+  </div>
+{% endmacro %}

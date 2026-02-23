@@ -45,6 +45,8 @@ class Settings(BaseSettings):
     API_KEY_PREFIX: str = "openeval-key-"
     HMAC_KEY: str
 
+    PAGE_LIMIT: int = 10
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
