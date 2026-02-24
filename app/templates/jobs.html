@@ -3,7 +3,7 @@
   {% if task %}
     Jobs - {{ task.name }} - {{ site_name }}
   {% else %}
-    Jobs - {{ '[anonymous]' if user is none else user.github and user.github.name }} - {{ site_name }}
+    Jobs - {{ user.github.name if is_active_user(user) else '[anonymous]' }} - {{ site_name }}
   {% endif %}
 {% endblock %}
 {% block content %}

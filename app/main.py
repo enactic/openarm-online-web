@@ -48,15 +48,3 @@ def logout(current_user: CurrentUser):
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="access_token", path="/")
     return response
-
-
-@app.get("/me", response_class=HTMLResponse)
-def me_page(request: Request, current_user: CurrentUser):
-    return templates.TemplateResponse(
-        request,
-        "me.html",
-        {
-            "site_name": settings.SITE_NAME,
-            "current_user": current_user,
-        },
-    )

@@ -20,7 +20,7 @@
         <td>{{ job.id }}</td>
         <td>{{ job.task_name }}</td>
         <td>{{ job.docker_tag }}</td>
-        <td>{{ '[anonymous]' if user is none else user.github and user.github.name }}</td>
+        <td>{{ user_format(user) }}</td>
         <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
         <td>{{ job.count }}</td>
         <td>{{ format_rate(job.success_rate) }}</td>

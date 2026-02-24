@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from markupsafe import Markup
 from pathlib import Path
+
 from fastapi.templating import Jinja2Templates
+from jinja2 import pass_context
 
 
 def format_rate(value):
@@ -22,6 +25,21 @@ def format_rate(value):
     return value
 
 
+def is_active_user(user):
+    return user and user.github
+
+
+@pass_context
+def user_format(context, user):
+    if not is_active_user(user):
+        return "[anonymous]"
+
+    link = context.get("request").url_for("user_page", id=user.id)
+    return Markup(f'<a href="{link}">{user.github.name}</a>')
+
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 templates.env.globals["format_rate"] = format_rate
+templates.env.globals["is_active_user"] = is_active_user
+templates.env.globals["user_format"] = user_format
