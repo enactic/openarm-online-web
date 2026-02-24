@@ -31,7 +31,7 @@ def list_jobs_by_user_page(
     current_user: CurrentUserOptional,
 ):
     jobs = crud.get_jobs_with_statistics_by_user_id(session=session, user_id=user_id)
-    user = crud.find_user(session=session, user_id=user_id)
+    user = crud.find_user(session=session, id=user_id)
     if current_user and user_id == current_user.id:
         tasks = crud.get_tasks(session=session)
     else:

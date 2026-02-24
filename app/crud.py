@@ -33,8 +33,8 @@ def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:
     return session.exec(select(ApiKey).where(ApiKey.hashed_key == hashed_key)).first()
 
 
-def find_user(*, session, user_id: int) -> User | None:
-    return session.get(User, user_id)
+def find_user(*, session, id: int) -> User | None:
+    return session.get(User, id)
 
 
 def find_user_by_github_id(*, session: Session, github_id: int) -> User | None:
@@ -75,8 +75,8 @@ def update_user_github(
     session.commit()
 
 
-def find_task(*, session, task_id: int) -> Task | None:
-    return session.get(Task, task_id)
+def find_task(*, session, id: int) -> Task | None:
+    return session.get(Task, id)
 
 
 def get_tasks(*, session: Session) -> list[Task]:
@@ -101,10 +101,10 @@ def create_job(
     return job
 
 
-def find_job(*, session, job_id: int) -> Job | None:
+def find_job(*, session, id: int) -> Job | None:
     statement = (
         select(Job)
-        .where(Job.id == job_id)
+        .where(Job.id == id)
         .options(selectinload(Job.job_results))
         .options(selectinload(Job.task))
     )
@@ -120,6 +120,7 @@ def _get_jobs_with_statistics_statement() -> Select[Row]:
     return (
         select(
             Job.id,
+            Job.user_id,
             Task.name.label("task_name"),
             Job.docker_tag,
             Job.created_at,
@@ -142,12 +143,13 @@ def get_jobs_with_statistics_by_task_id(*, session: Session, task_id: int) -> li
     return session.exec(statement.where(Job.task_id == task_id)).all()
 
 
-def get_job_with_statistics_by_job(*, session: Session, job: Job) -> Row:
+def get_job_with_statistics_by_id(*, session: Session, id: int) -> Row:
     statement = _get_jobs_with_statistics_statement()
-    return session.exec(statement.where(Job.id == job.id)).first()
+    return session.exec(statement.where(Job.id == id)).first()
 
 
 def create_job_result(*, session: Session, request: ApiRequestJobResult):
     job_result = JobResult(job_id=request.job_id, success=request.success)
     session.add(job_result)
     session.commit()
+    return session.exec(statement.where(Job.id == job_id)).first()

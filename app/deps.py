@@ -46,7 +46,7 @@ def find_current_user_optional(request: Request, session: SessionDep) -> Optiona
     user_id = get_sub(token)
     if user_id is None:
         return None
-    return crud.find_user(session=session, user_id=user_id)
+    return crud.find_user(session=session, id=user_id)
 
 
 CurrentUserOptional = Annotated[Optional[User], Depends(find_current_user_optional)]

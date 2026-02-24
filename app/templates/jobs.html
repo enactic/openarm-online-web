@@ -24,13 +24,13 @@
       </label>
       <button type="submit">Create</button>
     </form>
+    <br />
   {% endif %}
-  <h2>Jobs</h2>
   {% if jobs %}
     <table border="1">
       <thead>
         <tr>
-          <th>Job ID</th>
+          <th>ID</th>
           <th>Task name</th>
           <th>Docker tag</th>
           <th>Created (UTC)</th>
@@ -47,7 +47,7 @@
             <td>{{ job.docker_tag }}</td>
             <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
             <td>{{ job.count }}</td>
-            <td>{{ '-' if job.success_rate is none else job.success_rate }}</td>
+            <td>{{ format_rate(job.success_rate) }}</td>
             <td>
               <a href="{{ url_for('list_job_results_page').include_query_params(job_id=job.id) }}">Results</a>
             </td>

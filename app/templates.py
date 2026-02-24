@@ -15,4 +15,13 @@
 from pathlib import Path
 from fastapi.templating import Jinja2Templates
 
+
+def format_rate(value):
+    if value is None:
+        return "-"
+    return value
+
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
+templates.env.globals["format_rate"] = format_rate

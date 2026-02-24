@@ -3,11 +3,11 @@
 {% block content %}
   <h1>Job Results</h1>
   <div>Number of results: {{ count }}</div>
-  <div>Success rate: {{ '-' if rate is none else rate }}</div>
+  <div>Success rate: {{ format_rate(rate) }}</div>
   <table border="1">
     <thead>
       <tr>
-        <th>Job ID</th>
+        <th>ID</th>
         <th>Task name</th>
         <th>Created (UTC)</th>
         <th>success</th>
@@ -16,8 +16,12 @@
     <tbody>
       {% for result in job.job_results %}
         <tr>
-          <td>{{ job.id }}</td>
-          <td>{{ job.task.name }}</td>
+          <td>
+            <a href="{{ url_for('job_page', job_id=job.id) }}">{{ job.id }}</a>
+          </td>
+          <td>
+            <a href="{{ url_for('task_page', task_id=job.task.id) }}">{{ job.task.name }}</a>
+          </td>
           <td>{{ result.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
           <td>{{ result.success }}</td>
         </tr>
