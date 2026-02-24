@@ -33,3 +33,24 @@ def list_tasks_page(
         "tasks.html",
         {"site_name": settings.SITE_NAME, "current_user": current_user, "tasks": tasks},
     )
+
+
+@router.get("/{task_id}", response_class=HTMLResponse)
+def task_page(
+    task_id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+):
+    task = crud.find_task(session=session, id=task_id)
+    if task is None:
+        return templates.TemplateResponse(request, "404.html", status_code=404)
+    return templates.TemplateResponse(
+        request,
+        "task.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "task": task,
+        },
+    )

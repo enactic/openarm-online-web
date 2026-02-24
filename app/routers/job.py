@@ -30,9 +30,9 @@ def list_jobs_page(
     current_user: CurrentUserOptional,
     task_id: int = Query(),
 ):
-    task = crud.find_task(session=session, task_id=task_id)
+    task = crud.find_task(session=session, id=task_id)
     if task is None:
-        return RedirectResponse(url=request.url_for("list_tasks_page"), status_code=303)
+        return templates.TemplateResponse(request, "404.html", status_code=404)
     jobs = crud.get_jobs_with_statistics_by_task_id(session=session, task_id=task_id)
     return templates.TemplateResponse(
         request,
@@ -42,6 +42,29 @@ def list_jobs_page(
             "current_user": current_user,
             "jobs": jobs,
             "task": task,
+        },
+    )
+
+
+@router.get("/{job_id}", response_class=HTMLResponse)
+def job_page(
+    job_id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+):
+    job = crud.get_job_with_statistics_by_id(session=session, id=job_id)
+    if job is None:
+        return templates.TemplateResponse(request, "404.html", status_code=404)
+    user = crud.find_user(session=session, id=job.user_id)
+    return templates.TemplateResponse(
+        request,
+        "job.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "job": job,
+            "user": user,
         },
     )
 

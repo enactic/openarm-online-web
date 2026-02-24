@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Task - {{ task.name }} - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Task</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Prompt</th>
+        <th>Docker tag (Used on reset)</th>
+        <th>Created (UTC)</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ task.id }}</td>
+        <td>{{ task.name }}</td>
+        <td>{{ task.prompt }}</td>
+        <td>{{ task.reset_docker_tag }}</td>
+        <td>{{ task.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+        <td>
+          <a href="{{ url_for('list_jobs_page').include_query_params(task_id=task.id) }}">Jobs</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Job - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Job</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Task name</th>
+        <th>Docker tag</th>
+        <th>Created by</th>
+        <th>Created (UTC)</th>
+        <th>Number of results</th>
+        <th>Success rate</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ job.id }}</td>
+        <td>{{ job.task_name }}</td>
+        <td>{{ job.docker_tag }}</td>
+        <td>{{ '[anonymous]' if user is none else user.github and user.github.name }}</td>
+        <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+        <td>{{ job.count }}</td>
+        <td>{{ format_rate(job.success_rate) }}</td>
+        <td>
+          <a href="{{ url_for('list_job_results_page').include_query_params(job_id=job.id) }}">Results</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

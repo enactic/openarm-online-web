@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from fastapi import APIRouter, Form, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 
 from app import crud
 from app.deps import SessionDep, CurrentUser
@@ -30,8 +30,8 @@ def list_job_results_page(
     current_user: CurrentUser,
     job_id: int = Query(),
 ):
-    job = crud.find_job(session=session, job_id=job_id)
-    statistics = crud.get_job_with_statistics_by_job(session=session, job=job)
+    job = crud.find_job(session=session, id=job_id)
+    statistics = crud.get_job_with_statistics_by_id(session=session, id=job.id)
     return templates.TemplateResponse(
         request,
         "job_results.html",
