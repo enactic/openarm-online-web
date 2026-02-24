@@ -16,6 +16,8 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 
+from jinja2 import pass_context
+
 
 def format_rate(value):
     if value is None:
@@ -27,7 +29,16 @@ def is_active_user(user):
     return user and user.github
 
 
+@pass_context
+def update_query_params(context, **kwargs):
+    request = context.get("request")
+    params = dict(request.query_params)
+    params.update(kwargs)
+    return request.url.include_query_params(**params)
+
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 templates.env.globals["format_rate"] = format_rate
 templates.env.globals["is_active_user"] = is_active_user
+templates.env.globals["update_query_params"] = update_query_params

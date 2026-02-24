@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.4",
+    "fastapi-pagination>=0.15.10",
     "fastapi[standard]>=0.128.8",
     "jinja2>=3.1.6",
     "psycopg[binary]>=3.3.2",

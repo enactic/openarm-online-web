@@ -15,6 +15,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from fastapi_pagination import add_pagination
+
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
 from app.routers import api, job, job_result, login, task, user
 from app.settings import settings
@@ -48,3 +50,6 @@ def logout(current_user: CurrentUser):
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="access_token", path="/")
     return response
+
+
+add_pagination(app)

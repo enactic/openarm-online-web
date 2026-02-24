@@ -9,3 +9,27 @@
     [anonymous]
   {% endif %}
 {% endmacro %}
+
+{% macro pagination(pagenator) %}
+  <div>
+    {% if pagenator.page > 1 %}
+      <span>
+        <a href="{{ update_query_params(page=pagenator.page - 1) }}">Next</a>
+      </span>
+    {% endif %}
+    {% for i in range(1, (pagenator.total // pagenator.size) + 1) %}
+      <span>
+        {% if pagenator.page == i %}
+          <b>{{ i }}</b>
+        {% else %}
+          <a href="{{ update_query_params(page=i) }}">{{ i }}</a>
+        {% endif %}
+      </span>
+    {% endfor %}
+    {% if pagenator.page < (pagenator.total // pagenator.size) %}
+      <span>
+        <a href="{{ update_query_params(page=pagenator.page + 1) }}">Next</a>
+      </span>
+    {% endif %}
+  </div>
+{% endmacro %}

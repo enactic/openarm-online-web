@@ -16,7 +16,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app import crud
-from app.deps import CurrentUserOptional, SessionDep
+from app.deps import CurrentUserOptional, PaginationDep, SessionDep
 from app.settings import settings
 from app.templates import templates
 
@@ -25,13 +25,20 @@ router = APIRouter(prefix="/tasks")
 
 @router.get("/", response_class=HTMLResponse)
 def list_tasks_page(
-    request: Request, session: SessionDep, current_user: CurrentUserOptional
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+    params: PaginationDep,
 ):
-    tasks = crud.get_tasks(session=session)
+    paginator = crud.get_paginated_tasks(session=session, params=params)
     return templates.TemplateResponse(
         request,
         "tasks.html",
-        {"site_name": settings.SITE_NAME, "current_user": current_user, "tasks": tasks},
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "paginator": paginator,
+        },
     )
 
 
