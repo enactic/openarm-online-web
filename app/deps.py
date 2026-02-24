@@ -15,13 +15,18 @@
 from collections.abc import Generator
 from typing import Annotated, Optional
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException
+from fastapi.security.api_key import APIKeyHeader
 from sqlmodel import Session
+from starlette import status
 
-from app.crud import find_user
+from app import crud
 from app.db import engine
-from app.models import User
-from app.security import get_sub
+from app.models import ApiKey, User
+from app.security import get_hex_digest, get_sub
+from app.settings import settings
+
+api_key_header = APIKeyHeader(name=settings.API_KEY_HEADER_NAME, auto_error=True)
 
 
 class NotLoggedIn(Exception):
@@ -41,7 +46,7 @@ def find_current_user_optional(request: Request, session: SessionDep) -> Optiona
     user_id = get_sub(token)
     if user_id is None:
         return None
-    return find_user(session=session, user_id=user_id)
+    return crud.find_user(session=session, user_id=user_id)
 
 
 CurrentUserOptional = Annotated[Optional[User], Depends(find_current_user_optional)]
@@ -54,3 +59,18 @@ def find_current_user(user: CurrentUserOptional) -> User:
 
 
 CurrentUser = Annotated[User, Depends(find_current_user)]
+
+
+def find_current_api_key(
+    session: SessionDep,
+    key: str = Depends(api_key_header),
+) -> ApiKey:
+    api_key = crud.find_api_key_by_hash(session=session, hashed_key=get_hex_digest(key))
+    if api_key is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key"
+        )
+    return api_key
+
+
+CurrentApiKey = Annotated[ApiKey, Depends(find_current_api_key)]

@@ -17,6 +17,7 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
 
 from app.models import ApiKey, Job, JobResult, Task, User, UserGitHub
+from app.schemas import ApiRequestJobResult
 from app.security import generate_api_key, get_hex_digest
 
 
@@ -26,6 +27,10 @@ def create_api_key(*, session: Session, name: str) -> str:
     session.add(api_key)
     session.commit()
     return key
+
+
+def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:
+    return session.exec(select(ApiKey).where(ApiKey.hashed_key == hashed_key)).first()
 
 
 def find_user(*, session, user_id: int) -> User | None:
@@ -106,6 +111,10 @@ def find_job(*, session, job_id: int) -> Job | None:
     return session.exec(statement).first()
 
 
+def get_jobs(*, session: Session) -> list[Job]:
+    return session.exec(select(Job)).all()
+
+
 def _get_jobs_with_statistics_statement() -> Select[Row]:
     success_func_avg = func.avg(case((JobResult.success == True, 1), else_=0))
     return (
@@ -136,3 +145,9 @@ def get_jobs_with_statistics_by_task_id(*, session: Session, task_id: int) -> li
 def get_job_with_statistics_by_job(*, session: Session, job: Job) -> Row:
     statement = _get_jobs_with_statistics_statement()
     return session.exec(statement.where(Job.id == job.id)).first()
+
+
+def create_job_result(*, session: Session, request: ApiRequestJobResult):
+    job_result = JobResult(job_id=request.job_id, success=request.success)
+    session.add(job_result)
+    session.commit()
