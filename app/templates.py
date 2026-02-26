@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from pathlib import Path
+
 from fastapi.templating import Jinja2Templates
 
 
@@ -22,6 +23,11 @@ def format_rate(value):
     return value
 
 
+def is_active_user(user):
+    return user and user.github
+
+
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 templates.env.globals["format_rate"] = format_rate
+templates.env.globals["is_active_user"] = is_active_user

@@ -23,16 +23,34 @@ from app.templates import templates
 router = APIRouter(prefix="/users")
 
 
-@router.get("/{user_id}/jobs", response_class=HTMLResponse)
-def list_jobs_by_user_page(
-    user_id: int,
+@router.get("/{id}", response_class=HTMLResponse)
+def user_page(
+    id: int,
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
 ):
-    jobs = crud.get_jobs_with_statistics_by_user_id(session=session, user_id=user_id)
-    user = crud.find_user(session=session, id=user_id)
-    if current_user and user_id == current_user.id:
+    user = crud.find_user(session=session, id=id)
+    if user is None:
+        return templates.TemplateResponse(request, "404.html", status_code=404)
+
+    return templates.TemplateResponse(
+        request,
+        "user.html",
+        {"site_name": settings.SITE_NAME, "current_user": current_user, "user": user},
+    )
+
+
+@router.get("/{id}/jobs", response_class=HTMLResponse)
+def list_jobs_by_user_page(
+    id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+):
+    jobs = crud.get_jobs_with_statistics_by_user_id(session=session, user_id=id)
+    user = crud.find_user(session=session, id=id)
+    if current_user and id == current_user.id:
         tasks = crud.get_tasks(session=session)
     else:
         tasks = None
