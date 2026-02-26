@@ -16,7 +16,7 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse
 
 from app import crud
-from app.deps import SessionDep, CurrentUser
+from app.deps import CurrentUserOptional, SessionDep
 from app.settings import settings
 from app.templates import templates
 
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/job_results")
 def list_job_results_page(
     request: Request,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentUserOptional,
     job_id: int = Query(),
 ):
     job = crud.find_job(session=session, id=job_id)
@@ -37,6 +37,7 @@ def list_job_results_page(
         "job_results.html",
         {
             "site_name": settings.SITE_NAME,
+            "current_user": current_user,
             "job": job,
             "count": statistics.count,
             "rate": statistics.success_rate,
