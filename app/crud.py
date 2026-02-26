@@ -152,4 +152,3 @@ def create_job_result(*, session: Session, request: ApiRequestJobResult):
     job_result = JobResult(job_id=request.job_id, success=request.success)
     session.add(job_result)
     session.commit()
-    return session.exec(statement.where(Job.id == job_id)).first()
