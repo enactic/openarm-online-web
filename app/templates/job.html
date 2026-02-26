@@ -1,3 +1,4 @@
+{% import "macros.html" as macro with context %}
 {% extends "base.html" %}
 {% block title %}Job - {{ site_name }}{% endblock %}
 {% block content %}
@@ -20,7 +21,7 @@
         <td>{{ job.id }}</td>
         <td>{{ job.task_name }}</td>
         <td>{{ job.docker_tag }}</td>
-        <td>{{ user_format(user) }}</td>
+        <td>{{ macro.user_name(user, link=true) }}</td>
         <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
         <td>{{ job.count }}</td>
         <td>{{ format_rate(job.success_rate) }}</td>

@@ -1,0 +1,11 @@
+{% macro user_name(user, link=False) %}
+  {% if is_active_user(user) %}
+    {% if link %}
+      <a href="{{ url_for('user_page', id=user.id) }}">{{ user.github.name }}</a>
+    {% else %}
+      {{ user.github.name }}
+    {% endif %}
+  {% else %}
+    [anonymous]
+  {% endif %}
+{% endmacro %}

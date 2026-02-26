@@ -1,9 +1,10 @@
+{% import "macros.html" as macro with context %}
 {% extends "base.html" %}
 {% block title %}
   {% if task %}
     Jobs - {{ task.name }} - {{ site_name }}
   {% else %}
-    Jobs - {{ user.github.name if is_active_user(user) else '[anonymous]' }} - {{ site_name }}
+    Jobs - {{ macro.user_name(user) }} - {{ site_name }}
   {% endif %}
 {% endblock %}
 {% block content %}
