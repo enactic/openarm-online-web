@@ -32,8 +32,7 @@ def is_active_user(user):
 @pass_context
 def update_query_params(context, **kwargs):
     request = context.get("request")
-    params = dict(request.query_params)
-    params.update(kwargs)
+    params = dict(request.query_params) | kwargs
     return request.url.include_query_params(**params)
 
 
