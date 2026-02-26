@@ -84,6 +84,6 @@ def create_job_page(
         docker_tag=docker_tag,
     )
     return RedirectResponse(
-        url=request.url_for("list_jobs_by_user_page", user_id=current_user.id),
+        url=request.url_for("list_jobs_by_user_page", id=current_user.id),
         status_code=303,
     )
