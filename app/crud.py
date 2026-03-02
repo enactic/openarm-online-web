@@ -20,8 +20,7 @@ from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
 
-from app.models import ApiKey, Job, JobResult, Task, User, UserGitHub
-from app.schemas import ApiRequestJobResult
+from app.models import ApiKey, Job, JobResult, JobResultCreate, Task, User, UserGitHub
 from app.security import generate_api_key, get_hex_digest
 
 
@@ -160,10 +159,12 @@ def get_job_with_statistics_by_id(*, session: Session, id: int) -> Row:
     return session.exec(statement.where(Job.id == id)).first()
 
 
-def create_job_result(*, session: Session, request: ApiRequestJobResult):
-    job_result = JobResult(job_id=request.job_id, success=request.success)
+def create_job_result(*, session: Session, job_result_create: JobResultCreate):
+    job_result = JobResult.model_validate(job_result_create)
     session.add(job_result)
     session.commit()
+    session.refresh(job_result)
+    return job_result
 
 
 def get_paginated_job_results(

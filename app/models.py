@@ -110,18 +110,22 @@ class Job(SQLModel, table=True):
     job_results: list["JobResult"] = Relationship(back_populates="job")
 
 
-class JobResult(SQLModel, table=True):
+class JobResultCreate(SQLModel):
+    job_id: int = Field(foreign_key="job.id", index=True, nullable=False)
+    success: bool = Field(nullable=False)
+
+
+class JobResult(JobResultCreate, table=True):
     __tablename__ = "job_result"
 
-    id: int = Field(primary_key=True)
-    job_id: int = Field(foreign_key="job.id", index=True)
-    success: bool = Field(default=False)
-    created_at: datetime = Field(
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime | None = Field(
+        default=None,
         sa_column=Column(
             DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-        )
+        ),
     )
 
     job: Job = Relationship(back_populates="job_results")

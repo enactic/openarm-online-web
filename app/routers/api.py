@@ -18,8 +18,7 @@ from fastapi_pagination import Page
 
 from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
-from app.models import Task, Job
-from app.schemas import ApiRequestJobResult
+from app.models import Task, Job, JobResult, JobResultCreate
 
 router = APIRouter(prefix="/api/v1")
 
@@ -36,14 +35,8 @@ def api_get_jobs(session: SessionDep, api_key: CurrentApiKey, params: Pagination
     return crud.get_paginated_jobs(session=session, params=params)
 
 
-@router.post("/job_results")
+@router.post("/job_results", response_model=JobResult)
 def api_post_job_results(
-    request: ApiRequestJobResult, session: SessionDep, api_key: CurrentApiKey
+    request: JobResultCreate, session: SessionDep, api_key: CurrentApiKey
 ):
-    try:
-        crud.create_job_result(session=session, request=request)
-        return {"status": True}
-    except Exception as err:
-        # todo error log
-        print(err)
-        return {"stauts": False}
+    return crud.create_job_result(session=session, job_result_create=request)
