@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from fastapi_pagination import Page
+
+from typing import Optional
 
 from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
 from app.models import Task, Job, JobResult, JobResultCreate
 
 router = APIRouter(prefix="/api/v1")
-
-# todo: filter
 
 
 @router.get("/tasks", response_model=Page[Task])
@@ -31,8 +31,16 @@ def api_get_tasks(session: SessionDep, api_key: CurrentApiKey, params: Paginatio
 
 
 @router.get("/jobs", response_model=Page[Job])
-def api_get_jobs(session: SessionDep, api_key: CurrentApiKey, params: PaginationDep):
-    return crud.get_paginated_jobs(session=session, params=params)
+def api_get_jobs(
+    session: SessionDep,
+    api_key: CurrentApiKey,
+    params: PaginationDep,
+    task_id: Optional[int] = Query(None),
+    user_id: Optional[int] = Query(None),
+):
+    return crud.get_paginated_jobs(
+        session=session, params=params, filter={"task_id": task_id, "user_id": user_id}
+    )
 
 
 @router.post("/job_results", response_model=JobResult)

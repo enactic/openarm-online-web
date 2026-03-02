@@ -117,8 +117,13 @@ def get_jobs(*, session: Session) -> list[Job]:
     return session.exec(select(Job)).all()
 
 
-def get_paginated_jobs(*, session: Session, params: Params) -> Page[Job]:
-    return model_paginate(session, select(Job).order_by(Job.id), params)
+def get_paginated_jobs(*, session: Session, params: Params, filter: dict) -> Page[Job]:
+    statement = select(Job).order_by(Job.id)
+    if filter.get("task_id") is not None:
+        statement = statement.where(Job.task_id == filter["task_id"])
+    if filter.get("user_id") is not None:
+        statement = statement.where(Job.user_id == filter["user_id"])
+    return model_paginate(session, statement, params)
 
 
 def _get_jobs_with_statistics_statement() -> Select[Row]:
