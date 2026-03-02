@@ -12,24 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
 from pydantic import BaseModel
-
-
-class ApiResponseTask(BaseModel):
-    id: int
-    name: str | None
-    prompt: str
-    reset_docker_tag: str
-    created_at: datetime
-
-
-class ApiResponseJob(BaseModel):
-    id: int
-    user_id: int
-    task_id: int
-    docker_tag: str
-    created_at: datetime
 
 
 class ApiRequestJobResult(BaseModel):
