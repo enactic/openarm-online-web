@@ -15,8 +15,9 @@
 from collections.abc import Generator
 from typing import Annotated, Optional
 
-from fastapi import Depends, Request, HTTPException
+from fastapi import Depends, Query, Request, HTTPException
 from fastapi.security.api_key import APIKeyHeader
+from fastapi_pagination import Params
 from sqlmodel import Session
 from starlette import status
 
@@ -74,3 +75,12 @@ def find_current_api_key(
 
 
 CurrentApiKey = Annotated[ApiKey, Depends(find_current_api_key)]
+
+
+def get_pagination_params(
+    page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100)
+) -> Params:
+    return Params(page=page, size=size)
+
+
+PaginationDep = Annotated[Params, Depends(get_pagination_params)]

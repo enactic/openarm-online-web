@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlmodel import paginate
+
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
@@ -81,6 +84,10 @@ def find_task(*, session, id: int) -> Task | None:
 
 def get_tasks(*, session: Session) -> list[Task]:
     return session.exec(select(Task)).all()
+
+
+def get_paginated_tasks(*, session: Session, params: Params) -> Page[Task]:
+    return paginate(session, select(Task), params)
 
 
 def create_job(
