@@ -16,7 +16,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app import crud
-from app.deps import SessionDep, CurrentUserOptional
+from app.deps import CurrentUserOptional, PaginationDep, SessionDep
 from app.settings import settings
 from app.templates import templates
 
@@ -47,8 +47,11 @@ def list_jobs_by_user_page(
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
+    params: PaginationDep,
 ):
-    jobs = crud.get_jobs_with_statistics_by_user_id(session=session, user_id=id)
+    paginator = crud.get_paginated_jobs_with_statistics_by_user_id(
+        session=session, params=params, user_id=id
+    )
     user = crud.find_user(session=session, id=id)
     if current_user and id == current_user.id:
         tasks = crud.get_tasks(session=session)
@@ -63,6 +66,6 @@ def list_jobs_by_user_page(
             "current_user": current_user,
             "user": user,
             "tasks": tasks,
-            "jobs": jobs,
+            "paginator": paginator,
         },
     )
