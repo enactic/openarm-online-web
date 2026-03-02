@@ -109,12 +109,7 @@ def create_job(
 
 
 def find_job(*, session, id: int) -> Job | None:
-    statement = (
-        select(Job)
-        .where(Job.id == id)
-        .options(selectinload(Job.job_results))
-        .options(selectinload(Job.task))
-    )
+    statement = select(Job).where(Job.id == id).options(selectinload(Job.task))
     return session.exec(statement).first()
 
 
@@ -159,3 +154,12 @@ def create_job_result(*, session: Session, request: ApiRequestJobResult):
     job_result = JobResult(job_id=request.job_id, success=request.success)
     session.add(job_result)
     session.commit()
+
+
+def get_paginated_job_results(
+    *, session: Session, params: Params, filter: dict
+) -> Page[JobResult]:
+    statement = select(JobResult).order_by(JobResult.id)
+    if "job_id" in filter:
+        statement = statement.where(JobResult.job_id == filter["job_id"])
+    return paginate(session, statement, params)

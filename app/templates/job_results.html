@@ -1,31 +1,33 @@
+{% import "macros.html" as macro with context %}
 {% extends "base.html" %}
 {% block title %}Job Results - {{ site_name }}{% endblock %}
 {% block content %}
   <h1>Job Results</h1>
   <div>Number of results: {{ count }}</div>
   <div>Success rate: {{ format_rate(rate) }}</div>
+  <div>
+    Job ID: <a href="{{ url_for('job_page', job_id=job.id) }}">{{ job.id }}</a>
+  </div>
+  <div>
+    Task name: <a href="{{ url_for('task_page', task_id=job.task.id) }}">{{ job.task.name }}</a>
+  </div>
   <table border="1">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Task name</th>
         <th>Created (UTC)</th>
         <th>success</th>
       </tr>
     </thead>
     <tbody>
-      {% for result in job.job_results %}
+      {% for result in paginator.items %}
         <tr>
-          <td>
-            <a href="{{ url_for('job_page', job_id=job.id) }}">{{ job.id }}</a>
-          </td>
-          <td>
-            <a href="{{ url_for('task_page', task_id=job.task.id) }}">{{ job.task.name }}</a>
-          </td>
+          <td>{{ result.id }}</td>
           <td>{{ result.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
           <td>{{ result.success }}</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+  {{ macro.pagination(paginator) }}
 {% endblock %}

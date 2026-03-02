@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
@@ -29,6 +30,10 @@ def is_active_user(user):
     return user and user.github
 
 
+def total_pages(pagenator):
+    return math.ceil(pagenator.total / pagenator.size)
+
+
 @pass_context
 def update_query_params(context, **kwargs):
     request = context.get("request")
@@ -41,3 +46,4 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 templates.env.globals["format_rate"] = format_rate
 templates.env.globals["is_active_user"] = is_active_user
 templates.env.globals["update_query_params"] = update_query_params
+templates.env.globals["total_pages"] = total_pages
