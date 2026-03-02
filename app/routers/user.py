@@ -20,7 +20,7 @@ from app.deps import CurrentUserOptional, PaginationDep, SessionDep
 from app.settings import settings
 from app.templates import templates
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", include_in_schema=False)
 
 
 @router.get("/{id}", response_class=HTMLResponse)
