@@ -6,10 +6,10 @@
   <div>Number of results: {{ count }}</div>
   <div>Success rate: {{ format_rate(rate) }}</div>
   <div>
-    Job ID: <a href="{{ url_for('job_page', job_id=job.id) }}">{{ job.id }}</a>
+    Job ID: <a href="{{ url_for('job_page', id=job.id) }}">{{ job.id }}</a>
   </div>
   <div>
-    Task name: <a href="{{ url_for('task_page', task_id=job.task.id) }}">{{ job.task.name }}</a>
+    Task name: <a href="{{ url_for('task_page', id=job.task.id) }}">{{ job.task.name }}</a>
   </div>
   <table border="1">
     <thead>

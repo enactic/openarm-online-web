@@ -46,14 +46,14 @@ def list_jobs_page(
     )
 
 
-@router.get("/{job_id}", response_class=HTMLResponse)
+@router.get("/{id}", response_class=HTMLResponse)
 def job_page(
-    job_id: int,
+    id: int,
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
 ):
-    job = crud.get_job_with_statistics_by_id(session=session, id=job_id)
+    job = crud.get_job_with_statistics_by_id(session=session, id=id)
     if job is None:
         return templates.TemplateResponse(request, "404.html", status_code=404)
     user = crud.find_user(session=session, id=job.user_id)
