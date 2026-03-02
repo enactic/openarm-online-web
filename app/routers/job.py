@@ -16,7 +16,7 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import crud
-from app.deps import CurrentUser, CurrentUserOptional, SessionDep
+from app.deps import CurrentUser, CurrentUserOptional, PaginationDep, SessionDep
 from app.settings import settings
 from app.templates import templates
 
@@ -28,19 +28,22 @@ def list_jobs_page(
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
+    params: PaginationDep,
     task_id: int = Query(),
 ):
     task = crud.find_task(session=session, id=task_id)
     if task is None:
         return templates.TemplateResponse(request, "404.html", status_code=404)
-    jobs = crud.get_jobs_with_statistics_by_task_id(session=session, task_id=task_id)
+    paginator = crud.get_paginated_jobs_with_statistics_by_task_id(
+        session=session, params=params, task_id=task_id
+    )
     return templates.TemplateResponse(
         request,
         "jobs.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
-            "jobs": jobs,
+            "paginator": paginator,
             "task": task,
         },
     )

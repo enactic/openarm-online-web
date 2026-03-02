@@ -27,7 +27,7 @@
     </form>
     <br />
   {% endif %}
-  {% if jobs %}
+  {% if paginator.items %}
     <table border="1">
       <thead>
         <tr>
@@ -41,7 +41,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for job in jobs %}
+        {% for job in paginator.items %}
           <tr>
             <td>{{ job.id }}</td>
             <td>{{ job.task_name }}</td>
@@ -56,6 +56,7 @@
         {% endfor %}
       </tbody>
     </table>
+    {{ macro.pagination(paginator) }}
   {% else %}
     <p>No jobs yet.</p>
   {% endif %}

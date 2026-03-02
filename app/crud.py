@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from fastapi_pagination import Page, Params
-from fastapi_pagination.ext.sqlmodel import paginate
+from fastapi_pagination.ext.sqlalchemy import paginate as alchemy_paginate
+from fastapi_pagination.ext.sqlmodel import paginate as model_paginate
 
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
@@ -87,7 +88,7 @@ def get_tasks(*, session: Session) -> list[Task]:
 
 
 def get_paginated_tasks(*, session: Session, params: Params) -> Page[Task]:
-    return paginate(session, select(Task).order_by(Task.id), params)
+    return model_paginate(session, select(Task).order_by(Task.id), params)
 
 
 def create_job(
@@ -123,7 +124,7 @@ def get_jobs(*, session: Session) -> list[Job]:
 
 
 def get_paginated_jobs(*, session: Session, params: Params) -> Page[Job]:
-    return paginate(session, select(Job).order_by(Job.id), params)
+    return model_paginate(session, select(Job).order_by(Job.id), params)
 
 
 def _get_jobs_with_statistics_statement() -> Select[Row]:
@@ -141,17 +142,22 @@ def _get_jobs_with_statistics_statement() -> Select[Row]:
         .join(Task, Job.task_id == Task.id)
         .outerjoin(JobResult, JobResult.job_id == Job.id)
         .group_by(Job.id, Task.name)
+        .order_by(Job.id)
     )
 
 
-def get_jobs_with_statistics_by_user_id(*, session: Session, user_id: int) -> list[Row]:
+def get_paginated_jobs_with_statistics_by_user_id(
+    *, session: Session, params: Params, user_id: int
+) -> Page[Row]:
     statement = _get_jobs_with_statistics_statement()
-    return session.exec(statement.where(Job.user_id == user_id)).all()
+    return alchemy_paginate(session, statement.where(Job.user_id == user_id), params)
 
 
-def get_jobs_with_statistics_by_task_id(*, session: Session, task_id: int) -> list[Row]:
+def get_paginated_jobs_with_statistics_by_task_id(
+    *, session: Session, params: Params, task_id: int
+) -> Page[Row]:
     statement = _get_jobs_with_statistics_statement()
-    return session.exec(statement.where(Job.task_id == task_id)).all()
+    return alchemy_paginate(session, statement.where(Job.task_id == task_id), params)
 
 
 def get_job_with_statistics_by_id(*, session: Session, id: int) -> Row:
