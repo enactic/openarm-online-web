@@ -87,7 +87,7 @@ def get_tasks(*, session: Session) -> list[Task]:
 
 
 def get_paginated_tasks(*, session: Session, params: Params) -> Page[Task]:
-    return paginate(session, select(Task), params)
+    return paginate(session, select(Task).order_by(Task.id), params)
 
 
 def create_job(
@@ -120,6 +120,10 @@ def find_job(*, session, id: int) -> Job | None:
 
 def get_jobs(*, session: Session) -> list[Job]:
     return session.exec(select(Job)).all()
+
+
+def get_paginated_jobs(*, session: Session, params: Params) -> Page[Job]:
+    return paginate(session, select(Job).order_by(Job.id), params)
 
 
 def _get_jobs_with_statistics_statement() -> Select[Row]:
