@@ -78,6 +78,12 @@ def update_user_github(
     session.commit()
 
 
+def create_tasks(*, session: Session, data: List[dict]):
+    tasks = [Task.model_validate(d) for d in data]
+    session.add_all(tasks)
+    session.commit()
+
+
 def find_task(*, session, id: int) -> Task | None:
     return session.get(Task, id)
 

@@ -78,16 +78,17 @@ class ApiKey(SQLModel, table=True):
 
 
 class Task(SQLModel, table=True):
-    id: int = Field(primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     name: str | None = Field(default=None, max_length=255)
     prompt: str = Field(sa_type=Text)
     reset_docker_tag: str = Field(max_length=255)
-    created_at: datetime = Field(
+    created_at: datetime | None = Field(
+        default=None,
         sa_column=Column(
             DateTime(timezone=True),
             nullable=False,
             server_default=func.now(),
-        )
+        ),
     )
     jobs: list["Job"] = Relationship(back_populates="task")
 

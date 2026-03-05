@@ -1,0 +1,5 @@
+[
+  {"name": "task1", "prompt": "dummy1", "reset_docker_tag": "reset.tag1"},
+  {"name": "task2", "prompt": "dummy2", "reset_docker_tag": "reset.tag2"},
+  {"name": "task3", "prompt": "dummy3", "reset_docker_tag": "reset.tag3"}
+]

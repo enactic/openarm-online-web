@@ -14,12 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import sys
+
+from pathlib import Path
 
 from sqlmodel import Session
 
 from app.db import engine
-from app.crud import create_api_key
+from app.crud import create_tasks
 
+json_path = Path(sys.argv[1])
 with Session(engine) as session:
-    print(create_api_key(session=session, name=sys.argv[1]))
+    task_data = json.loads(json_path.read_text(encoding="utf-8"))
+    create_tasks(session=session, data=task_data)
