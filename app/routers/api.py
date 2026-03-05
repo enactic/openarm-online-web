@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
+from fastapi.openapi.docs import get_swagger_ui_html
 
 from fastapi_pagination import Page
 
@@ -21,6 +22,7 @@ from typing import Optional
 from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
 from app.models import Task, Job, JobResult, JobResultCreate
+from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
 
@@ -48,3 +50,11 @@ def api_post_job_results(
     request: JobResultCreate, session: SessionDep, api_key: CurrentApiKey
 ):
     return crud.create_job_result(session=session, job_result_create=request)
+
+
+@router.get("/reference", include_in_schema=False)
+def api_reference(request: Request):
+    return get_swagger_ui_html(
+        openapi_url=request.app.openapi_url,
+        title=f"API reference - {settings.SITE_NAME}",
+    )

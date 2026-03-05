@@ -26,7 +26,7 @@ from app.settings import settings
 from app.templates import templates
 from app.security import create_access_token
 
-router = APIRouter(prefix="/login")
+router = APIRouter(prefix="/login", include_in_schema=False)
 
 
 @router.get("/", response_class=HTMLResponse)

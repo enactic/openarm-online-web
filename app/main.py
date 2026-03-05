@@ -36,7 +36,7 @@ async def requires_login_handler(request: Request, exc: NotLoggedIn):
     return RedirectResponse(url="/login", status_code=303)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def top_page(request: Request, current_user: CurrentUserOptional):
     return templates.TemplateResponse(
         request,
@@ -45,7 +45,7 @@ def top_page(request: Request, current_user: CurrentUserOptional):
     )
 
 
-@app.get("/logout")
+@app.get("/logout", include_in_schema=False)
 def logout(current_user: CurrentUser):
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="access_token", path="/")
