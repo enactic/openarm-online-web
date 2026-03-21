@@ -60,3 +60,13 @@ openeval-key-xxx
 ```
 
 An API key is generated and displayed on stdout, use it when accessing the API.
+
+## License
+
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+
+Copyright 2026 Enactic, Inc.
+
+## Code of Conduct
+
+All participation in the OpenArm project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
