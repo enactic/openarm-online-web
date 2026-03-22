@@ -23,6 +23,7 @@ from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
 from app.models import Task, Job, JobResult, JobResultCreate
 from app.settings import settings
+from app.schemas import JobWithTask
 
 router = APIRouter(prefix="/api/v1")
 
@@ -43,6 +44,14 @@ def api_get_jobs(
     return crud.get_paginated_jobs(
         session=session, params=params, filter={"task_id": task_id, "user_id": user_id}
     )
+
+
+@router.get("/jobs/next", response_model=JobWithTask)
+def api_get_next_job(session: SessionDep, api_key: CurrentApiKey):
+    job = crud.get_next_job(session=session)
+    if job is None:
+        return Response(status_code=204)
+    return job
 
 
 @router.post("/job_results", response_model=JobResult)

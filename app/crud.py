@@ -22,6 +22,7 @@ from sqlmodel import Session, select, func, case, cast, Float
 
 from app.models import ApiKey, Job, JobResult, JobResultCreate, Task, User, UserGitHub
 from app.security import generate_api_key, get_hex_digest
+from app.schemas import JobWithTask
 
 
 def create_api_key(*, session: Session, name: str) -> str:
@@ -121,6 +122,18 @@ def find_job(*, session, id: int) -> Job | None:
 
 def get_jobs(*, session: Session) -> list[Job]:
     return session.exec(select(Job)).all()
+
+
+def get_next_job(*, session: Session) -> JobWithTask | None:
+    statement = (
+        select(Job)
+        .outerjoin(JobResult, JobResult.job_id == Job.id)
+        .where(JobResult.id == None)
+        .options(selectinload(Job.task))
+        .order_by(Job.id)
+        .limit(1)
+    )
+    return session.exec(statement).first()
 
 
 def get_paginated_jobs(*, session: Session, params: Params, filter: dict) -> Page[Job]:
