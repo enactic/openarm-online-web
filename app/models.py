@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import datetime, timezone
+from enum import Enum
 
 from sqlalchemy import DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
@@ -109,6 +110,7 @@ class Job(SQLModel, table=True):
     user: User = Relationship(back_populates="jobs")
     task: Task = Relationship(back_populates="jobs")
     job_results: list["JobResult"] = Relationship(back_populates="job")
+    executions: list["JobExecution"] = Relationship(back_populates="job")
 
 
 class JobResultCreate(SQLModel):
@@ -130,3 +132,44 @@ class JobResult(JobResultCreate, table=True):
     )
 
     job: Job = Relationship(back_populates="job_results")
+
+
+class JobExecutionStatus(str, Enum):
+    # pending -> running -> completed | failed
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class JobExecution(SQLModel, table=True):
+    __tablename__ = "job_execution"
+
+    id: int | None = Field(default=None, primary_key=True)
+    job_id: int = Field(foreign_key="job.id", index=True)
+    status: JobExecutionStatus = Field(default=JobExecutionStatus.PENDING, index=True)
+    error_message: str | None = Field(default=None, sa_type=Text)
+    claimed_by: str | None = Field(default=None, max_length=255)
+    claimed_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+    created_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        ),
+    )
+    updated_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+            onupdate=func.now(),
+        ),
+    )
+
+    job: Job = Relationship(back_populates="executions")
