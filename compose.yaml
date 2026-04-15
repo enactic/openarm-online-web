@@ -24,6 +24,7 @@ services:
       - ./scripts:/src/scripts
     environment:
       - PYTHONPATH=/src
+      - TEST_DATABASE_URL=postgresql+psycopg://openeval:openeval@db:5432/openeval_test
     env_file:
       - .env
     depends_on:
