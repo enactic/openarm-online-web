@@ -41,15 +41,15 @@ def user_page(
     )
 
 
-@router.get("/{id}/jobs", response_class=HTMLResponse)
-def list_jobs_by_user_page(
+@router.get("/{id}/submissions", response_class=HTMLResponse)
+def list_submissions_by_user_page(
     id: int,
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
     params: PaginationDep,
 ):
-    paginator = crud.get_paginated_jobs_with_statistics_by_user_id(
+    paginator = crud.get_paginated_submissions_with_statistics_by_user_id(
         session=session, params=params, user_id=id
     )
     user = crud.find_user(session=session, id=id)
@@ -60,7 +60,7 @@ def list_jobs_by_user_page(
 
     return templates.TemplateResponse(
         request,
-        "jobs.html",
+        "submissions.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,

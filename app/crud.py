@@ -16,11 +16,20 @@ from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate as alchemy_paginate
 from fastapi_pagination.ext.sqlmodel import paginate as model_paginate
 
+from sqlalchemy import Select
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
 
-from app.models import ApiKey, Job, JobResult, JobResultCreate, Task, User, UserGitHub
+from app.models import (
+    ApiKey,
+    Submission,
+    JobResult,
+    JobResultCreate,
+    Task,
+    User,
+    UserGitHub,
+)
 from app.security import generate_api_key, get_hex_digest
 
 
@@ -96,78 +105,88 @@ def get_paginated_tasks(*, session: Session, params: Params) -> Page[Task]:
     return model_paginate(session, select(Task).order_by(Task.id), params)
 
 
-def create_job(
+def create_submission(
     *,
     session: Session,
     user: User,
     task_id: int,
     docker_tag: str,
-) -> User:
-    job = Job(
+) -> Submission:
+    submission = Submission(
         user=user,
         task_id=task_id,
         docker_tag=docker_tag,
     )
-    session.add(job)
+    session.add(submission)
     session.commit()
-    session.refresh(job)
-    return job
+    session.refresh(submission)
+    return submission
 
 
-def find_job(*, session, id: int) -> Job | None:
-    statement = select(Job).where(Job.id == id).options(selectinload(Job.task))
+def find_submission(*, session, id: int) -> Submission | None:
+    statement = (
+        select(Submission)
+        .where(Submission.id == id)
+        .options(selectinload(Submission.task))
+    )
     return session.exec(statement).first()
 
 
-def get_jobs(*, session: Session) -> list[Job]:
-    return session.exec(select(Job)).all()
+def get_submissions(*, session: Session) -> list[Submission]:
+    return session.exec(select(Submission)).all()
 
 
-def get_paginated_jobs(*, session: Session, params: Params, filter: dict) -> Page[Job]:
-    statement = select(Job).order_by(Job.id)
+def get_paginated_submissions(
+    *, session: Session, params: Params, filter: dict
+) -> Page[Submission]:
+    statement = select(Submission).order_by(Submission.id)
     if filter.get("task_id") is not None:
-        statement = statement.where(Job.task_id == filter["task_id"])
+        statement = statement.where(Submission.task_id == filter["task_id"])
     if filter.get("user_id") is not None:
-        statement = statement.where(Job.user_id == filter["user_id"])
+        statement = statement.where(Submission.user_id == filter["user_id"])
     return model_paginate(session, statement, params)
 
 
-def _get_jobs_with_statistics_statement() -> Select[Row]:
+def _get_submissions_with_statistics_statement() -> Select[Row]:
     success_func_avg = func.avg(case((JobResult.success == True, 1), else_=0))
     return (
         select(
-            Job.id,
-            Job.user_id,
+            Submission.id,
+            Submission.user_id,
             Task.name.label("task_name"),
-            Job.docker_tag,
-            Job.created_at,
+            Submission.docker_tag,
+            Submission.created_at,
             func.count(JobResult.id).label("count"),
             cast(success_func_avg, Float).label("success_rate"),
         )
-        .join(Task, Job.task_id == Task.id)
-        .outerjoin(JobResult, JobResult.job_id == Job.id)
-        .group_by(Job.id, Task.name)
-        .order_by(Job.id)
+        .join(Task, Submission.task_id == Task.id)
+        .outerjoin(JobResult, JobResult.submission_id == Submission.id)
+        .group_by(Submission.id, Task.name)
+        .order_by(Submission.id)
     )
 
 
-def get_paginated_jobs_with_statistics_by_user_id(
+def get_paginated_submissions_with_statistics_by_user_id(
     *, session: Session, params: Params, user_id: int
 ) -> Page[Row]:
-    statement = _get_jobs_with_statistics_statement()
-    return alchemy_paginate(session, statement.where(Job.user_id == user_id), params)
+    statement = _get_submissions_with_statistics_statement()
+    return alchemy_paginate(
+        session, statement.where(Submission.user_id == user_id), params
+    )
 
 
-def get_paginated_jobs_with_statistics_by_task_id(
+def get_paginated_submissions_with_statistics_by_task_id(
     *, session: Session, params: Params, task_id: int
 ) -> Page[Row]:
-    statement = _get_jobs_with_statistics_statement()
-    return alchemy_paginate(session, statement.where(Job.task_id == task_id), params)
+    statement = _get_submissions_with_statistics_statement()
+    return alchemy_paginate(
+        session, statement.where(Submission.task_id == task_id), params
+    )
 
 
-def get_job_with_statistics_by_id(*, session: Session, id: int) -> Row:
-    statement = _get_jobs_with_statistics_statement()
-    return session.exec(statement.where(Job.id == id)).first()
+def get_submission_with_statistics_by_id(*, session: Session, id: int) -> Row:
+    statement = _get_submissions_with_statistics_statement()
+    return session.exec(statement.where(Submission.id == id)).first()
 
 
 def create_job_result(*, session: Session, job_result_create: JobResultCreate):
@@ -182,6 +201,6 @@ def get_paginated_job_results(
     *, session: Session, params: Params, filter: dict
 ) -> Page[JobResult]:
     statement = select(JobResult).order_by(JobResult.id)
-    if "job_id" in filter:
-        statement = statement.where(JobResult.job_id == filter["job_id"])
-    return paginate(session, statement, params)
+    if "submission_id" in filter:
+        statement = statement.where(JobResult.submission_id == filter["submission_id"])
+    return model_paginate(session, statement, params)

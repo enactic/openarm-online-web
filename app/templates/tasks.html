@@ -21,7 +21,7 @@
           <td>{{ task.prompt }}</td>
           <td>{{ task.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
           <td>
-            <a href="{{ url_for('list_jobs_page').include_query_params(task_id=task.id) }}">Jobs</a>
+            <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
           </td>
         </tr>
       {% endfor %}
