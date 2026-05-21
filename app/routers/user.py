@@ -32,7 +32,15 @@ def user_page(
 ):
     user = crud.find_user(session=session, id=id)
     if user is None:
-        return templates.TemplateResponse(request, "404.html", status_code=404)
+        return templates.TemplateResponse(
+            request,
+            "404.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+            },
+            status_code=404,
+        )
 
     return templates.TemplateResponse(
         request,
@@ -51,7 +59,15 @@ def list_submissions_by_user_page(
 ):
     user = crud.find_user(session=session, id=id)
     if user is None:
-        return templates.TemplateResponse(request, "404.html", status_code=404)
+        return templates.TemplateResponse(
+            request,
+            "404.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+            },
+            status_code=404,
+        )
     paginator = crud.get_paginated_submissions_with_statistics_by_user_id(
         session=session, params=params, user_id=id
     )
