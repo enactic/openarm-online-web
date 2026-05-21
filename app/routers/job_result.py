@@ -32,6 +32,8 @@ def list_job_results_page(
     submission_id: int = Query(),
 ):
     submission = crud.find_submission(session=session, id=submission_id)
+    if submission is None:
+        return templates.TemplateResponse(request, "404.html", status_code=404)
     paginator = crud.get_paginated_job_results(
         session=session, params=params, filter={"submission_id": submission_id}
     )

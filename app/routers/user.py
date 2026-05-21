@@ -49,10 +49,12 @@ def list_submissions_by_user_page(
     current_user: CurrentUserOptional,
     params: PaginationDep,
 ):
+    user = crud.find_user(session=session, id=id)
+    if user is None:
+        return templates.TemplateResponse(request, "404.html", status_code=404)
     paginator = crud.get_paginated_submissions_with_statistics_by_user_id(
         session=session, params=params, user_id=id
     )
-    user = crud.find_user(session=session, id=id)
     if current_user and id == current_user.id:
         tasks = crud.get_tasks(session=session)
     else:
