@@ -32,7 +32,7 @@ class User(SQLModel, table=True):
         back_populates="user",
         sa_relationship_kwargs={"uselist": False, "lazy": "joined"},
     )
-    jobs: list["Job"] = Relationship(back_populates="user")
+    submissions: list["Submission"] = Relationship(back_populates="user")
 
 
 class UserGitHub(SQLModel, table=True):
@@ -90,10 +90,10 @@ class Task(SQLModel, table=True):
             server_default=func.now(),
         ),
     )
-    jobs: list["Job"] = Relationship(back_populates="task")
+    submissions: list["Submission"] = Relationship(back_populates="task")
 
 
-class Job(SQLModel, table=True):
+class Submission(SQLModel, table=True):
     id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
     task_id: int = Field(foreign_key="task.id", index=True)
@@ -106,13 +106,13 @@ class Job(SQLModel, table=True):
         )
     )
 
-    user: User = Relationship(back_populates="jobs")
-    task: Task = Relationship(back_populates="jobs")
-    job_results: list["JobResult"] = Relationship(back_populates="job")
+    user: User = Relationship(back_populates="submissions")
+    task: Task = Relationship(back_populates="submissions")
+    job_results: list["JobResult"] = Relationship(back_populates="submission")
 
 
 class JobResultCreate(SQLModel):
-    job_id: int = Field(foreign_key="job.id", index=True, nullable=False)
+    submission_id: int = Field(foreign_key="submission.id", index=True, nullable=False)
     success: bool = Field(nullable=False)
 
 
@@ -129,4 +129,4 @@ class JobResult(JobResultCreate, table=True):
         ),
     )
 
-    job: Job = Relationship(back_populates="job_results")
+    submission: Submission = Relationship(back_populates="job_results")

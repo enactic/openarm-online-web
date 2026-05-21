@@ -20,11 +20,11 @@ from app.deps import CurrentUser, CurrentUserOptional, PaginationDep, SessionDep
 from app.settings import settings
 from app.templates import templates
 
-router = APIRouter(prefix="/jobs", include_in_schema=False)
+router = APIRouter(prefix="/submissions", include_in_schema=False)
 
 
 @router.get("/", response_class=HTMLResponse)
-def list_jobs_page(
+def list_submissions_page(
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
@@ -34,12 +34,12 @@ def list_jobs_page(
     task = crud.find_task(session=session, id=task_id)
     if task is None:
         return templates.TemplateResponse(request, "404.html", status_code=404)
-    paginator = crud.get_paginated_jobs_with_statistics_by_task_id(
+    paginator = crud.get_paginated_submissions_with_statistics_by_task_id(
         session=session, params=params, task_id=task_id
     )
     return templates.TemplateResponse(
         request,
-        "jobs.html",
+        "submissions.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
@@ -50,43 +50,43 @@ def list_jobs_page(
 
 
 @router.get("/{id}", response_class=HTMLResponse)
-def job_page(
+def submission_page(
     id: int,
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
 ):
-    job = crud.get_job_with_statistics_by_id(session=session, id=id)
-    if job is None:
+    submission = crud.get_submission_with_statistics_by_id(session=session, id=id)
+    if submission is None:
         return templates.TemplateResponse(request, "404.html", status_code=404)
-    user = crud.find_user(session=session, id=job.user_id)
+    user = crud.find_user(session=session, id=submission.user_id)
     return templates.TemplateResponse(
         request,
-        "job.html",
+        "submission.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
-            "job": job,
+            "submission": submission,
             "user": user,
         },
     )
 
 
 @router.post("/", response_class=HTMLResponse)
-def create_job_page(
+def create_submission_page(
     request: Request,
     session: SessionDep,
     current_user: CurrentUser,
     task_id: int = Form(),
     docker_tag: str = Form(),
 ):
-    crud.create_job(
+    crud.create_submission(
         session=session,
         user=current_user,
         task_id=task_id,
         docker_tag=docker_tag,
     )
     return RedirectResponse(
-        url=request.url_for("list_jobs_by_user_page", id=current_user.id),
+        url=request.url_for("list_submissions_by_user_page", id=current_user.id),
         status_code=303,
     )

@@ -1,8 +1,8 @@
 {% import "macros.html" as macro with context %}
 {% extends "base.html" %}
-{% block title %}Job - {{ site_name }}{% endblock %}
+{% block title %}Submission - {{ site_name }}{% endblock %}
 {% block content %}
-  <h1>Job</h1>
+  <h1>Submission</h1>
   <table border="1">
     <thead>
       <tr>
@@ -18,15 +18,15 @@
     </thead>
     <tbody>
       <tr>
-        <td>{{ job.id }}</td>
-        <td>{{ job.task_name }}</td>
-        <td>{{ job.docker_tag }}</td>
+        <td>{{ submission.id }}</td>
+        <td>{{ submission.task_name }}</td>
+        <td>{{ submission.docker_tag }}</td>
         <td>{{ macro.user_name(user, link=true) }}</td>
-        <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
-        <td>{{ job.count }}</td>
-        <td>{{ format_rate(job.success_rate) }}</td>
+        <td>{{ submission.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+        <td>{{ submission.count }}</td>
+        <td>{{ format_rate(submission.success_rate) }}</td>
         <td>
-          <a href="{{ url_for('list_job_results_page').include_query_params(job_id=job.id) }}">Results</a>
+          <a href="{{ url_for('list_job_results_page').include_query_params(submission_id=submission.id) }}">Results</a>
         </td>
       </tr>
     </tbody>

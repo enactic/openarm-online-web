@@ -2,16 +2,16 @@
 {% extends "base.html" %}
 {% block title %}
   {% if task %}
-    Jobs - {{ task.name }} - {{ site_name }}
+    Submissions - {{ task.name }} - {{ site_name }}
   {% else %}
-    Jobs - {{ macro.user_name(user) }} - {{ site_name }}
+    Submissions - {{ macro.user_name(user) }} - {{ site_name }}
   {% endif %}
 {% endblock %}
 {% block content %}
-  <h1>Jobs</h1>
+  <h1>Submissions</h1>
   {% if tasks %}
-    <h2>New Job</h2>
-    <form method="post" action="{{ url_for('create_job_page') }}">
+    <h2>New Submission</h2>
+    <form method="post" action="{{ url_for('create_submission_page') }}">
       <label>
         Task
         <select name="task_id" required>
@@ -41,16 +41,16 @@
         </tr>
       </thead>
       <tbody>
-        {% for job in paginator.items %}
+        {% for submission in paginator.items %}
           <tr>
-            <td>{{ job.id }}</td>
-            <td>{{ job.task_name }}</td>
-            <td>{{ job.docker_tag }}</td>
-            <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
-            <td>{{ job.count }}</td>
-            <td>{{ format_rate(job.success_rate) }}</td>
+            <td>{{ submission.id }}</td>
+            <td>{{ submission.task_name }}</td>
+            <td>{{ submission.docker_tag }}</td>
+            <td>{{ submission.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+            <td>{{ submission.count }}</td>
+            <td>{{ format_rate(submission.success_rate) }}</td>
             <td>
-              <a href="{{ url_for('list_job_results_page').include_query_params(job_id=job.id) }}">Results</a>
+              <a href="{{ url_for('list_job_results_page').include_query_params(submission_id=submission.id) }}">Results</a>
             </td>
           </tr>
         {% endfor %}
@@ -58,6 +58,6 @@
     </table>
     {{ macro.pagination(paginator) }}
   {% else %}
-    <p>No jobs yet.</p>
+    <p>No submissions yet.</p>
   {% endif %}
 {% endblock %}

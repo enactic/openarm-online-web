@@ -21,7 +21,7 @@ from typing import Optional
 
 from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
-from app.models import Task, Job, JobResult, JobResultCreate
+from app.models import Task, Submission, JobResult, JobResultCreate
 from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
@@ -32,15 +32,15 @@ def api_get_tasks(session: SessionDep, api_key: CurrentApiKey, params: Paginatio
     return crud.get_paginated_tasks(session=session, params=params)
 
 
-@router.get("/jobs", response_model=Page[Job])
-def api_get_jobs(
+@router.get("/submissions", response_model=Page[Submission])
+def api_get_submissions(
     session: SessionDep,
     api_key: CurrentApiKey,
     params: PaginationDep,
     task_id: Optional[int] = Query(None),
     user_id: Optional[int] = Query(None),
 ):
-    return crud.get_paginated_jobs(
+    return crud.get_paginated_submissions(
         session=session, params=params, filter={"task_id": task_id, "user_id": user_id}
     )
 

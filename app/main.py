@@ -18,13 +18,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi_pagination import add_pagination
 
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
-from app.routers import api, job, job_result, login, task, user
+from app.routers import api, submission, job_result, login, task, user
 from app.settings import settings
 from app.templates import templates
 
 app = FastAPI()
 app.include_router(api.router)
-app.include_router(job.router)
+app.include_router(submission.router)
 app.include_router(job_result.router)
 app.include_router(login.router)
 app.include_router(task.router)

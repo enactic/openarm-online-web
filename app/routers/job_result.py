@@ -29,20 +29,22 @@ def list_job_results_page(
     session: SessionDep,
     current_user: CurrentUserOptional,
     params: PaginationDep,
-    job_id: int = Query(),
+    submission_id: int = Query(),
 ):
-    job = crud.find_job(session=session, id=job_id)
+    submission = crud.find_submission(session=session, id=submission_id)
     paginator = crud.get_paginated_job_results(
-        session=session, params=params, filter={"job_id": job_id}
+        session=session, params=params, filter={"submission_id": submission_id}
     )
-    statistics = crud.get_job_with_statistics_by_id(session=session, id=job.id)
+    statistics = crud.get_submission_with_statistics_by_id(
+        session=session, id=submission.id
+    )
     return templates.TemplateResponse(
         request,
         "job_results.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
-            "job": job,
+            "submission": submission,
             "paginator": paginator,
             "count": statistics.count,
             "rate": statistics.success_rate,
