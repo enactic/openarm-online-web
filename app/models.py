@@ -162,7 +162,6 @@ class ReadyExecution(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id", unique=True, index=True)
-    task_id: int = Field(foreign_key="task.id", index=True)
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
