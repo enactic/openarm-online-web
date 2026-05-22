@@ -109,6 +109,7 @@ class Submission(SQLModel, table=True):
     user: User = Relationship(back_populates="submissions")
     task: Task = Relationship(back_populates="submissions")
     rollouts: list["Rollout"] = Relationship(back_populates="submission")
+    jobs: list["Job"] = Relationship(back_populates="submission")
 
 
 class RolloutCreate(SQLModel):
@@ -128,3 +129,81 @@ class Rollout(RolloutCreate, table=True):
     )
 
     submission: Submission = Relationship(back_populates="rollouts")
+
+
+class Job(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    submission_id: int = Field(foreign_key="submission.id", index=True)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    submission: Submission = Relationship(back_populates="jobs")
+    ready_execution: "ReadyExecution" = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"uselist": False},
+    )
+    claimed_execution: "ClaimedExecution" = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"uselist": False},
+    )
+    failed_execution: "FailedExecution" = Relationship(
+        back_populates="job",
+        sa_relationship_kwargs={"uselist": False},
+    )
+
+
+class ReadyExecution(SQLModel, table=True):
+    __tablename__ = "ready_execution"
+
+    id: int | None = Field(default=None, primary_key=True)
+    job_id: int = Field(foreign_key="job.id", unique=True, index=True)
+    task_id: int = Field(foreign_key="task.id", index=True)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    job: Job = Relationship(back_populates="ready_execution")
+
+
+class ClaimedExecution(SQLModel, table=True):
+    __tablename__ = "claimed_execution"
+
+    id: int | None = Field(default=None, primary_key=True)
+    job_id: int = Field(foreign_key="job.id", unique=True, index=True)
+    api_key_id: int = Field(foreign_key="api_key.id", index=True)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    job: Job = Relationship(back_populates="claimed_execution")
+    api_key: ApiKey = Relationship()
+
+
+class FailedExecution(SQLModel, table=True):
+    __tablename__ = "failed_execution"
+
+    id: int | None = Field(default=None, primary_key=True)
+    job_id: int = Field(foreign_key="job.id", unique=True, index=True)
+    error: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    job: Job = Relationship(back_populates="failed_execution")
