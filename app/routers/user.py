@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse
 
 from app import crud
 from app.deps import CurrentUserOptional, PaginationDep, SessionDep
+from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
 
@@ -32,16 +33,7 @@ def user_page(
 ):
     user = crud.find_user(session=session, id=id)
     if user is None:
-        return templates.TemplateResponse(
-            request,
-            "404.html",
-            {
-                "site_name": settings.SITE_NAME,
-                "current_user": current_user,
-            },
-            status_code=404,
-        )
-
+        return not_found(request, current_user)
     return templates.TemplateResponse(
         request,
         "user.html",
@@ -59,15 +51,7 @@ def list_submissions_by_user_page(
 ):
     user = crud.find_user(session=session, id=id)
     if user is None:
-        return templates.TemplateResponse(
-            request,
-            "404.html",
-            {
-                "site_name": settings.SITE_NAME,
-                "current_user": current_user,
-            },
-            status_code=404,
-        )
+        return not_found(request, current_user)
     paginator = crud.get_paginated_submissions_with_statistics_by_user_id(
         session=session, params=params, user_id=id
     )
