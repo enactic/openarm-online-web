@@ -39,6 +39,6 @@ ENV PATH="/src/.venv/bin:$PATH"
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=app/uv.lock,target=uv.lock \
     --mount=type=bind,source=app/pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-workspace
+    uv sync --frozen --no-install-workspace --dev
 
 CMD ["uv", "run", "fastapi", "dev", "/src/app/main.py", "--host", "0.0.0.0"]
