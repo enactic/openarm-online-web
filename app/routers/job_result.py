@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse
 
 from app import crud
 from app.deps import CurrentUserOptional, PaginationDep, SessionDep
+from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
 
@@ -33,15 +34,7 @@ def list_job_results_page(
 ):
     submission = crud.find_submission(session=session, id=submission_id)
     if submission is None:
-        return templates.TemplateResponse(
-            request,
-            "404.html",
-            {
-                "site_name": settings.SITE_NAME,
-                "current_user": current_user,
-            },
-            status_code=404,
-        )
+        return not_found(request, current_user)
     paginator = crud.get_paginated_job_results(
         session=session, params=params, filter={"submission_id": submission_id}
     )
