@@ -51,7 +51,15 @@ def task_page(
 ):
     task = crud.find_task(session=session, id=id)
     if task is None:
-        return templates.TemplateResponse(request, "404.html", status_code=404)
+        return templates.TemplateResponse(
+            request,
+            "404.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+            },
+            status_code=404,
+        )
     return templates.TemplateResponse(
         request,
         "task.html",

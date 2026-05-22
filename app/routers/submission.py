@@ -33,7 +33,15 @@ def list_submissions_page(
 ):
     task = crud.find_task(session=session, id=task_id)
     if task is None:
-        return templates.TemplateResponse(request, "404.html", status_code=404)
+        return templates.TemplateResponse(
+            request,
+            "404.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+            },
+            status_code=404,
+        )
     paginator = crud.get_paginated_submissions_with_statistics_by_task_id(
         session=session, params=params, task_id=task_id
     )
@@ -58,7 +66,15 @@ def submission_page(
 ):
     submission = crud.get_submission_with_statistics_by_id(session=session, id=id)
     if submission is None:
-        return templates.TemplateResponse(request, "404.html", status_code=404)
+        return templates.TemplateResponse(
+            request,
+            "404.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+            },
+            status_code=404,
+        )
     user = crud.find_user(session=session, id=submission.user_id)
     return templates.TemplateResponse(
         request,
