@@ -92,7 +92,7 @@ def upgrade() -> None:
         "failed_execution",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("job_id", sa.Integer(), nullable=False),
-        sa.Column("error", sa.Text(), nullable=False),
+        sa.Column("reason", sa.Text(), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

@@ -197,7 +197,7 @@ class FailedExecution(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     job_id: int = Field(foreign_key="job.id", unique=True, index=True)
-    error: str = Field(sa_type=Text)
+    reason: str = Field(sa_type=Text)
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
