@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
@@ -143,15 +144,15 @@ class Job(SQLModel, table=True):
     )
 
     submission: Submission = Relationship(back_populates="jobs")
-    ready_execution: "ReadyExecution" | None = Relationship(
+    ready_execution: Optional["ReadyExecution"] = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
-    claimed_execution: "ClaimedExecution" | None = Relationship(
+    claimed_execution: Optional["ClaimedExecution"] = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
-    failed_execution: "FailedExecution" | None = Relationship(
+    failed_execution: Optional["FailedExecution"] = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
