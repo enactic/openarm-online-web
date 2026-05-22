@@ -26,7 +26,7 @@
         <td>{{ submission.count }}</td>
         <td>{{ format_rate(submission.success_rate) }}</td>
         <td>
-          <a href="{{ url_for('list_job_results_page').include_query_params(submission_id=submission.id) }}">Results</a>
+          <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Results</a>
         </td>
       </tr>
     </tbody>

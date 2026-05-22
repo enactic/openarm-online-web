@@ -108,17 +108,15 @@ class Submission(SQLModel, table=True):
 
     user: User = Relationship(back_populates="submissions")
     task: Task = Relationship(back_populates="submissions")
-    job_results: list["JobResult"] = Relationship(back_populates="submission")
+    rollouts: list["Rollout"] = Relationship(back_populates="submission")
 
 
-class JobResultCreate(SQLModel):
+class RolloutCreate(SQLModel):
     submission_id: int = Field(foreign_key="submission.id", index=True, nullable=False)
     success: bool = Field(nullable=False)
 
 
-class JobResult(JobResultCreate, table=True):
-    __tablename__ = "job_result"
-
+class Rollout(RolloutCreate, table=True):
     id: int | None = Field(default=None, primary_key=True)
     created_at: datetime | None = Field(
         default=None,
@@ -129,4 +127,4 @@ class JobResult(JobResultCreate, table=True):
         ),
     )
 
-    submission: Submission = Relationship(back_populates="job_results")
+    submission: Submission = Relationship(back_populates="rollouts")

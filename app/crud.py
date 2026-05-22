@@ -24,8 +24,8 @@ from sqlmodel import Session, select, func, case, cast, Float
 from app.models import (
     ApiKey,
     Submission,
-    JobResult,
-    JobResultCreate,
+    Rollout,
+    RolloutCreate,
     Task,
     User,
     UserGitHub,
@@ -148,7 +148,7 @@ def get_paginated_submissions(
 
 
 def _get_submissions_with_statistics_statement() -> Select[Row]:
-    success_func_avg = func.avg(case((JobResult.success == True, 1), else_=0))
+    success_func_avg = func.avg(case((Rollout.success == True, 1), else_=0))
     return (
         select(
             Submission.id,
@@ -156,11 +156,11 @@ def _get_submissions_with_statistics_statement() -> Select[Row]:
             Task.name.label("task_name"),
             Submission.docker_tag,
             Submission.created_at,
-            func.count(JobResult.id).label("count"),
+            func.count(Rollout.id).label("count"),
             cast(success_func_avg, Float).label("success_rate"),
         )
         .join(Task, Submission.task_id == Task.id)
-        .outerjoin(JobResult, JobResult.submission_id == Submission.id)
+        .outerjoin(Rollout, Rollout.submission_id == Submission.id)
         .group_by(Submission.id, Task.name)
         .order_by(Submission.id)
     )
@@ -189,18 +189,18 @@ def get_submission_with_statistics_by_id(*, session: Session, id: int) -> Row:
     return session.exec(statement.where(Submission.id == id)).first()
 
 
-def create_job_result(*, session: Session, job_result_create: JobResultCreate):
-    job_result = JobResult.model_validate(job_result_create)
-    session.add(job_result)
+def create_rollout(*, session: Session, rollout_create: RolloutCreate):
+    rollout = Rollout.model_validate(rollout_create)
+    session.add(rollout)
     session.commit()
-    session.refresh(job_result)
-    return job_result
+    session.refresh(rollout)
+    return rollout
 
 
-def get_paginated_job_results(
+def get_paginated_rollouts(
     *, session: Session, params: Params, filter: dict
-) -> Page[JobResult]:
-    statement = select(JobResult).order_by(JobResult.id)
+) -> Page[Rollout]:
+    statement = select(Rollout).order_by(Rollout.id)
     if "submission_id" in filter:
-        statement = statement.where(JobResult.submission_id == filter["submission_id"])
+        statement = statement.where(Rollout.submission_id == filter["submission_id"])
     return model_paginate(session, statement, params)
