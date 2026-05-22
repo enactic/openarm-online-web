@@ -21,8 +21,7 @@ from app.models import Task
 
 
 def test_find_task(session: Session, tasks: list[Task]):
-    actual = crud.find_task(session=session, id=tasks[0].id)
-    assert actual == tasks[0]
+    assert crud.find_task(session=session, id=tasks[0].id) == tasks[0]
 
 
 def test_find_task_not_found(session: Session):
