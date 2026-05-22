@@ -143,15 +143,15 @@ class Job(SQLModel, table=True):
     )
 
     submission: Submission = Relationship(back_populates="jobs")
-    ready_execution: "ReadyExecution" = Relationship(
+    ready_execution: "ReadyExecution" | None = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
-    claimed_execution: "ClaimedExecution" = Relationship(
+    claimed_execution: "ClaimedExecution" | None = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
-    failed_execution: "FailedExecution" = Relationship(
+    failed_execution: "FailedExecution" | None = Relationship(
         back_populates="job",
         sa_relationship_kwargs={"uselist": False},
     )
