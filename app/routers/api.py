@@ -21,7 +21,7 @@ from typing import Optional
 
 from app import crud
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
-from app.models import Task, Submission, JobResult, JobResultCreate
+from app.models import Task, Submission, Rollout, RolloutCreate
 from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
@@ -45,11 +45,11 @@ def api_get_submissions(
     )
 
 
-@router.post("/job_results", response_model=JobResult)
-def api_post_job_results(
-    request: JobResultCreate, session: SessionDep, api_key: CurrentApiKey
+@router.post("/rollouts", response_model=Rollout)
+def api_post_rollouts(
+    request: RolloutCreate, session: SessionDep, api_key: CurrentApiKey
 ):
-    return crud.create_job_result(session=session, job_result_create=request)
+    return crud.create_rollout(session=session, rollout_create=request)
 
 
 @router.get("/reference", include_in_schema=False)

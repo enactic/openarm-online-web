@@ -21,11 +21,11 @@ from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
 
-router = APIRouter(prefix="/job_results", include_in_schema=False)
+router = APIRouter(prefix="/rollouts", include_in_schema=False)
 
 
 @router.get("/", response_class=HTMLResponse)
-def list_job_results_page(
+def list_rollouts_page(
     request: Request,
     session: SessionDep,
     current_user: CurrentUserOptional,
@@ -35,7 +35,7 @@ def list_job_results_page(
     submission = crud.find_submission(session=session, id=submission_id)
     if submission is None:
         return not_found(request, current_user)
-    paginator = crud.get_paginated_job_results(
+    paginator = crud.get_paginated_rollouts(
         session=session, params=params, filter={"submission_id": submission_id}
     )
     statistics = crud.get_submission_with_statistics_by_id(
@@ -43,7 +43,7 @@ def list_job_results_page(
     )
     return templates.TemplateResponse(
         request,
-        "job_results.html",
+        "rollouts.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
