@@ -12,7 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
 
-# TODO: Remove `test_dummy` when you add a real test.
-def test_dummy():
-    assert True
+from sqlmodel import Session
+
+from app import crud
+from app.models import Task
+
+
+def test_find_task(session: Session, tasks: list[Task]):
+    actual = crud.find_task(session=session, id=tasks[0].id)
+    assert actual == tasks[0]
+
+
+def test_find_task_not_found(session: Session):
+    assert crud.find_task(session=session, id=9999) is None
