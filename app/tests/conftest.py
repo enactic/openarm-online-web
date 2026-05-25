@@ -26,7 +26,18 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("HMAC_KEY", "test-hmac-key")
 
 from app import crud
-from app.models import Task
+from app.models import (
+    ApiKey,
+    ClaimedExecution,
+    FailedExecution,
+    Job,
+    ReadyExecution,
+    Rollout,
+    Submission,
+    Task,
+    User,
+    UserGitHub,
+)
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -48,6 +59,16 @@ def setup_db() -> Generator[None, None, None]:
 def fixture_session() -> Generator[Session, None, None]:
     with Session(test_engine) as session:
         yield session
+        session.rollback()
+        session.exec(delete(Rollout))
+        session.exec(delete(FailedExecution))
+        session.exec(delete(ClaimedExecution))
+        session.exec(delete(ReadyExecution))
+        session.exec(delete(Job))
+        session.exec(delete(Submission))
+        session.exec(delete(UserGitHub))
+        session.exec(delete(User))
+        session.exec(delete(ApiKey))
         session.exec(delete(Task))
         session.commit()
 
@@ -57,3 +78,24 @@ def fixture_tasks(session: Session) -> list[Task]:
     data = json.loads((FIXTURES_DIR / "task.json").read_text())
     crud.create_tasks(session=session, data=data)
     return crud.get_tasks(session=session)
+
+
+@pytest.fixture(name="api_key")
+def fixture_api_key(session: Session) -> ApiKey:
+    api_key = ApiKey(hashed_key="test_key", name="test")
+    session.add(api_key)
+    session.commit()
+    session.refresh(api_key)
+    return api_key
+
+
+@pytest.fixture(name="user")
+def fixture_user(session: Session) -> User:
+    return crud.create_user(session=session, github_id=1, login_name="testuser")
+
+
+@pytest.fixture(name="submission")
+def fixture_submission(session: Session, user: User, tasks: list[Task]) -> Submission:
+    return crud.create_submission(
+        session=session, user=user, task_id=tasks[0].id, docker_tag="test/image:latest"
+    )
