@@ -42,7 +42,10 @@ jobs:
       - uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
       - name: Run tests
         env:
+          POSTGRES_SERVER: localhost
+          POSTGRES_USER: openeval
+          POSTGRES_PASSWORD: openeval
+          POSTGRES_DB: openeval_test
           PYTHONPATH: ${{ github.workspace }}
-          TEST_DATABASE_URL: postgresql+psycopg://openeval:openeval@localhost:5432/openeval_test
         working-directory: app
         run: uv run pytest tests/

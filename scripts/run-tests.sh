@@ -16,9 +16,12 @@
 
 set -euo pipefail
 
-docker compose exec db createdb -U openeval openeval_test 2>&1 | grep -v "already exists" || :
+test_db=openeval_test
+
+docker compose exec db createdb -U openeval "${test_db}" 2>&1 | grep -v "already exists" || :
 
 docker compose exec \
+  --env POSTGRES_DB="${test_db}" \
   --workdir /src/app \
   app \
   uv run pytest tests/
