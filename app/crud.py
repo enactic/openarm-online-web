@@ -30,6 +30,7 @@ from app.models import (
     User,
     UserGitHub,
 )
+from app.job_queue import enqueue
 from app.security import generate_api_key, get_hex_digest
 
 
@@ -105,7 +106,7 @@ def get_paginated_tasks(*, session: Session, params: Params) -> Page[Task]:
     return model_paginate(session, select(Task).order_by(Task.id), params)
 
 
-def create_submission(
+def _create_submission_no_commit(
     *,
     session: Session,
     user: User,
@@ -118,7 +119,41 @@ def create_submission(
         docker_tag=docker_tag,
     )
     session.add(submission)
+    session.flush()
+    return submission
+
+
+def create_submission(
+    *,
+    session: Session,
+    user: User,
+    task_id: int,
+    docker_tag: str,
+) -> Submission:
+    submission = _create_submission_no_commit(
+        session=session,
+        user=user,
+        task_id=task_id,
+        docker_tag=docker_tag,
+    )
     session.commit()
+    session.refresh(submission)
+    return submission
+
+
+def create_submission_with_enqueue(
+    *,
+    session: Session,
+    user: User,
+    task_id: int,
+    docker_tag: str,
+) -> Submission:
+    # Create a submission and enqueue a job in a single transaction.
+    submission = _create_submission_no_commit(
+        session=session, user=user, task_id=task_id, docker_tag=docker_tag
+    )
+    # It is committed within `enqueue()`.
+    enqueue(session=session, submission_id=submission.id)
     session.refresh(submission)
     return submission
 
