@@ -37,7 +37,7 @@ def create_api_key(*, session: Session, name: str) -> str:
     key = generate_api_key()
     api_key = ApiKey(hashed_key=get_hex_digest(key), name=name)
     session.add(api_key)
-    session.commit()
+    session.flush()
     return key
 
 
@@ -69,8 +69,7 @@ def create_user(
     )
     user = User(github=user_github)
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    session.flush()
     return user
 
 
@@ -80,17 +79,17 @@ def update_user_github(
     user: User,
     login_name: str | None = None,
     name: str | None = None,
-) -> User:
+):
     user.github.login_name = login_name
     user.github.name = name
     session.add(user)
-    session.commit()
+    session.flush()
 
 
-def create_tasks(*, session: Session, data: List[dict]):
+def create_tasks(*, session: Session, data: list[dict]):
     tasks = [Task.model_validate(d) for d in data]
     session.add_all(tasks)
-    session.commit()
+    session.flush()
 
 
 def find_task(*, session, id: int) -> Task | None:
@@ -118,8 +117,7 @@ def create_submission(
         docker_tag=docker_tag,
     )
     session.add(submission)
-    session.commit()
-    session.refresh(submission)
+    session.flush()
     return submission
 
 
@@ -192,8 +190,7 @@ def get_submission_with_statistics_by_id(*, session: Session, id: int) -> Row:
 def create_rollout(*, session: Session, rollout_create: RolloutCreate):
     rollout = Rollout.model_validate(rollout_create)
     session.add(rollout)
-    session.commit()
-    session.refresh(rollout)
+    session.flush()
     return rollout
 
 

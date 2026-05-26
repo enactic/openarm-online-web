@@ -22,4 +22,6 @@ from app.db import engine
 from app.crud import create_api_key
 
 with Session(engine) as session:
-    print(create_api_key(session=session, name=sys.argv[1]))
+    with session.begin():
+        api_key = create_api_key(session=session, name=sys.argv[1])
+print(api_key)

@@ -28,7 +28,7 @@ def enqueue(*, session: Session, submission_id: int) -> Job:
     session.add(job)
     session.flush()
     session.add(ReadyExecution(job_id=job.id))
-    session.commit()
+    session.flush()
     session.refresh(job)
     return job
 
@@ -49,7 +49,7 @@ def claim_next_job(*, session: Session, api_key_id: int, task_id: int) -> Job | 
     job = session.get(Job, ready.job_id)
     session.delete(ready)
     session.add(ClaimedExecution(job_id=job.id, api_key_id=api_key_id))
-    session.commit()
+    session.flush()
     return job
 
 
@@ -66,7 +66,7 @@ def complete_job(*, session: Session, job_id: int, api_key_id: int) -> None:
         raise ValueError(f"Job({job.id}) is claimed by another runner")
     session.delete(claimed)
     session.delete(job)
-    session.commit()
+    session.flush()
 
 
 def fail_job(*, session: Session, job_id: int, reason: str, api_key_id: int) -> Job:
@@ -82,7 +82,7 @@ def fail_job(*, session: Session, job_id: int, reason: str, api_key_id: int) -> 
         raise ValueError(f"Job({job.id}) is claimed by another runner")
     session.delete(claimed)
     session.add(FailedExecution(job_id=job_id, reason=reason))
-    session.commit()
+    session.flush()
     return job
 
 
@@ -97,5 +97,5 @@ def retry_job(*, session: Session, job_id: int) -> Job:
         raise ValueError(f"Job({job.id}) has no failed execution")
     session.delete(failed)
     session.add(ReadyExecution(job_id=job.id))
-    session.commit()
+    session.flush()
     return job

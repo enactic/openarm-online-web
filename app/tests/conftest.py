@@ -90,6 +90,7 @@ def fixture_client(session: Session, user: User):
 def fixture_tasks(session: Session) -> list[Task]:
     data = json.loads((FIXTURES_DIR / "task.json").read_text())
     crud.create_tasks(session=session, data=data)
+    session.commit()
     return crud.get_tasks(session=session)
 
 
@@ -104,11 +105,15 @@ def fixture_api_key(session: Session) -> ApiKey:
 
 @pytest.fixture(name="user")
 def fixture_user(session: Session) -> User:
-    return crud.create_user(session=session, github_id=1, login_name="testuser")
+    user = crud.create_user(session=session, github_id=1, login_name="testuser")
+    session.commit()
+    return user
 
 
 @pytest.fixture(name="submission")
 def fixture_submission(session: Session, user: User, tasks: list[Task]) -> Submission:
-    return crud.create_submission(
+    submission = crud.create_submission(
         session=session, user=user, task_id=tasks[0].id, docker_tag="test/image:latest"
     )
+    session.commit()
+    return submission
