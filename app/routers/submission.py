@@ -15,7 +15,7 @@
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from app import crud
+from app import crud, job_queue
 from app.deps import CurrentUser, CurrentUserOptional, PaginationDep, SessionDep
 from app.responses import not_found
 from app.settings import settings
@@ -81,12 +81,13 @@ def create_submission_page(
     task_id: int = Form(),
     docker_tag: str = Form(),
 ):
-    crud.create_submission(
+    submission = crud.create_submission(
         session=session,
         user=current_user,
         task_id=task_id,
         docker_tag=docker_tag,
     )
+    job_queue.enqueue(session=session, submission_id=submission.id)
     return RedirectResponse(
         url=request.url_for("list_submissions_by_user_page", id=current_user.id),
         status_code=303,

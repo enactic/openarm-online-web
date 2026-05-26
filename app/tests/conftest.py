@@ -25,7 +25,11 @@ os.environ.setdefault("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("HMAC_KEY", "test-hmac-key")
 
+from fastapi.testclient import TestClient
+
+from app.main import app
 from app import crud
+from app.deps import find_current_user_optional, get_db
 from app.models import (
     ApiKey,
     ClaimedExecution,
@@ -71,6 +75,22 @@ def fixture_session() -> Generator[Session, None, None]:
         session.exec(delete(ApiKey))
         session.exec(delete(Task))
         session.commit()
+
+
+@pytest.fixture(name="client")
+def fixture_client(session: Session, user: User):
+    def override_get_db():
+        return session
+
+    def override_find_current_user_optional():
+        return user
+
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[find_current_user_optional] = (
+        override_find_current_user_optional
+    )
+    yield TestClient(app, follow_redirects=False)
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(name="tasks")
