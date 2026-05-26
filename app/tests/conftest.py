@@ -18,18 +18,20 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
-from sqlmodel import Session, SQLModel, create_engine, delete
+from sqlmodel import Session, SQLModel, delete
 
 os.environ.setdefault("GITHUB_CLIENT_ID", "test-github-client-id")
 os.environ.setdefault("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("HMAC_KEY", "test-hmac-key")
+os.environ.setdefault("POSTGRES_DB", "openeval_test")
 
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app import crud
-from app.deps import find_current_user_optional, get_db
+from app.db import engine
+from app.deps import SessionDep, find_current_user_optional
 from app.models import (
     ApiKey,
     ClaimedExecution,
@@ -42,26 +44,21 @@ from app.models import (
     User,
     UserGitHub,
 )
+from app.settings import settings
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
-
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+psycopg://openeval:openeval@localhost:5432/openeval_test",
-)
-
-test_engine = create_engine(TEST_DATABASE_URL)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_db() -> Generator[None, None, None]:
-    SQLModel.metadata.create_all(test_engine)
+    assert settings.POSTGRES_DB.endswith("_test")
+    SQLModel.metadata.create_all(engine)
     yield
 
 
 @pytest.fixture(name="session")
 def fixture_session() -> Generator[Session, None, None]:
-    with Session(test_engine) as session:
+    with Session(engine) as session:
         yield session
         session.rollback()
         session.exec(delete(Rollout))
@@ -79,13 +76,9 @@ def fixture_session() -> Generator[Session, None, None]:
 
 @pytest.fixture(name="client")
 def fixture_client(session: Session, user: User):
-    def override_get_db():
-        return session
+    def override_find_current_user_optional(db_session: SessionDep):
+        return db_session.get(User, user.id)
 
-    def override_find_current_user_optional():
-        return user
-
-    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[find_current_user_optional] = (
         override_find_current_user_optional
     )
