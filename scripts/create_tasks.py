@@ -25,6 +25,7 @@ from app.db import engine
 from app.crud import create_tasks
 
 json_path = Path(sys.argv[1])
+task_data = json.loads(json_path.read_text(encoding="utf-8"))
 with Session(engine) as session:
-    task_data = json.loads(json_path.read_text(encoding="utf-8"))
-    create_tasks(session=session, data=task_data)
+    with session.begin():
+        create_tasks(session=session, data=task_data)
