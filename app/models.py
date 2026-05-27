@@ -215,3 +215,7 @@ class ClaimedJob(BaseModel):
     docker_tag: str
     reset_docker_tag: str
     prompt: str
+
+
+class CompleteJobRequest(BaseModel):
+    success: bool

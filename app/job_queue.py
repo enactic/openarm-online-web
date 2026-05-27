@@ -23,6 +23,13 @@ from app.models import (
 )
 
 
+def find_job(*, session: Session, id: int, for_update: bool = True) -> Job | None:
+    statement = select(Job).where(Job.id == id)
+    if for_update:
+        statement = statement.with_for_update()
+    return session.exec(statement).first()
+
+
 def enqueue(*, session: Session, submission_id: int) -> Job:
     job = Job(submission_id=submission_id)
     session.add(job)

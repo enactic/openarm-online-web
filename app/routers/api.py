@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request, status
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from fastapi_pagination import Page
@@ -21,7 +21,14 @@ from typing import Optional
 
 from app import crud, job_queue
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
-from app.models import ClaimedJob, Task, Submission, Rollout, RolloutCreate
+from app.models import (
+    ClaimedJob,
+    Task,
+    Submission,
+    Rollout,
+    RolloutCreate,
+    CompleteJobRequest,
+)
 from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
@@ -52,11 +59,9 @@ def api_post_rollouts(
     return crud.create_rollout(session=session, rollout_create=request)
 
 
-@router.post("/tasks/{task_id}/jobs/claim", response_model=Optional[ClaimedJob])
-def api_claim_job(task_id: int, session: SessionDep, api_key: CurrentApiKey):
-    job = job_queue.claim_next_job(
-        session=session, api_key_id=api_key.id, task_id=task_id
-    )
+@router.post("/tasks/{id}/jobs/claim", response_model=Optional[ClaimedJob])
+def api_claim_job(id: int, session: SessionDep, api_key: CurrentApiKey):
+    job = job_queue.claim_next_job(session=session, api_key_id=api_key.id, task_id=id)
     if job is None:
         return None
     submission = crud.find_submission(session=session, id=job.submission_id)
@@ -65,6 +70,30 @@ def api_claim_job(task_id: int, session: SessionDep, api_key: CurrentApiKey):
         docker_tag=submission.docker_tag,
         reset_docker_tag=submission.task.reset_docker_tag,
         prompt=submission.task.prompt,
+    )
+
+
+@router.post("/jobs/{id}/complete", response_model=Rollout)
+def api_complete_job(
+    id: int, payload: CompleteJobRequest, session: SessionDep, api_key: CurrentApiKey
+):
+    job = job_queue.find_job(session=session, id=id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Job({id}) not found"
+        )
+    try:
+        job_queue.complete_job(session=session, job_id=id, api_key_id=api_key.id)
+    except ValueError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)
+        ) from err
+    return crud.create_rollout(
+        session=session,
+        rollout_create=RolloutCreate(
+            submission_id=job.submission_id,
+            success=payload.success,
+        ),
     )
 
 
