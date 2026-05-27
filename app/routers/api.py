@@ -19,9 +19,9 @@ from fastapi_pagination import Page
 
 from typing import Optional
 
-from app import crud
+from app import crud, job_queue
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
-from app.models import Task, Submission, Rollout, RolloutCreate
+from app.models import ClaimedJob, Task, Submission, Rollout, RolloutCreate
 from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
@@ -50,6 +50,22 @@ def api_post_rollouts(
     request: RolloutCreate, session: SessionDep, api_key: CurrentApiKey
 ):
     return crud.create_rollout(session=session, rollout_create=request)
+
+
+@router.post("/tasks/{task_id}/jobs/claim", response_model=Optional[ClaimedJob])
+def api_claim_job(task_id: int, session: SessionDep, api_key: CurrentApiKey):
+    job = job_queue.claim_next_job(
+        session=session, api_key_id=api_key.id, task_id=task_id
+    )
+    if job is None:
+        return None
+    submission = crud.find_submission(session=session, id=job.submission_id)
+    return ClaimedJob(
+        job_id=job.id,
+        docker_tag=submission.docker_tag,
+        reset_docker_tag=submission.task.reset_docker_tag,
+        prompt=submission.task.prompt,
+    )
 
 
 @router.get("/reference", include_in_schema=False)

@@ -31,7 +31,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app import crud
 from app.db import engine
-from app.deps import SessionDep, find_current_user_optional
+from app.deps import SessionDep, find_current_api_key, find_current_user_optional
 from app.models import (
     ApiKey,
     ClaimedExecution,
@@ -75,13 +75,17 @@ def fixture_session() -> Generator[Session, None, None]:
 
 
 @pytest.fixture(name="client")
-def fixture_client(session: Session, user: User):
+def fixture_client(session: Session, user: User, api_key: ApiKey):
     def override_find_current_user_optional(db_session: SessionDep):
         return db_session.get(User, user.id)
+
+    def override_find_current_api_key(db_session: SessionDep):
+        return db_session.get(ApiKey, api_key.id)
 
     app.dependency_overrides[find_current_user_optional] = (
         override_find_current_user_optional
     )
+    app.dependency_overrides[find_current_api_key] = override_find_current_api_key
     yield TestClient(app, follow_redirects=False)
     app.dependency_overrides.clear()
 
