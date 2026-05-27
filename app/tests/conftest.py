@@ -37,6 +37,7 @@ from app.models import (
     ClaimedExecution,
     FailedExecution,
     Job,
+    JobFailure,
     ReadyExecution,
     Rollout,
     Submission,
@@ -62,6 +63,7 @@ def fixture_session() -> Generator[Session, None, None]:
         yield session
         session.rollback()
         session.exec(delete(Rollout))
+        session.exec(delete(JobFailure))
         session.exec(delete(FailedExecution))
         session.exec(delete(ClaimedExecution))
         session.exec(delete(ReadyExecution))

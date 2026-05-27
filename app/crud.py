@@ -23,6 +23,7 @@ from sqlmodel import Session, select, func, case, cast, Float
 
 from app.models import (
     ApiKey,
+    JobFailure,
     Submission,
     Rollout,
     RolloutCreate,
@@ -201,3 +202,12 @@ def get_paginated_rollouts(
     if "submission_id" in filter:
         statement = statement.where(Rollout.submission_id == filter["submission_id"])
     return model_paginate(session, statement, params)
+
+
+def create_job_failure(
+    *, session: Session, submission_id: int, reason: str
+) -> JobFailure:
+    failure = JobFailure(submission_id=submission_id, reason=reason)
+    session.add(failure)
+    session.flush()
+    return failure
