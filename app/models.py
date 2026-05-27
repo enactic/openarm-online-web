@@ -15,6 +15,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
+from pydantic import BaseModel
 from sqlalchemy import DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
 
@@ -207,3 +208,10 @@ class FailedExecution(SQLModel, table=True):
     )
 
     job: Job = Relationship(back_populates="failed_execution")
+
+
+class ClaimedJob(BaseModel):
+    job_id: int
+    docker_tag: str
+    reset_docker_tag: str
+    prompt: str
