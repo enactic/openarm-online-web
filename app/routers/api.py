@@ -23,11 +23,12 @@ from app import crud, job_queue
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
 from app.models import (
     ClaimedJob,
-    Task,
-    Submission,
+    CompleteJobRequest,
+    FailJobRequest,
     Rollout,
     RolloutCreate,
-    CompleteJobRequest,
+    Submission,
+    Task,
 )
 from app.settings import settings
 
@@ -93,6 +94,36 @@ def api_complete_job(
         rollout_create=RolloutCreate(
             submission_id=job.submission_id,
             success=payload.success,
+        ),
+    )
+
+
+@router.post("/jobs/{id}/fail", response_model=Rollout)
+def api_fail_job(
+    id: int, payload: FailJobRequest, session: SessionDep, api_key: CurrentApiKey
+):
+    job = job_queue.find_job(session=session, id=id)
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Job({id}) not found"
+        )
+    try:
+        job_queue.fail_job(
+            session=session,
+            job_id=id,
+            reason=payload.reason,
+            api_key_id=api_key.id,
+        )
+    except ValueError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)
+        ) from err
+    return crud.create_rollout(
+        session=session,
+        rollout_create=RolloutCreate(
+            submission_id=job.submission_id,
+            success=None,
+            message=payload.reason,
         ),
     )
 

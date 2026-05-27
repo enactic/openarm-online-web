@@ -147,7 +147,8 @@ def upgrade() -> None:
     op.create_table(
         "rollout",
         sa.Column("submission_id", sa.Integer(), nullable=False),
-        sa.Column("success", sa.Boolean(), nullable=False),
+        sa.Column("success", sa.Boolean(), nullable=True),
+        sa.Column("message", sa.Text(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",

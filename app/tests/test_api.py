@@ -19,7 +19,15 @@ from sqlmodel import Session, select
 
 from app.main import app
 from app.deps import SessionDep, find_current_api_key
-from app.models import ApiKey, ClaimedExecution, Job, Submission, Task
+from app.models import (
+    ApiKey,
+    ClaimedExecution,
+    FailedExecution,
+    Job,
+    Rollout,
+    Submission,
+    Task,
+)
 
 
 @contextmanager
@@ -125,6 +133,14 @@ def test_complete_job_success(session: Session, tasks: list[Task], client: TestC
         is None
     )
 
+    assert session.exec(
+        select(Rollout).where(Rollout.submission_id == submission.id)
+    ).first().model_dump(exclude={"id", "created_at"}) == {
+        "submission_id": submission.id,
+        "success": True,
+        "message": None,
+    }
+
 
 def test_complete_job_fail(session: Session, tasks: list[Task], client: TestClient):
     job_id = _setup_claimed_job(tasks, client)
@@ -144,6 +160,14 @@ def test_complete_job_fail(session: Session, tasks: list[Task], client: TestClie
         ).first()
         is None
     )
+
+    assert session.exec(
+        select(Rollout).where(Rollout.submission_id == submission.id)
+    ).first().model_dump(exclude={"id", "created_at"}) == {
+        "submission_id": submission.id,
+        "success": False,
+        "message": None,
+    }
 
 
 def test_complete_job_not_found(session: Session, client: TestClient):
@@ -171,6 +195,72 @@ def test_complete_job_wrong_api_key(
     job_id = _setup_claimed_job(tasks, client)
     with _other_client(session) as other:
         response = other.post(f"/api/v1/jobs/{job_id}/complete", json={"success": True})
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": f"Job({job_id}) is claimed by another runner"}
+
+
+def test_fail_job(session: Session, tasks: list[Task], client: TestClient):
+    job_id = _setup_claimed_job(tasks, client)
+
+    response = client.post(f"/api/v1/jobs/{job_id}/fail", json={"reason": "timeout"})
+    assert response.status_code == 200
+
+    submission = session.exec(
+        select(Submission).where(Submission.docker_tag == "test/image:latest")
+    ).first()
+    assert response.json()["submission_id"] == submission.id
+    assert response.json()["success"] is None
+    assert response.json()["message"] == "timeout"
+
+    assert session.get(Job, job_id) is not None
+    assert (
+        session.exec(
+            select(ClaimedExecution).where(ClaimedExecution.job_id == job_id)
+        ).first()
+        is None
+    )
+    assert session.exec(
+        select(FailedExecution).where(FailedExecution.job_id == job_id)
+    ).first().model_dump(exclude={"id", "created_at"}) == {
+        "job_id": job_id,
+        "reason": "timeout",
+    }
+
+    assert session.exec(
+        select(Rollout).where(Rollout.submission_id == submission.id)
+    ).first().model_dump(exclude={"id", "created_at"}) == {
+        "submission_id": submission.id,
+        "success": None,
+        "message": "timeout",
+    }
+
+
+def test_fail_job_not_found(session: Session, client: TestClient):
+    response = client.post("/api/v1/jobs/9999/fail", json={"reason": "timeout"})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Job(9999) not found"}
+
+
+def test_fail_job_no_claimed_execution(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    client.post(
+        "/submissions/",
+        data={"task_id": tasks[0].id, "docker_tag": "test/image:latest"},
+    )
+    job = session.exec(select(Job)).first()
+    response = client.post(f"/api/v1/jobs/{job.id}/fail", json={"reason": "timeout"})
+    assert response.status_code == 400
+    assert response.json() == {"detail": f"Job({job.id}) has no claimed execution"}
+
+
+def test_fail_job_wrong_api_key(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    job_id = _setup_claimed_job(tasks, client)
+    with _other_client(session) as other:
+        response = other.post(f"/api/v1/jobs/{job_id}/fail", json={"reason": "timeout"})
 
     assert response.status_code == 400
     assert response.json() == {"detail": f"Job({job_id}) is claimed by another runner"}

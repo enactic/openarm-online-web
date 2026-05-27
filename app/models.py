@@ -116,7 +116,8 @@ class Submission(SQLModel, table=True):
 
 class RolloutCreate(SQLModel):
     submission_id: int = Field(foreign_key="submission.id", index=True, nullable=False)
-    success: bool = Field(nullable=False)
+    success: bool | None = Field(default=None)
+    message: str | None = Field(default=None, sa_type=Text)
 
 
 class Rollout(RolloutCreate, table=True):
@@ -219,3 +220,7 @@ class ClaimedJob(BaseModel):
 
 class CompleteJobRequest(BaseModel):
     success: bool
+
+
+class FailJobRequest(BaseModel):
+    reason: str
