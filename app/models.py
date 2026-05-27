@@ -210,6 +210,21 @@ class FailedExecution(SQLModel, table=True):
     job: Job = Relationship(back_populates="failed_execution")
 
 
+class JobFailure(SQLModel, table=True):
+    __tablename__ = "job_failure"
+
+    id: int | None = Field(default=None, primary_key=True)
+    submission_id: int = Field(foreign_key="submission.id", index=True)
+    reason: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+
 class ClaimedJob(BaseModel):
     job_id: int
     docker_tag: str
@@ -219,3 +234,7 @@ class ClaimedJob(BaseModel):
 
 class CompleteJobRequest(BaseModel):
     success: bool
+
+
+class FailJobRequest(BaseModel):
+    reason: str
