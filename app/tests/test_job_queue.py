@@ -92,7 +92,7 @@ def test_complete_job(session: Session, submission: Submission, api_key: ApiKey)
 
     assert (
         job_queue.complete_job(session=session, job_id=job.id, api_key_id=api_key.id)
-        is None
+        == job
     )
     assert session.get(Job, job.id) is None
     assert (
@@ -104,7 +104,9 @@ def test_complete_job(session: Session, submission: Submission, api_key: ApiKey)
 
 
 def test_complete_job_not_found(session: Session, api_key: ApiKey):
-    with pytest.raises(ValueError, match=re.escape("Job(9999) not found")):
+    with pytest.raises(
+        job_queue.JobNotFoundError, match=re.escape("Job(9999) not found")
+    ):
         job_queue.complete_job(session=session, job_id=9999, api_key_id=api_key.id)
 
 
@@ -158,7 +160,9 @@ def test_fail_job(session: Session, submission: Submission, api_key: ApiKey):
 
 
 def test_fail_job_not_found(session: Session, api_key: ApiKey):
-    with pytest.raises(ValueError, match=re.escape("Job(9999) not found")):
+    with pytest.raises(
+        job_queue.JobNotFoundError, match=re.escape("Job(9999) not found")
+    ):
         job_queue.fail_job(
             session=session, job_id=9999, reason="timeout", api_key_id=api_key.id
         )
@@ -213,7 +217,9 @@ def test_retry_job(session: Session, submission: Submission, api_key: ApiKey):
 
 
 def test_retry_job_not_found(session: Session):
-    with pytest.raises(ValueError, match=re.escape("Job(9999) not found")):
+    with pytest.raises(
+        job_queue.JobNotFoundError, match=re.escape("Job(9999) not found")
+    ):
         job_queue.retry_job(session=session, job_id=9999)
 
 
