@@ -55,6 +55,6 @@ async def timeout_worker():
     while True:
         await asyncio.sleep(settings.CLAIM_TIMEOUT_CHECK_INTERVAL * 60)
         try:
-            timeout_claimed_jobs()
+            await asyncio.to_thread(timeout_claimed_jobs)
         except Exception:
             logger.exception("Error in timeout_claimed_jobs()")
