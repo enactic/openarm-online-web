@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import timedelta
+
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.models import (
@@ -21,16 +24,19 @@ from app.models import (
     ReadyExecution,
     Submission,
 )
+from app.settings import settings
 
 
 class JobNotFoundError(Exception):
     pass
 
 
-def find_job(*, session: Session, id: int, for_update: bool = False) -> Job | None:
+def find_job(
+    *, session: Session, id: int, for_update: bool = False, skip_locked: bool = False
+) -> Job | None:
     statement = select(Job).where(Job.id == id)
     if for_update:
-        statement = statement.with_for_update()
+        statement = statement.with_for_update(skip_locked=skip_locked)
     return session.exec(statement).first()
 
 
@@ -69,7 +75,9 @@ def complete_job(*, session: Session, job_id: int, api_key_id: int) -> Job:
     if job is None:
         raise JobNotFoundError(f"Job({job_id}) not found")
     claimed = session.exec(
-        select(ClaimedExecution).where(ClaimedExecution.job_id == job_id)
+        select(ClaimedExecution)
+        .where(ClaimedExecution.job_id == job_id)
+        .with_for_update()
     ).first()
     if claimed is None:
         raise ValueError(f"Job({job.id}) has no claimed execution")
@@ -86,7 +94,9 @@ def fail_job(*, session: Session, job_id: int, reason: str, api_key_id: int) -> 
     if job is None:
         raise JobNotFoundError(f"Job({job_id}) not found")
     claimed = session.exec(
-        select(ClaimedExecution).where(ClaimedExecution.job_id == job.id)
+        select(ClaimedExecution)
+        .where(ClaimedExecution.job_id == job.id)
+        .with_for_update()
     ).first()
     if claimed is None:
         raise ValueError(f"Job({job.id}) has no claimed execution")
@@ -111,3 +121,12 @@ def retry_job(*, session: Session, job_id: int) -> Job:
     session.add(ReadyExecution(job_id=job.id))
     session.flush()
     return job
+
+
+def find_all_expired_claimed_executions(*, session: Session) -> list[ClaimedExecution]:
+    return session.exec(
+        select(ClaimedExecution).where(
+            ClaimedExecution.created_at
+            < func.now() - timedelta(minutes=settings.CLAIM_TIMEOUT)
+        )
+    ).all()

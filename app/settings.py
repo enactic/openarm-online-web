@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pydantic import PostgresDsn, computed_field
+from pydantic import Field, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     HMAC_KEY: str
 
     API_KEY_HEADER_NAME: str = "X-API-KEY"
+
+    CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
+    CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
 
     @computed_field  # type: ignore[prop-decorator]
     @property
