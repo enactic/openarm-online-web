@@ -23,7 +23,11 @@ from app.models import (
 )
 
 
-def find_job(*, session: Session, id: int, for_update: bool = True) -> Job | None:
+class JobNotFoundError(Exception):
+    pass
+
+
+def find_job(*, session: Session, id: int, for_update: bool = False) -> Job | None:
     statement = select(Job).where(Job.id == id)
     if for_update:
         statement = statement.with_for_update()
@@ -53,17 +57,17 @@ def claim_next_job(*, session: Session, api_key_id: int, task_id: int) -> Job | 
     ready = session.exec(statement).first()
     if ready is None:
         return None
-    job = session.get(Job, ready.job_id)
+    job = ready.job
     session.delete(ready)
     session.add(ClaimedExecution(job_id=job.id, api_key_id=api_key_id))
     session.flush()
     return job
 
 
-def complete_job(*, session: Session, job_id: int, api_key_id: int) -> None:
-    job = session.get(Job, job_id)
+def complete_job(*, session: Session, job_id: int, api_key_id: int) -> Job:
+    job = find_job(session=session, id=job_id, for_update=True)
     if job is None:
-        raise ValueError(f"Job({job_id}) not found")
+        raise JobNotFoundError(f"Job({job_id}) not found")
     claimed = session.exec(
         select(ClaimedExecution).where(ClaimedExecution.job_id == job_id)
     ).first()
@@ -74,12 +78,13 @@ def complete_job(*, session: Session, job_id: int, api_key_id: int) -> None:
     session.delete(claimed)
     session.delete(job)
     session.flush()
+    return job
 
 
 def fail_job(*, session: Session, job_id: int, reason: str, api_key_id: int) -> Job:
-    job = session.get(Job, job_id)
+    job = find_job(session=session, id=job_id, for_update=True)
     if job is None:
-        raise ValueError(f"Job({job_id}) not found")
+        raise JobNotFoundError(f"Job({job_id}) not found")
     claimed = session.exec(
         select(ClaimedExecution).where(ClaimedExecution.job_id == job.id)
     ).first()
@@ -94,9 +99,9 @@ def fail_job(*, session: Session, job_id: int, reason: str, api_key_id: int) -> 
 
 
 def retry_job(*, session: Session, job_id: int) -> Job:
-    job = session.get(Job, job_id)
+    job = find_job(session=session, id=job_id, for_update=True)
     if job is None:
-        raise ValueError(f"Job({job_id}) not found")
+        raise JobNotFoundError(f"Job({job_id}) not found")
     failed = session.exec(
         select(FailedExecution).where(FailedExecution.job_id == job.id)
     ).first()

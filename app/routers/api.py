@@ -79,13 +79,12 @@ def api_claim_job(id: int, session: SessionDep, api_key: CurrentApiKey):
 def api_complete_job(
     id: int, payload: CompleteJobRequest, session: SessionDep, api_key: CurrentApiKey
 ):
-    job = job_queue.find_job(session=session, id=id)
-    if job is None:
+    try:
+        job = job_queue.complete_job(session=session, job_id=id, api_key_id=api_key.id)
+    except job_queue.JobNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Job({id}) not found"
         )
-    try:
-        job_queue.complete_job(session=session, job_id=id, api_key_id=api_key.id)
     except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)
@@ -103,17 +102,16 @@ def api_complete_job(
 def api_fail_job(
     id: int, payload: FailJobRequest, session: SessionDep, api_key: CurrentApiKey
 ):
-    job = job_queue.find_job(session=session, id=id)
-    if job is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Job({id}) not found"
-        )
     try:
-        job_queue.fail_job(
+        job = job_queue.fail_job(
             session=session,
             job_id=id,
             reason=payload.reason,
             api_key_id=api_key.id,
+        )
+    except job_queue.JobNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Job({id}) not found"
         )
     except ValueError as err:
         raise HTTPException(
