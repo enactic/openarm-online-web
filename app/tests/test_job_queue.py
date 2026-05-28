@@ -14,6 +14,7 @@
 
 import pytest
 import re
+from datetime import datetime, timezone
 
 from sqlmodel import Session, select
 
@@ -229,3 +230,32 @@ def test_retry_job_no_failed_raise(session: Session, submission: Submission):
         ValueError, match=re.escape(f"Job({job.id}) has no failed execution")
     ):
         job_queue.retry_job(session=session, job_id=job.id)
+
+
+def test_find_all_expired_claimed_executions(
+    session: Session, submission: Submission, api_key: ApiKey
+):
+    job = job_queue.enqueue(session=session, submission_id=submission.id)
+    job_queue.claim_next_job(
+        session=session, api_key_id=api_key.id, task_id=submission.task_id
+    )
+    claimed = session.exec(
+        select(ClaimedExecution).where(ClaimedExecution.job_id == job.id)
+    ).first()
+    expired_at = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    claimed.created_at = expired_at
+    session.add(claimed)
+    session.commit()
+
+    assert job_queue.find_all_expired_claimed_executions(session=session) == [claimed]
+
+
+def test_find_all_expired_claimed_executions_not_expired(
+    session: Session, submission: Submission, api_key: ApiKey
+):
+    job_queue.enqueue(session=session, submission_id=submission.id)
+    job_queue.claim_next_job(
+        session=session, api_key_id=api_key.id, task_id=submission.task_id
+    )
+
+    assert job_queue.find_all_expired_claimed_executions(session=session) == []

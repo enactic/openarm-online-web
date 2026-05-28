@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
@@ -19,10 +23,25 @@ from fastapi_pagination import add_pagination
 
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
 from app.routers import api, submission, rollout, login, task, user
+from app.scheduler import timeout_worker
 from app.settings import settings
 from app.templates import templates
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(timeout_worker())
+    try:
+        yield
+    finally:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(api.router)
 app.include_router(submission.router)
 app.include_router(rollout.router)
