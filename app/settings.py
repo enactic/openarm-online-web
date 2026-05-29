@@ -47,6 +47,12 @@ class Settings(BaseSettings):
 
     API_KEY_HEADER_NAME: str = "X-API-KEY"
 
+    S3_ENDPOINT_URL: str | None = None
+    S3_ACCESS_KEY_ID: str | None = None
+    S3_SECRET_ACCESS_KEY: str | None = None
+    S3_REGION: str = "us-east-1"
+    S3_BUCKET_NAME: str = "openeval"
+
     CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
     CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
 
