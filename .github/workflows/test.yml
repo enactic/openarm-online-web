@@ -37,6 +37,22 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      s3:
+        image: rustfs/rustfs:latest
+        env:
+          RUSTFS_VOLUMES: /data
+          RUSTFS_ADDRESS: 0.0.0.0:9000
+          RUSTFS_ACCESS_KEY: openeval-access
+          RUSTFS_SECRET_KEY: openeval-secret
+          RUSTFS_UNSAFE_BYPASS_DISK_CHECK: true
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 40s
     steps:
       - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
@@ -47,5 +63,8 @@ jobs:
           POSTGRES_PASSWORD: openeval
           POSTGRES_DB: openeval_test
           PYTHONPATH: ${{ github.workspace }}
+          S3_ENDPOINT_URL: http://localhost:9000
+          S3_ACCESS_KEY_ID: openeval-access
+          S3_SECRET_ACCESS_KEY: openeval-secret
         working-directory: app
         run: uv run pytest tests/
