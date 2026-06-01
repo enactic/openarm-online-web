@@ -13,16 +13,21 @@
 # limitations under the License.
 
 import boto3
+from botocore.config import Config
 
 from app.settings import settings
 
 
 def _client():
+    config = Config(
+        signature_version="s3v4",
+    )
     return boto3.client(
         "s3",
         endpoint_url=settings.S3_ENDPOINT_URL,
         aws_access_key_id=settings.S3_ACCESS_KEY_ID,
         aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
+        config=config,
         region_name=settings.S3_REGION,
     )
 
