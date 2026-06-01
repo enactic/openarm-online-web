@@ -38,7 +38,7 @@ def create_bucket():
 
 def test_generate_presigned_upload_url():
     url = generate_presigned_upload_url("path/to/example")
-    response = requests.put(url, data=b"test content")
+    response = requests.put(url, data=b"test content", timeout=5)
     assert response.status_code == 200
 
     assert (
@@ -56,7 +56,7 @@ def test_generate_presigned_upload_url_invalid_method():
         Body=b"test content",
     )
     url = generate_presigned_upload_url("path/to/example")
-    response = requests.get(url, data=b"test content")
+    response = requests.get(url, data=b"test content", timeout=5)
     assert response.status_code == 403
 
 
@@ -67,12 +67,13 @@ def test_generate_presigned_download_url():
         Body=b"test content",
     )
     url = generate_presigned_download_url("path/to/example")
-    response = requests.get(url)
+    response = requests.get(url, timeout=5)
     assert response.status_code == 200
     assert response.content == b"test content"
 
 
 def test_generate_presigned_download_url_invalid_method():
+def test_generate_presigned_download_url_invalid_method():
     url = generate_presigned_download_url("path/to/example")
-    response = requests.put(url, data=b"test content")
+    response = requests.put(url, data=b"test content", timeout=5)
     assert response.status_code == 403
