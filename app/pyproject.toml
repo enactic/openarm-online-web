@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.4",
+    "boto3>=1.43.17",
     "fastapi-pagination>=0.15.10",
     "fastapi[standard]>=0.128.8",
     "jinja2>=3.1.6",
@@ -16,5 +17,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "moto[s3]>=5.2.1",
     "pytest>=9.0.3",
 ]
