@@ -73,7 +73,6 @@ def test_generate_presigned_download_url():
 
 
 def test_generate_presigned_download_url_invalid_method():
-def test_generate_presigned_download_url_invalid_method():
     url = generate_presigned_download_url("path/to/example")
     response = requests.put(url, data=b"test content", timeout=5)
     assert response.status_code == 403
