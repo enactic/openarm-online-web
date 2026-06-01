@@ -30,6 +30,8 @@ services:
       db:
         condition: service_healthy
         restart: true
+      s3:
+        condition: service_healthy
   db:
     image: postgres:18
     restart: always
@@ -48,3 +50,37 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+  s3:
+    image: rustfs/rustfs:latest
+    security_opt:
+      - "no-new-privileges:true"
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    environment:
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=${RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS:-http://127.0.0.1:9001}
+      - RUSTFS_ACCESS_KEY=${RUSTFS_ACCESS_KEY:-openeval-access}
+      - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY:-openeval-secret}
+      - RUSTFS_OBS_LOGGER_LEVEL=info
+      - RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true
+    volumes:
+      - s3:/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh", "-c",
+          "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9001/rustfs/console/health"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  s3:
