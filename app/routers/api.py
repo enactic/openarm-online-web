@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import uuid
+
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from fastapi.openapi.docs import get_swagger_ui_html
 
@@ -30,7 +32,9 @@ from app.models import (
     RolloutCreate,
     Submission,
     Task,
+    UploadUrlResponse,
 )
+from app.s3 import generate_presigned_upload_url
 from app.settings import settings
 
 router = APIRouter(prefix="/api/v1")
@@ -94,6 +98,7 @@ def api_complete_job(
         rollout_create=RolloutCreate(
             submission_id=job.submission_id,
             success=payload.success,
+            s3_key=payload.s3_key,
         ),
     )
 
@@ -122,6 +127,12 @@ def api_fail_job(
         submission_id=job.submission_id,
         reason=payload.reason,
     )
+
+
+@router.get("/rrd/upload-url", response_model=UploadUrlResponse)
+def api_get_upload_url(api_key: CurrentApiKey):
+    s3_key = f"rrd/{uuid.uuid4()}.rrd"
+    return UploadUrlResponse(url=generate_presigned_upload_url(s3_key), s3_key=s3_key)
 
 
 @router.get("/reference", include_in_schema=False)

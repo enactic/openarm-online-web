@@ -22,18 +22,7 @@ from app.s3 import (
 )
 from app.settings import settings
 
-
-@pytest.fixture(autouse=True)
-def create_bucket():
-    client = _client()
-    client.create_bucket(Bucket=settings.S3_BUCKET_NAME)
-
-    yield
-
-    objects = client.list_objects_v2(Bucket=settings.S3_BUCKET_NAME).get("Contents", [])
-    for obj in objects:
-        client.delete_object(Bucket=settings.S3_BUCKET_NAME, Key=obj["Key"])
-    client.delete_bucket(Bucket=settings.S3_BUCKET_NAME)
+pytestmark = pytest.mark.usefixtures("create_bucket")
 
 
 def test_generate_presigned_upload_url():

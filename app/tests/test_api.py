@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+import requests
+
 from collections.abc import Generator
 from contextlib import contextmanager
 from fastapi.testclient import TestClient
@@ -29,6 +32,8 @@ from app.models import (
     Submission,
     Task,
 )
+from app.settings import settings
+from app.s3 import _client as s3client
 
 
 @contextmanager
@@ -118,7 +123,10 @@ def _setup_claimed_job(tasks: list[Task], client: TestClient) -> int:
 def test_complete_job_success(session: Session, tasks: list[Task], client: TestClient):
     job_id = _setup_claimed_job(tasks, client)
 
-    response = client.post(f"/api/v1/jobs/{job_id}/complete", json={"success": True})
+    response = client.post(
+        f"/api/v1/jobs/{job_id}/complete",
+        json={"success": True, "s3_key": "rrd/dummy.rrd"},
+    )
     assert response.status_code == 200
     submission = session.exec(
         select(Submission).where(Submission.docker_tag == "test/image:latest")
@@ -139,13 +147,17 @@ def test_complete_job_success(session: Session, tasks: list[Task], client: TestC
     ).first().model_dump(exclude={"id", "created_at"}) == {
         "submission_id": submission.id,
         "success": True,
+        "s3_key": "rrd/dummy.rrd",
     }
 
 
 def test_complete_job_fail(session: Session, tasks: list[Task], client: TestClient):
     job_id = _setup_claimed_job(tasks, client)
 
-    response = client.post(f"/api/v1/jobs/{job_id}/complete", json={"success": False})
+    response = client.post(
+        f"/api/v1/jobs/{job_id}/complete",
+        json={"success": False, "s3_key": "rrd/dummy.rrd"},
+    )
     assert response.status_code == 200
     submission = session.exec(
         select(Submission).where(Submission.docker_tag == "test/image:latest")
@@ -166,11 +178,14 @@ def test_complete_job_fail(session: Session, tasks: list[Task], client: TestClie
     ).first().model_dump(exclude={"id", "created_at"}) == {
         "submission_id": submission.id,
         "success": False,
+        "s3_key": "rrd/dummy.rrd",
     }
 
 
 def test_complete_job_not_found(session: Session, client: TestClient):
-    response = client.post(f"/api/v1/jobs/9999/complete", json={"success": True})
+    response = client.post(
+        f"/api/v1/jobs/9999/complete", json={"success": True, "s3_key": "rrd/dummy.rrd"}
+    )
     assert response.status_code == 404
     assert response.json() == {"detail": "Job(9999) not found"}
 
@@ -183,7 +198,10 @@ def test_complete_job_no_claimed(
         data={"task_id": tasks[0].id, "docker_tag": "test/image:latest"},
     )
     job = session.exec(select(Job)).first()
-    response = client.post(f"/api/v1/jobs/{job.id}/complete", json={"success": True})
+    response = client.post(
+        f"/api/v1/jobs/{job.id}/complete",
+        json={"success": True, "s3_key": "rrd/dummy.rrd"},
+    )
     assert response.status_code == 400
     assert response.json() == {"detail": f"Job({job.id}) has no claimed execution"}
 
@@ -193,7 +211,10 @@ def test_complete_job_wrong_api_key(
 ):
     job_id = _setup_claimed_job(tasks, client)
     with _other_client(session) as other:
-        response = other.post(f"/api/v1/jobs/{job_id}/complete", json={"success": True})
+        response = other.post(
+            f"/api/v1/jobs/{job_id}/complete",
+            json={"success": True, "s3_key": "rrd/dummy.rrd"},
+        )
 
     assert response.status_code == 400
     assert response.json() == {"detail": f"Job({job_id}) is claimed by another runner"}
@@ -261,3 +282,18 @@ def test_fail_job_wrong_api_key(
 
     assert response.status_code == 400
     assert response.json() == {"detail": f"Job({job_id}) is claimed by another runner"}
+
+
+def test_get_upload_url(client: TestClient, create_bucket):
+    response = client.get(f"/api/v1/rrd/upload-url")
+    assert response.status_code == 200
+
+    s3_key = response.json()["s3_key"]
+    assert re.fullmatch(r"rrd/[0-9a-f-]{36}\.rrd", s3_key)
+
+    s3_response = requests.put(response.json()["url"], data=b"test content", timeout=5)
+    assert s3_response.status_code == 200
+    assert (
+        s3client().get_object(Bucket=settings.S3_BUCKET_NAME, Key=s3_key)["Body"].read()
+        == b"test content"
+    )

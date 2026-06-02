@@ -148,6 +148,7 @@ def upgrade() -> None:
         "rollout",
         sa.Column("submission_id", sa.Integer(), nullable=False),
         sa.Column("success", sa.Boolean(), nullable=False),
+        sa.Column("s3_key", sa.String(length=1024), nullable=False),
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",

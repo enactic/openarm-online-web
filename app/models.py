@@ -117,6 +117,7 @@ class Submission(SQLModel, table=True):
 class RolloutCreate(SQLModel):
     submission_id: int = Field(foreign_key="submission.id", index=True, nullable=False)
     success: bool = Field(nullable=False)
+    s3_key: str = Field(nullable=False, max_length=1024)
 
 
 class Rollout(RolloutCreate, table=True):
@@ -234,7 +235,13 @@ class ClaimedJob(BaseModel):
 
 class CompleteJobRequest(BaseModel):
     success: bool
+    s3_key: str = Field(max_length=1024)
 
 
 class FailJobRequest(BaseModel):
     reason: str
+
+
+class UploadUrlResponse(BaseModel):
+    url: str
+    s3_key: str
