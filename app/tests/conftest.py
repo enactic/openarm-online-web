@@ -49,6 +49,7 @@ from app.models import (
     User,
     UserGitHub,
 )
+from app.s3 import _client
 from app.settings import settings
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -59,6 +60,19 @@ def setup_db() -> Generator[None, None, None]:
     assert settings.POSTGRES_DB.endswith("_test")
     SQLModel.metadata.create_all(engine)
     yield
+
+
+@pytest.fixture
+def create_bucket():
+    client = _client()
+    client.create_bucket(Bucket=settings.S3_BUCKET_NAME)
+
+    yield
+
+    objects = client.list_objects_v2(Bucket=settings.S3_BUCKET_NAME).get("Contents", [])
+    for obj in objects:
+        client.delete_object(Bucket=settings.S3_BUCKET_NAME, Key=obj["Key"])
+    client.delete_bucket(Bucket=settings.S3_BUCKET_NAME)
 
 
 @pytest.fixture(name="session")
