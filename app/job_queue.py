@@ -15,6 +15,7 @@
 from datetime import timedelta
 
 from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from app.models import (
@@ -38,6 +39,20 @@ def find_job(
     if for_update:
         statement = statement.with_for_update(skip_locked=skip_locked)
     return session.exec(statement).first()
+
+
+def find_jobs_by_submission_id(*, session: Session, submission_id: int) -> list[Job]:
+    statement = (
+        select(Job)
+        .where(Job.submission_id == submission_id)
+        .options(
+            selectinload(Job.ready_execution),
+            selectinload(Job.claimed_execution),
+            selectinload(Job.failed_execution),
+        )
+        .order_by(Job.id)
+    )
+    return session.exec(statement).all()
 
 
 def enqueue(*, session: Session, submission_id: int) -> Job:

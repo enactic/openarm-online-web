@@ -11,23 +11,62 @@
   <div>
     Task name: <a href="{{ url_for('task_page', id=submission.task.id) }}">{{ submission.task.name }}</a>
   </div>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Created (UTC)</th>
-        <th>success</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for rollout in paginator.items %}
+  {% if paginator.items %}
+    <table border="1">
+      <thead>
         <tr>
-          <td>{{ rollout.id }}</td>
-          <td>{{ rollout.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
-          <td>{{ rollout.success }}</td>
+          <th>ID</th>
+          <th>Created</th>
+          <th>Success</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {{ macro.pagination(paginator) }}
+      </thead>
+      <tbody>
+        {% for rollout in paginator.items %}
+          <tr>
+            <td>{{ rollout.id }}</td>
+            <td>{{ rollout.created_at.isoformat(timespec="seconds") }}</td>
+            <td>{{ rollout.success }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ macro.pagination(paginator) }}
+  {% else %}
+    <p>No rollouts yet.</p>
+  {% endif %}
+  {% if is_owner %}
+    <h2>Jobs</h2>
+    {% if jobs %}
+      <table border="1">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for job in jobs %}
+            <tr>
+              <td>{{ job.id }}</td>
+              <td>{{ job.created_at.isoformat(timespec="seconds") }}</td>
+              {% if job.failed_execution %}
+                <td>Failed</td>
+                <td>{{ job.failed_execution.reason }}</td>
+              {% elif job.claimed_execution %}
+                <td>Running</td>
+                <td></td>
+              {% else %}
+                <td>Waiting</td>
+                <td></td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No jobs.</p>
+    {% endif %}
+  {% endif %}
 {% endblock %}
