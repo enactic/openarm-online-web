@@ -16,9 +16,10 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
 from app.models import Job, ReadyExecution, Submission, Task, User
+from app.settings import settings
 
 
-def test_create_submission_enqueues_job(
+def test_create_submission_enqueues_jobs(
     session: Session,
     tasks: list[Task],
     user: User,
@@ -41,11 +42,12 @@ def test_create_submission_enqueues_job(
         "docker_tag": "test/image:latest",
     }
 
-    job = session.exec(select(Job).where(Job.submission_id == submission.id)).first()
-    assert job.model_dump(exclude={"id", "created_at"}) == {
-        "submission_id": submission.id
-    }
-
-    assert session.exec(
-        select(ReadyExecution).where(ReadyExecution.job_id == job.id)
-    ).first().model_dump(exclude={"id", "created_at"}) == {"job_id": job.id}
+    jobs = session.exec(select(Job).where(Job.submission_id == submission.id)).all()
+    assert len(jobs) == settings.JOBS_PER_SUBMISSION
+    for job in jobs:
+        assert job.model_dump(exclude={"id", "created_at"}) == {
+            "submission_id": submission.id
+        }
+        assert session.exec(
+            select(ReadyExecution).where(ReadyExecution.job_id == job.id)
+        ).first().model_dump(exclude={"id", "created_at"}) == {"job_id": job.id}

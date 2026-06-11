@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_BUCKET_NAME: str = "openeval"
 
+    JOBS_PER_SUBMISSION: int = Field(default=3, ge=1)
     CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
     CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
 

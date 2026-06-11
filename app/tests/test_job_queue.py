@@ -41,6 +41,21 @@ def test_enqueue(session: Session, submission: Submission):
     ).first().model_dump(exclude={"id", "created_at"}) == {"job_id": job.id}
 
 
+def test_bulk_enqueue(session: Session, submission: Submission):
+    jobs = job_queue.bulk_enqueue(session=session, submission_id=submission.id, count=3)
+
+    assert (
+        session.exec(
+            select(Job).where(Job.submission_id == submission.id).order_by(Job.id)
+        ).all()
+        == jobs
+    )
+    for job in jobs:
+        assert session.exec(
+            select(ReadyExecution).where(ReadyExecution.job_id == job.id)
+        ).first().model_dump(exclude={"id", "created_at"}) == {"job_id": job.id}
+
+
 def test_claim_next_job(session: Session, submission: Submission, api_key: ApiKey):
     job = job_queue.enqueue(session=session, submission_id=submission.id)
 
