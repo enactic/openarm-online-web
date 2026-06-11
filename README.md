@@ -26,13 +26,21 @@ Please configure the following variables according to the comments in `.env`.
 * `SECRET_KEY`
 * `HMAC_KEY`
 
-For environments launched with Docker Compose, variables starting with `POSTGRES_` can remain unchanged.
+For environments launched with Docker Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
 
-#### 3. Build and Migration
+#### 3. Initial Setup
 
 ```bash
-docker compose run --rm app alembic -c /src/app/alembic.ini upgrade head
+scripts/setup.sh
 ```
+
+```
+...
+openeval-key-xxx
+Configure 'OPENEVAL_API_KEY' in .env and start it with 'docker compose up -d'.
+```
+
+Finally, an API key will be displayed. Set it in the `.env` file.
 
 #### 4. Start up
 
@@ -42,20 +50,10 @@ docker compose up -d
 
 The server has started and can be accessed at http://localhost:8000/ .
 
-#### 5. Load initial data.
-
-##### Task
-
-```bash
-docker compose exec app /src/scripts/create_tasks.py /src/app/tests/fixtures/task.json
-```
-
-Three tasks for testing will be created.
-
-##### API key
+#### 5. Generate an API key
 
 ```console
-$ docker compose exec app /src/scripts/create_api_keys.py test-key
+$ docker compose exec app /src/scripts/create_api_keys.py demo-key
 openeval-key-xxx
 ```
 
