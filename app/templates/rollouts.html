@@ -3,7 +3,7 @@
 {% block title %}Rollouts - {{ site_name }}{% endblock %}
 {% block content %}
   <h1>Rollouts</h1>
-  <div>Number of results: {{ count }}</div>
+  <div>Number of rollouts: {{ count }}</div>
   <div>Success rate: {{ format_rate(rate) }}</div>
   <div>
     Submission ID: <a href="{{ url_for('submission_page', id=submission.id) }}">{{ submission.id }}</a>
@@ -20,11 +20,11 @@
       </tr>
     </thead>
     <tbody>
-      {% for result in paginator.items %}
+      {% for rollout in paginator.items %}
         <tr>
-          <td>{{ result.id }}</td>
-          <td>{{ result.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
-          <td>{{ result.success }}</td>
+          <td>{{ rollout.id }}</td>
+          <td>{{ rollout.created_at.strftime("%Y-%m-%d %H:%M UTC") }}</td>
+          <td>{{ rollout.success }}</td>
         </tr>
       {% endfor %}
     </tbody>
