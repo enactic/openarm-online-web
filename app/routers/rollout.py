@@ -15,7 +15,7 @@
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse
 
-from app import crud
+from app import crud, job_queue
 from app.deps import CurrentUserOptional, PaginationDep, SessionDep
 from app.responses import not_found
 from app.settings import settings
@@ -41,15 +41,24 @@ def list_rollouts_page(
     statistics = crud.get_submission_with_statistics_by_id(
         session=session, id=submission.id
     )
+    is_owner = current_user is not None and current_user.id == submission.user_id
+    if is_owner:
+        jobs = job_queue.find_jobs_by_submission_id(
+            session=session, submission_id=submission.id
+        )
+    else:
+        jobs = None
     return templates.TemplateResponse(
         request,
         "rollouts.html",
         {
-            "site_name": settings.SITE_NAME,
-            "current_user": current_user,
-            "submission": submission,
-            "paginator": paginator,
             "count": statistics.count,
+            "current_user": current_user,
+            "is_owner": is_owner,
+            "jobs": jobs,
+            "paginator": paginator,
             "rate": statistics.success_rate,
+            "site_name": settings.SITE_NAME,
+            "submission": submission,
         },
     )
