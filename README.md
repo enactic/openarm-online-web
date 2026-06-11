@@ -50,7 +50,7 @@ docker compose up -d
 
 The server has started and can be accessed at http://localhost:8000/ .
 
-#### Generate an API key
+#### 5. Generate an API key
 
 ```console
 $ docker compose exec app /src/scripts/create_api_keys.py demo-key
