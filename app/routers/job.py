@@ -35,7 +35,11 @@ def retry_job_page(
     submission = crud.find_submission(session=session, id=job.submission_id)
     if submission is None or submission.user_id != current_user.id:
         return not_found(request, current_user)
-    job_queue.retry_job(session=session, job_id=job.id)
+    try:
+        job_queue.retry_job(session=session, job_id=job.id)
+    except ValueError:
+        # Job is no longer in a failed state (e.g. already retried)
+        pass
     return RedirectResponse(
         url=request.url_for("list_rollouts_page").include_query_params(
             submission_id=job.submission_id
