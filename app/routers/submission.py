@@ -87,7 +87,9 @@ def create_submission_page(
         task_id=task_id,
         docker_tag=docker_tag,
     )
-    job_queue.enqueue(session=session, submission_id=submission.id)
+    job_queue.bulk_enqueue(
+        session=session, submission_id=submission.id, count=settings.JOBS_PER_SUBMISSION
+    )
     return RedirectResponse(
         url=request.url_for("list_submissions_by_user_page", id=current_user.id),
         status_code=303,

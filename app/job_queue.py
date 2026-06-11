@@ -50,6 +50,15 @@ def enqueue(*, session: Session, submission_id: int) -> Job:
     return job
 
 
+def bulk_enqueue(*, session: Session, submission_id: int, count: int) -> list[Job]:
+    jobs = [Job(submission_id=submission_id) for _ in range(count)]
+    session.add_all(jobs)
+    session.flush()
+    session.add_all([ReadyExecution(job_id=job.id) for job in jobs])
+    session.flush()
+    return jobs
+
+
 def claim_next_job(*, session: Session, api_key_id: int, task_id: int) -> Job | None:
     statement = (
         select(ReadyExecution)
