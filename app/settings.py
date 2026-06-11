@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_BUCKET_NAME: str = "openeval"
 
+    # Base URL of the Rerun web viewer.
+    # The version should match the Rerun SDK version used by
+    # the runner (openarm_dataset converter) to record the RRD file.
+    # See also: https://rerun.io/docs/howto/integrations/embed-web
+    RERUN_VIEWER_URL: str = "https://app.rerun.io/version/0.33.0/index.html"
+
     JOBS_PER_SUBMISSION: int = Field(default=3, ge=1)
     CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
     CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
