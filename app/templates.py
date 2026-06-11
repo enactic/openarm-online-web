@@ -14,10 +14,14 @@
 
 import math
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi.templating import Jinja2Templates
 
 from jinja2 import pass_context
+
+from app.s3 import generate_presigned_download_url
+from app.settings import settings
 
 
 def format_rate(value):
@@ -28,6 +32,11 @@ def format_rate(value):
 
 def is_active_user(user):
     return user and user.github
+
+
+def rerun_viewer_url(s3_key):
+    download_url = generate_presigned_download_url(s3_key, expires_in=600)
+    return f"{settings.RERUN_VIEWER_URL}?url={quote(download_url, safe='')}"
 
 
 def total_pages(pagenator):
@@ -45,5 +54,6 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 templates.env.globals["format_rate"] = format_rate
 templates.env.globals["is_active_user"] = is_active_user
-templates.env.globals["update_query_params"] = update_query_params
+templates.env.globals["rerun_viewer_url"] = rerun_viewer_url
 templates.env.globals["total_pages"] = total_pages
+templates.env.globals["update_query_params"] = update_query_params
