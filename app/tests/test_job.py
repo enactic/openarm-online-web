@@ -58,7 +58,7 @@ def test_retry_job_not_found(client: TestClient):
 def test_retry_job_by_non_owner(
     session: Session,
     tasks: list[Task],
-    api_key: Apache,
+    api_key: ApiKey,
     client: TestClient,
 ):
     other = crud.create_user(session=session, github_id=2, login_name="other")
