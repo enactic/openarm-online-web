@@ -52,7 +52,12 @@
               <td>{{ job.id }}</td>
               <td>{{ job.created_at.isoformat(timespec="seconds") }}</td>
               {% if job.failed_execution %}
-                <td>Failed</td>
+                <td>
+                  Failed
+                  <form method="post" action="{{ url_for('retry_job_page', id=job.id) }}">
+                    <button type="submit">Re-run</button>
+                  </form>
+                </td>
                 <td>{{ job.failed_execution.reason }}</td>
               {% elif job.claimed_execution %}
                 <td>Running</td>
