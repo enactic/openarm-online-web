@@ -26,6 +26,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("HMAC_KEY", "test-hmac-key")
 os.environ.setdefault("POSTGRES_DB", "openeval_test")
 os.environ.setdefault("S3_ENDPOINT_URL", "http://s3:9000")
+os.environ.setdefault("S3_BUCKET_NAME", "openeval-test")
 os.environ.setdefault("S3_ACCESS_KEY_ID", "openeval-access")
 os.environ.setdefault("S3_SECRET_ACCESS_KEY", "openeval-secret")
 
