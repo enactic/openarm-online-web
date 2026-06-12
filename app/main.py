@@ -22,7 +22,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi_pagination import add_pagination
 
 from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
-from app.routers import api, job, login, rollout, submission, task, user
+from app.routers import api, job, leaderboard, login, rollout, submission, task, user
 from app.scheduler import timeout_worker
 from app.settings import settings
 from app.templates import templates
@@ -44,6 +44,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(api.router)
 app.include_router(job.router)
+app.include_router(leaderboard.router)
 app.include_router(login.router)
 app.include_router(rollout.router)
 app.include_router(submission.router)

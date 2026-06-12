@@ -188,6 +188,31 @@ def get_submission_with_statistics_by_id(*, session: Session, id: int) -> Row:
     return session.exec(statement.where(Submission.id == id)).first()
 
 
+def get_paginated_top_submissions_by_task_id(
+    *, session: Session, params: Params, task_id: int
+) -> Page[Row]:
+    success_rate = cast(
+        func.avg(case((Rollout.success == True, 1), else_=0)), Float
+    ).label("success_rate")
+    count = func.count(Rollout.id).label("count")
+    statement = (
+        select(
+            Submission.id,
+            Submission.user_id,
+            func.coalesce(UserGitHub.name, UserGitHub.login_name).label("user_name"),
+            Submission.docker_tag,
+            count,
+            success_rate,
+        )
+        .join(UserGitHub, UserGitHub.user_id == Submission.user_id)
+        .join(Rollout, Rollout.submission_id == Submission.id)
+        .where(Submission.task_id == task_id)
+        .group_by(Submission.id, UserGitHub.name, UserGitHub.login_name)
+        .order_by(success_rate.desc(), count.desc(), Submission.id)
+    )
+    return alchemy_paginate(session, statement, params)
+
+
 def create_rollout(*, session: Session, rollout_create: RolloutCreate):
     rollout = Rollout.model_validate(rollout_create)
     session.add(rollout)

@@ -1,13 +1,16 @@
-{% macro user_name(user, link=False) %}
-  {% if is_active_user(user) %}
+{% macro user_label(name, id, link=False) %}
+  {% if name %}
     {% if link %}
-      <a href="{{ url_for('user_page', id=user.id) }}">{{ user.github.name }}</a>
+      <a href="{{ url_for('user_page', id=id) }}">{{ name }}</a>
     {% else %}
-      {{ user.github.name }}
+      {{ name }}
     {% endif %}
   {% else %}
     [anonymous]
   {% endif %}
+{% endmacro %}
+{% macro user_name(user, link=False) %}
+  {{ user_label((user.github.name or user.github.login_name) if is_active_user(user) else none, user.id, link) }}
 {% endmacro %}
 {% macro pagination(pagenator) %}
   <div>
