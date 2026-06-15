@@ -14,10 +14,11 @@
 
 import pytest
 
+from fastapi_pagination import Params
 from sqlmodel import Session
 
 from app import crud
-from app.models import Task
+from app.models import RolloutCreate, Task
 
 
 def test_find_task(session: Session, tasks: list[Task]):
@@ -26,3 +27,75 @@ def test_find_task(session: Session, tasks: list[Task]):
 
 def test_find_task_not_found(session: Session):
     assert crud.find_task(session=session, id=9999) is None
+
+
+def _add_rollouts(
+    session: Session, submission_id: int, n_successes: int, n_failures: int
+):
+    for _ in range(n_successes):
+        crud.create_rollout(
+            session=session,
+            rollout_create=RolloutCreate(
+                submission_id=submission_id, success=True, s3_key="rrd/x.rrd"
+            ),
+        )
+    for _ in range(n_failures):
+        crud.create_rollout(
+            session=session,
+            rollout_create=RolloutCreate(
+                submission_id=submission_id, success=False, s3_key="rrd/x.rrd"
+            ),
+        )
+
+
+def test_top_submissions_order_by_success_rate(
+    session: Session, user: User, tasks: list[Task]
+):
+    task = tasks[0]
+    # success_rate: 100%
+    high = crud.create_submission(
+        session=session, user=user, task_id=task.id, docker_tag="high"
+    )
+    _add_rollouts(session, high.id, n_successes=3, n_failures=0)
+
+    # success_rate: 33%
+    low = crud.create_submission(
+        session=session, user=user, task_id=task.id, docker_tag="low"
+    )
+    _add_rollouts(session, low.id, n_successes=1, n_failures=2)
+
+    # no rollouts
+    crud.create_submission(
+        session=session, user=user, task_id=task.id, docker_tag="none"
+    )
+    session.commit()
+
+    page = crud.get_paginated_top_submissions_by_task_id(
+        session=session, params=Params(page=1, size=20), task_id=task.id
+    )
+    assert page.items == [
+        (high.id, user.id, "testuser", "high", 3, 1.0),
+        (low.id, user.id, "testuser", "low", 3, pytest.approx(1 / 3)),
+    ]
+
+
+def test_top_submissions_filter_by_task(
+    session: Session, user: User, tasks: list[Task]
+):
+    target = crud.create_submission(
+        session=session, user=user, task_id=tasks[0].id, docker_tag="target"
+    )
+    _add_rollouts(session, target.id, n_successes=3, n_failures=0)
+
+    other = crud.create_submission(
+        session=session, user=user, task_id=tasks[1].id, docker_tag="other"
+    )
+    _add_rollouts(session, other.id, n_successes=3, n_failures=0)
+    session.commit()
+
+    page = crud.get_paginated_top_submissions_by_task_id(
+        session=session, params=Params(page=1, size=20), task_id=tasks[0].id
+    )
+    assert page.items == [
+        (target.id, user.id, "testuser", "target", 3, 1.0),
+    ]

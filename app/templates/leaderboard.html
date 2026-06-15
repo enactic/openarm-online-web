@@ -1,0 +1,37 @@
+{% import "macros.html" as macro with context %}
+{% extends "base.html" %}
+{% block title %}Leaderboard - {{ task.name }} - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Leaderboard - {{ task.name }}</h1>
+  {% if paginator.items %}
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Created by</th>
+          <th>Docker tag</th>
+          <th>Success rate</th>
+          <th>Number of rollouts</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for submission in paginator.items %}
+          <tr>
+            <td>{{ (paginator.page - 1) * paginator.size + loop.index }}</td>
+            <td>{{ macro.user_label(submission.user_name, submission.user_id, link=true) }}</td>
+            <td>{{ submission.docker_tag }}</td>
+            <td>{{ format_rate(submission.success_rate) }}</td>
+            <td>{{ submission.count }}</td>
+            <td>
+              <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Rollouts</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {{ macro.pagination(paginator) }}
+  {% else %}
+    <p>No rollouts yet.</p>
+  {% endif %}
+{% endblock %}
