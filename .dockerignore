@@ -18,6 +18,8 @@
 **/.pytest_cache/
 **/.venv/
 **/__pycache__/
+.git/
+db/
 
 app/*.Dockerfile
 app/.gitignore
