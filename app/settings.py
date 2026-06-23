@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from urllib.parse import quote_plus
+from urllib.parse import quote
 
 from pydantic import Field, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -72,7 +72,7 @@ class Settings(BaseSettings):
             PostgresDsn.build(
                 scheme="postgresql+psycopg",
                 username=self.POSTGRES_USER,
-                password=quote_plus(self.POSTGRES_PASSWORD),
+                password=quote(self.POSTGRES_PASSWORD, safe=""),
                 host=self.POSTGRES_SERVER,
                 port=self.POSTGRES_PORT,
                 path=self.POSTGRES_DB,
