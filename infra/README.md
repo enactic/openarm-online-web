@@ -14,6 +14,7 @@ Installation document: https://opentofu.org/docs/intro/install/
 
 ```bash
 cd infra
+cp environments/shared/backend.hcl.example environments/shared/backend.hcl
 cp environments/staging/backend.hcl.example environments/staging/backend.hcl
 cp environments/production/backend.hcl.example environments/production/backend.hcl
 # Update `environments/*/backend.hcl` to your environment.
@@ -25,6 +26,17 @@ Provide variable values via a `terraform.tfvars` file in the environment directo
 See also: https://opentofu.org/docs/language/values/variables/#variable-definitions-tfvars-files
 
 ## Usage
+
+First, create the shared resources.
+
+```bash
+cd infra/environments/shared
+tofu init -backend-config=backend.hcl
+tofu plan
+tofu apply
+```
+
+After that, create the resources for each environment.
 
 Example of execution in the staging environment.
 Please move to the `environments/staging` directory and run the command.
