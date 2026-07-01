@@ -53,3 +53,49 @@ variable "private_subnet_cidrs" {
   type    = list(string)
   default = ["10.29.10.0/24", "10.29.11.0/24"]
 }
+
+# --- RDS (staging and production) ---
+variable "db_name" {
+  type    = string
+  default = "openeval"
+}
+
+variable "db_username" {
+  type    = string
+  default = "openeval"
+}
+
+variable "db_engine_version" {
+  type    = string
+  default = "18"
+}
+
+variable "db_instance_class" {
+  type    = string
+  default = "db.t4g.micro"
+}
+
+variable "db_allocated_storage" {
+  type    = number
+  default = 20
+}
+
+variable "rds_multi_az" {
+  type    = bool
+  default = false
+}
+
+variable "rds_skip_final_snapshot" {
+  type    = bool
+  default = true
+}
+
+variable "rds_deletion_protection" {
+  type    = bool
+  default = false
+}
+
+variable "rds_backup_retention_period" {
+  type    = number
+  default = 0
+}
