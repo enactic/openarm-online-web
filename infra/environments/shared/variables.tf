@@ -32,3 +32,24 @@ variable "route53_zone_name" {
   type    = string
   default = "run.example.com"
 }
+
+# --- Networking (staging and production) ---
+variable "vpc_cidr" {
+  type    = string
+  default = "10.29.0.0/16"
+}
+
+variable "azs" {
+  type    = list(string)
+  default = ["ap-northeast-1a", "ap-northeast-1c"]
+}
+
+variable "public_subnet_cidrs" {
+  type    = list(string)
+  default = ["10.29.0.0/24", "10.29.1.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  type    = list(string)
+  default = ["10.29.10.0/24", "10.29.11.0/24"]
+}
