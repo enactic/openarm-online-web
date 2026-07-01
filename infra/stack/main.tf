@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "stack" {
-  source      = "../../stack"
-  project     = var.project
-  environment = var.environment
+locals {
+  name = "${var.project}-${var.environment}"
+}
+
+module "ecr" {
+  source               = "../modules/ecr"
+  name                 = local.name
+  image_tag_mutability = var.image_tag_mutability
 }
