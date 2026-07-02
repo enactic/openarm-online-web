@@ -21,6 +21,7 @@ module "stack" {
   source      = "../../stack"
   project     = var.project
   environment = var.environment
+  domain_name = var.domain_name
 
   # ECR
   image_tag_mutability = "IMMUTABLE"
@@ -34,4 +35,7 @@ module "stack" {
   # Security Group
   vpc_id                = data.terraform_remote_state.shared.outputs.vpc_id
   rds_security_group_id = data.terraform_remote_state.shared.outputs.rds_security_group_id
+
+  # Certificate
+  route53_zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
 }

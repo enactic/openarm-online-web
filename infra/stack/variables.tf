@@ -64,3 +64,12 @@ variable "container_port" {
   type    = number
   default = 8000
 }
+
+# Certificate
+variable "domain_name" {
+  type = string
+}
+
+variable "route53_zone_id" {
+  type = string
+}

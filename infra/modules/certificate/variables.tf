@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "vpc_id" {
-  value = aws_vpc.this.id
+variable "domain_name" {
+  type = string
 }
 
-output "rds_security_group_id" {
-  value = aws_security_group.db.id
-}
-
-output "route53_zone_id" {
-  value = aws_route53_zone.public.zone_id
+variable "zone_id" {
+  type = string
 }
