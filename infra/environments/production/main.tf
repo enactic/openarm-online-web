@@ -19,4 +19,7 @@ module "stack" {
 
   # ECR
   image_tag_mutability = "IMMUTABLE"
+
+  # Logs
+  log_retention_days = 365
 }

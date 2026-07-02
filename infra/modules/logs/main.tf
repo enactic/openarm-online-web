@@ -12,22 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "project" {
-  type = string
-}
-
-variable "environment" {
-  type = string
-}
-
-# ECR
-variable "image_tag_mutability" {
-  type    = string
-  default = "MUTABLE"
-}
-
-# Logs
-variable "log_retention_days" {
-  type    = number
-  default = 30
+resource "aws_cloudwatch_log_group" "this" {
+  name              = var.name
+  retention_in_days = var.retention_in_days
 }

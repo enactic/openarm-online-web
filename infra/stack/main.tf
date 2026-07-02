@@ -21,3 +21,9 @@ module "ecr" {
   name                 = local.name
   image_tag_mutability = var.image_tag_mutability
 }
+
+module "logs" {
+  source            = "../modules/logs"
+  name              = local.name
+  retention_in_days = var.log_retention_days
+}
