@@ -73,3 +73,8 @@ variable "domain_name" {
 variable "route53_zone_id" {
   type = string
 }
+
+# ALB
+variable "public_subnet_ids" {
+  type = list(string)
+}

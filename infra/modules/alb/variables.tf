@@ -12,18 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "vpc_id" {
-  value = aws_vpc.this.id
+variable "name" {
+  type = string
 }
 
-output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
+variable "vpc_id" {
+  type = string
 }
 
-output "rds_security_group_id" {
-  value = aws_security_group.db.id
+variable "public_subnet_ids" {
+  type = list(string)
 }
 
-output "route53_zone_id" {
-  value = aws_route53_zone.public.zone_id
+variable "security_group_id" {
+  type = string
+}
+
+variable "container_port" {
+  type = number
+  default = 8000
+}
+
+variable "health_check_path" {
+  type = string
+  default = "/"
+}
+
+variable "certificate_arn" {
+  type = string
 }

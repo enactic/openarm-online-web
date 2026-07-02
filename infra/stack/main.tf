@@ -63,3 +63,13 @@ module "certificate" {
   domain_name = var.domain_name
   zone_id     = var.route53_zone_id
 }
+
+module "alb" {
+  source            = "../modules/alb"
+  name              = local.name
+  vpc_id            = var.vpc_id
+  public_subnet_ids = var.public_subnet_ids
+  security_group_id = module.security_group.alb_id
+  container_port    = var.container_port
+  certificate_arn   = module.certificate.arn
+}
