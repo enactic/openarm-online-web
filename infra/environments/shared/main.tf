@@ -164,3 +164,53 @@ resource "aws_vpc_endpoint" "s3" {
     Name = "${var.project}-${var.environment}-s3"
   }
 }
+
+# --- RDS ---
+resource "aws_db_subnet_group" "db" {
+  name       = "${var.project}-${var.environment}"
+  subnet_ids = aws_subnet.private[*].id
+
+  tags = {
+    Name = "${var.project}-${var.environment}"
+  }
+}
+
+resource "aws_security_group" "db" {
+  name   = "${var.project}-${var.environment}-db"
+  vpc_id = aws_vpc.this.id
+
+  tags = {
+    Name = "${var.project}-${var.environment}-db"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "db_all" {
+  security_group_id = aws_security_group.db.id
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+resource "aws_db_instance" "db" {
+  identifier     = "${var.project}-${var.environment}"
+  engine         = "postgres"
+  engine_version = var.db_engine_version
+  instance_class = var.db_instance_class
+
+  allocated_storage = var.db_allocated_storage
+  storage_type      = "gp3"
+  storage_encrypted = true
+
+  db_subnet_group_name   = aws_db_subnet_group.db.name
+  vpc_security_group_ids = [aws_security_group.db.id]
+  multi_az               = var.rds_multi_az
+  publicly_accessible    = false
+
+  skip_final_snapshot       = var.rds_skip_final_snapshot
+  final_snapshot_identifier = var.rds_skip_final_snapshot ? null : "${var.project}-${var.environment}-final"
+  deletion_protection       = var.rds_deletion_protection
+  backup_retention_period   = var.rds_backup_retention_period
+
+  db_name  = var.db_name
+  username = var.db_username
+  manage_master_user_password = true
+}
