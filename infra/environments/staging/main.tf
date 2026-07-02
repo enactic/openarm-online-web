@@ -29,4 +29,7 @@ module "stack" {
 
   # Certificate
   route53_zone_id = data.terraform_remote_state.shared.outputs.route53_zone_id
+
+  # ALB
+  public_subnet_ids = data.terraform_remote_state.shared.outputs.public_subnet_ids
 }
