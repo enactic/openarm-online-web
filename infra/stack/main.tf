@@ -34,3 +34,11 @@ module "secrets" {
   secret_keys             = var.secret_keys
   recovery_window_in_days = var.secret_recovery_window_days
 }
+
+module "iam" {
+  source             = "../modules/iam"
+  name               = local.name
+  log_group_arn      = module.logs.arn
+  ecr_repository_arn = module.ecr.repository_arn
+  secret_arns        = values(module.secrets.secret_arn_map)
+}
