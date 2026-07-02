@@ -12,25 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-locals {
-  name = "${var.project}-${var.environment}"
+resource "aws_secretsmanager_secret" "this" {
+  for_each                = var.secret_keys
+  name                    = "${var.prefix}/${each.key}"
+  recovery_window_in_days = var.recovery_window_in_days
 }
 
-module "ecr" {
-  source               = "../modules/ecr"
-  name                 = local.name
-  image_tag_mutability = var.image_tag_mutability
-}
-
-module "logs" {
-  source            = "../modules/logs"
-  name              = local.name
-  retention_in_days = var.log_retention_days
-}
-
-module "secrets" {
-  source                  = "../modules/secrets"
-  prefix                  = "${var.project}/${var.environment}"
-  secret_keys             = var.secret_keys
-  recovery_window_in_days = var.secret_recovery_window_days
-}
+# Do not set the actual value in OpenTofu so that no value is stored in `state`.
+# You need to configure this using the AWS CLI or the AWS Management Console.
