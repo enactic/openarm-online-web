@@ -50,3 +50,17 @@ variable "secret_recovery_window_days" {
   type    = number
   default = 0
 }
+
+# Security Group
+variable "vpc_id" {
+  type = string
+}
+
+variable "rds_security_group_id" {
+  type = string
+}
+
+variable "container_port" {
+  type    = number
+  default = 8000
+}

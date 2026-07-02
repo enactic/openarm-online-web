@@ -42,3 +42,18 @@ module "iam" {
   ecr_repository_arn = module.ecr.repository_arn
   secret_arns        = values(module.secrets.secret_arn_map)
 }
+
+module "security_group" {
+  source         = "../modules/security_group"
+  name           = local.name
+  vpc_id         = var.vpc_id
+  container_port = var.container_port
+}
+
+resource "aws_vpc_security_group_ingress_rule" "db_from_task" {
+  security_group_id            = var.rds_security_group_id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = module.security_group.task_id
+}

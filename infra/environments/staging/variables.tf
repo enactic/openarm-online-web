@@ -26,3 +26,16 @@ variable "project" {
   type    = string
   default = "openeval"
 }
+
+variable "shared_state_config" {
+  type = object({
+    bucket = string
+    key    = string
+    region = string
+  })
+  default = {
+    bucket = "tfstate"
+    key    = "shared/terraform.tfstate"
+    region = "ap-northeast-1"
+  }
+}
