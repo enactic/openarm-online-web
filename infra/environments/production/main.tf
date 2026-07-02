@@ -22,4 +22,7 @@ module "stack" {
 
   # Logs
   log_retention_days = 365
+
+  # Secrets
+  secret_recovery_window_days = 7
 }

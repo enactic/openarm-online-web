@@ -31,3 +31,22 @@ variable "log_retention_days" {
   type    = number
   default = 30
 }
+
+# Secrets
+variable "secret_keys" {
+  type    = set(string)
+  default = [
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "SECRET_KEY",
+    "HMAC_KEY",
+    "S3_ACCESS_KEY_ID",
+    "S3_SECRET_ACCESS_KEY",
+    "POSTGRES_PASSWORD",
+  ]
+}
+
+variable "secret_recovery_window_days" {
+  type    = number
+  default = 0
+}

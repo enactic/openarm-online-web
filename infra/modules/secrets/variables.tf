@@ -12,25 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-locals {
-  name = "${var.project}-${var.environment}"
+variable "prefix" {
+  type = string
 }
 
-module "ecr" {
-  source               = "../modules/ecr"
-  name                 = local.name
-  image_tag_mutability = var.image_tag_mutability
+variable "secret_keys" {
+  type = set(string)
 }
 
-module "logs" {
-  source            = "../modules/logs"
-  name              = local.name
-  retention_in_days = var.log_retention_days
-}
-
-module "secrets" {
-  source                  = "../modules/secrets"
-  prefix                  = "${var.project}/${var.environment}"
-  secret_keys             = var.secret_keys
-  recovery_window_in_days = var.secret_recovery_window_days
+variable "recovery_window_in_days" {
+  type    = number
+  default = 0
 }
