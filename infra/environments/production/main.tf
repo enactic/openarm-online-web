@@ -12,4 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO: Add resource settings
+module "stack" {
+  source      = "../../stack"
+  project     = var.project
+  environment = var.environment
+
+  # ECR
+  image_tag_mutability = "IMMUTABLE"
+}

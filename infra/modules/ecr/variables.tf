@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module "stack" {
-  source      = "../../stack"
-  project     = var.project
-  environment = var.environment
+variable "name" {
+  type = string
+}
+
+variable "image_tag_mutability" {
+  type    = string
+  default = "MUTABLE"
 }
