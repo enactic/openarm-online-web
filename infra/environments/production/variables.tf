@@ -27,6 +27,11 @@ variable "project" {
   default = "openeval"
 }
 
+variable "domain_name" {
+  type    = string
+  default = "run.example.com"
+}
+
 variable "shared_state_config" {
   type = object({
     bucket = string

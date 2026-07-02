@@ -57,3 +57,9 @@ resource "aws_vpc_security_group_ingress_rule" "db_from_task" {
   ip_protocol                  = "tcp"
   referenced_security_group_id = module.security_group.task_id
 }
+
+module "certificate" {
+  source      = "../modules/certificate"
+  domain_name = var.domain_name
+  zone_id     = var.route53_zone_id
+}
