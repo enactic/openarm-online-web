@@ -12,30 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "region" {
-  type    = string
-  default = "ap-northeast-1"
+variable "name" {
+  type = string
 }
 
-variable "environment" {
-  type    = string
-  default = "production"
+variable "vpc_id" {
+  type = string
 }
 
-variable "project" {
-  type    = string
-  default = "openeval"
-}
-
-variable "shared_state_config" {
-  type = object({
-    bucket = string
-    key    = string
-    region = string
-  })
-  default = {
-    bucket = "tfstate"
-    key    = "shared/terraform.tfstate"
-    region = "ap-northeast-1"
-  }
+variable "container_port" {
+  type   = number
+  default = 8000
 }

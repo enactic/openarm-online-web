@@ -12,8 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+data "terraform_remote_state" "shared" {
+  backend = "s3"
+  config  = var.shared_state_config
+}
+
 module "stack" {
   source      = "../../stack"
   project     = var.project
   environment = var.environment
+
+  # Security Group
+  vpc_id                = data.terraform_remote_state.shared.outputs.vpc_id
+  rds_security_group_id = data.terraform_remote_state.shared.outputs.rds_security_group_id
 }
