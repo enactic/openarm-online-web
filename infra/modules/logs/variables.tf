@@ -12,22 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "project" {
+variable "name" {
   type = string
 }
 
-variable "environment" {
-  type = string
-}
-
-# ECR
-variable "image_tag_mutability" {
-  type    = string
-  default = "MUTABLE"
-}
-
-# Logs
-variable "log_retention_days" {
+variable "retention_in_days" {
   type    = number
   default = 30
 }
