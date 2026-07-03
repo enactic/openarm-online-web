@@ -44,3 +44,18 @@ variable "shared_state_config" {
     region = "ap-northeast-1"
   }
 }
+
+variable "image_tag" {
+  type    = string
+  default = "latest"
+}
+
+variable "s3_endpoint_url" {
+  type    = string
+  default = ""
+}
+
+variable "s3_bucket_name" {
+  type    = string
+  default = "openeval"
+}
