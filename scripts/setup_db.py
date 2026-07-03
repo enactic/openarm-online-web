@@ -38,7 +38,14 @@ with psycopg.connect(
     autocommit=True,
 ) as conn, conn.cursor() as cursor:
     cursor.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (role,))
-    if not cursor.fetchone():
+    if cursor.fetchone():
+        cursor.execute(
+            sql.SQL("ALTER ROLE {} WITH LOGIN PASSWORD {}").format(
+                sql.Identifier(role),
+                sql.Literal(role_password),
+            )
+        )
+    else:
         cursor.execute(
             sql.SQL("CREATE ROLE {} WITH LOGIN PASSWORD {}").format(
                 sql.Identifier(role),
