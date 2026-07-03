@@ -80,7 +80,7 @@ module "alb" {
 locals {
   container_environment = [
     { name = "POSTGRES_DB",     value = var.db_name },
-    { name = "POSTGRES_PORT",   value = 5432 },
+    { name = "POSTGRES_PORT",   value = "5432" },
     { name = "POSTGRES_SERVER", value = var.rds_host },
     { name = "POSTGRES_USER",   value = var.db_username },
     { name = "S3_BUCKET_NAME",  value = var.s3_bucket_name },

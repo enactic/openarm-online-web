@@ -70,9 +70,7 @@ resource "aws_ecs_service" "fastapi" {
     container_port   = var.container_port
   }
 
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
+  # Manage desired_count via Terraform (remove ignore_changes unless desired_count is controlled by autoscaling).
 }
 
 resource "aws_ecs_task_definition" "run" {

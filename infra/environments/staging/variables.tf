@@ -52,7 +52,7 @@ variable "image_tag" {
 
 variable "s3_endpoint_url" {
   type    = string
-  default = "https://s3"
+  default = ""
 }
 
 variable "s3_bucket_name" {
