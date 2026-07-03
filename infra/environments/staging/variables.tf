@@ -57,5 +57,5 @@ variable "s3_endpoint_url" {
 
 variable "s3_bucket_name" {
   type    = string
-  default = "openeval"
+  default = "openeval-staging"
 }
