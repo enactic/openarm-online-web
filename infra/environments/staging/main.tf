@@ -32,4 +32,14 @@ module "stack" {
 
   # ALB
   public_subnet_ids = data.terraform_remote_state.shared.outputs.public_subnet_ids
+
+  # ECS
+  private_subnet_ids    = data.terraform_remote_state.shared.outputs.private_subnet_ids
+  rds_host              = data.terraform_remote_state.shared.outputs.rds_host
+  rds_master_secret_arn = data.terraform_remote_state.shared.outputs.rds_master_secret_arn
+  db_name               = "${var.project}_${var.environment}"
+  db_username           = "${var.project}_${var.environment}"
+  image_tag             = var.image_tag
+  s3_endpoint_url       = var.s3_endpoint_url
+  s3_bucket_name        = var.s3_bucket_name
 }

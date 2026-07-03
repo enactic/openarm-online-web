@@ -78,3 +78,51 @@ variable "route53_zone_id" {
 variable "public_subnet_ids" {
   type = list(string)
 }
+
+# ECS
+variable "private_subnet_ids" {
+  type = list(string)
+}
+
+variable "rds_host" {
+  type = string
+}
+
+variable "rds_master_secret_arn" {
+  type = string
+}
+
+variable "image_tag" {
+  type = string
+}
+
+variable "db_name" {
+  type = string
+}
+
+variable "db_username" {
+  type = string
+}
+
+variable "s3_bucket_name" {
+  type = string
+}
+
+variable "s3_endpoint_url" {
+  type = string
+}
+
+variable "task_cpu" {
+  type    = number
+  default = 256
+}
+
+variable "task_memory" {
+  type    = number
+  default = 512
+}
+
+variable "desired_count" {
+  type    = number
+  default = 1
+}

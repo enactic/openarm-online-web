@@ -12,30 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "vpc_id" {
-  value = aws_vpc.this.id
-}
-
-output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
-}
-
-output "private_subnet_ids" {
-  value = aws_subnet.private[*].id
-}
-
-output "rds_security_group_id" {
-  value = aws_security_group.db.id
-}
-
-output "route53_zone_id" {
-  value = aws_route53_zone.public.zone_id
-}
-
-output "rds_host" {
-  value = aws_db_instance.db.address
-}
-
-output "rds_master_secret_arn" {
-  value = aws_db_instance.db.master_user_secret[0].secret_arn
+output "target_group_arn" {
+  value = aws_lb_target_group.this.arn
 }

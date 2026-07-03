@@ -40,7 +40,10 @@ module "iam" {
   name               = local.name
   log_group_arn      = module.logs.arn
   ecr_repository_arn = module.ecr.repository_arn
-  secret_arns        = values(module.secrets.secret_arn_map)
+  secret_arns = concat(
+    values(module.secrets.secret_arn_map),
+    [var.rds_master_secret_arn],
+  )
 }
 
 module "security_group" {
@@ -72,4 +75,41 @@ module "alb" {
   security_group_id = module.security_group.alb_id
   container_port    = var.container_port
   certificate_arn   = module.certificate.arn
+}
+
+locals {
+  container_environment = [
+    { name = "POSTGRES_DB",     value = var.db_name },
+    { name = "POSTGRES_PORT",   value = 5432 },
+    { name = "POSTGRES_SERVER", value = var.rds_host },
+    { name = "POSTGRES_USER",   value = var.db_username },
+    { name = "S3_BUCKET_NAME",  value = var.s3_bucket_name },
+    { name = "S3_ENDPOINT_URL", value = var.s3_endpoint_url },
+  ]
+  container_secrets = [
+    for key, arn in module.secrets.secret_arn_map : { name = key, value_from = arn }
+  ]
+}
+
+module "ecs" {
+  source             = "../modules/ecs"
+  name               = local.name
+  image              = "${module.ecr.repository_url}:${var.image_tag}"
+  container_port     = var.container_port
+  environment        = local.container_environment
+  secrets            = local.container_secrets
+  run_extra_secrets = [
+    { name = "POSTGRES_MASTER_USER",     value_from = "${var.rds_master_secret_arn}:username::" },
+    { name = "POSTGRES_MASTER_PASSWORD", value_from = "${var.rds_master_secret_arn}:password::" },
+  ]
+  subnet_ids         = var.private_subnet_ids
+  security_group_ids = [module.security_group.task_id]
+  target_group_arn   = module.alb.target_group_arn
+  execution_role_arn = module.iam.execution_role_arn
+  log_group_name     = module.logs.name
+  cpu                = var.task_cpu
+  memory             = var.task_memory
+  desired_count      = var.desired_count
+
+  depends_on = [module.alb]
 }
