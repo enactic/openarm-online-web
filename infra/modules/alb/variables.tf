@@ -29,12 +29,12 @@ variable "security_group_id" {
 }
 
 variable "container_port" {
-  type = number
+  type    = number
   default = 8000
 }
 
 variable "health_check_path" {
-  type = string
+  type    = string
   default = "/"
 }
 

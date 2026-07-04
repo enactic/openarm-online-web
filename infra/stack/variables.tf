@@ -34,7 +34,7 @@ variable "log_retention_days" {
 
 # Secrets
 variable "secret_keys" {
-  type    = set(string)
+  type = set(string)
   default = [
     "GITHUB_CLIENT_ID",
     "GITHUB_CLIENT_SECRET",

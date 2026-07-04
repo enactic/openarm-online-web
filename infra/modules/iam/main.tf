@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "ecs_assume" {
 
 data "aws_iam_policy_document" "execution" {
   statement {
-    actions   = [
+    actions = [
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "execution" {
     resources = ["*"]
   }
   statement {
-    actions   = [
+    actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",

@@ -79,11 +79,11 @@ module "alb" {
 
 locals {
   container_environment = [
-    { name = "POSTGRES_DB",     value = var.db_name },
-    { name = "POSTGRES_PORT",   value = "5432" },
+    { name = "POSTGRES_DB", value = var.db_name },
+    { name = "POSTGRES_PORT", value = "5432" },
     { name = "POSTGRES_SERVER", value = var.rds_host },
-    { name = "POSTGRES_USER",   value = var.db_username },
-    { name = "S3_BUCKET_NAME",  value = var.s3_bucket_name },
+    { name = "POSTGRES_USER", value = var.db_username },
+    { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
     { name = "S3_ENDPOINT_URL", value = var.s3_endpoint_url },
   ]
   container_secrets = [
@@ -92,14 +92,14 @@ locals {
 }
 
 module "ecs" {
-  source             = "../modules/ecs"
-  name               = local.name
-  image              = "${module.ecr.repository_url}:${var.image_tag}"
-  container_port     = var.container_port
-  environment        = local.container_environment
-  secrets            = local.container_secrets
+  source         = "../modules/ecs"
+  name           = local.name
+  image          = "${module.ecr.repository_url}:${var.image_tag}"
+  container_port = var.container_port
+  environment    = local.container_environment
+  secrets        = local.container_secrets
   run_extra_secrets = [
-    { name = "POSTGRES_MASTER_USER",     value_from = "${var.rds_master_secret_arn}:username::" },
+    { name = "POSTGRES_MASTER_USER", value_from = "${var.rds_master_secret_arn}:username::" },
     { name = "POSTGRES_MASTER_PASSWORD", value_from = "${var.rds_master_secret_arn}:password::" },
   ]
   subnet_ids         = var.private_subnet_ids
