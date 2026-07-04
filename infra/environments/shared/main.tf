@@ -30,14 +30,14 @@ resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags                 = {
+  tags = {
     Name = "${var.project}-${var.environment}"
   }
 }
 
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
-  tags   = {
+  tags = {
     Name = "${var.project}-${var.environment}"
   }
 }
@@ -47,7 +47,7 @@ resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.public_subnet_cidrs[count.index]
   availability_zone = var.azs[count.index]
-  tags              = {
+  tags = {
     Name = "${var.project}-${var.environment}-public-${var.azs[count.index]}"
   }
 }
@@ -57,14 +57,14 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.private_subnet_cidrs[count.index]
   availability_zone = var.azs[count.index]
-  tags              = {
+  tags = {
     Name = "${var.project}-${var.environment}-private-${var.azs[count.index]}"
   }
 }
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-  tags   = {
+  tags = {
     Name = "${var.project}-${var.environment}-public"
   }
 }
@@ -84,7 +84,7 @@ resource "aws_route_table_association" "public" {
 # NAT Gateway
 resource "aws_eip" "nat" {
   domain = "vpc"
-  tags   = {
+  tags = {
     Name = "${var.project}-${var.environment}-nat"
   }
 }
@@ -92,15 +92,15 @@ resource "aws_eip" "nat" {
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
-  tags          = {
+  tags = {
     Name = "${var.project}-${var.environment}"
   }
-  depends_on    = [aws_internet_gateway.this]
+  depends_on = [aws_internet_gateway.this]
 }
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
-  tags   = {
+  tags = {
     Name = "${var.project}-${var.environment}-private"
   }
 }
@@ -210,7 +210,7 @@ resource "aws_db_instance" "db" {
   deletion_protection       = var.rds_deletion_protection
   backup_retention_period   = var.rds_backup_retention_period
 
-  db_name  = var.db_name
-  username = var.db_username
+  db_name                     = var.db_name
+  username                    = var.db_username
   manage_master_user_password = true
 }

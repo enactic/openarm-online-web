@@ -24,3 +24,11 @@ repos:
         args: ["--profile=jinja", "--indent=2"]
         types_or:
           - html
+  - repo: https://github.com/tofuutils/pre-commit-opentofu
+    rev: v2.4.2
+    hooks:
+      - id: tofu_fmt
+        args:
+          - --args=-diff
+        stages:
+          - manual
