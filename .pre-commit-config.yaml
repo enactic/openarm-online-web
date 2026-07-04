@@ -30,5 +30,5 @@ repos:
       - id: tofu_fmt
         args:
           - --args=-diff
-        stage:
+        stages:
           - manual
