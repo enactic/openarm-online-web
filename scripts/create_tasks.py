@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import json
+import os
 import sys
 
 from pathlib import Path
@@ -24,8 +25,14 @@ from sqlmodel import Session
 from app.db import engine
 from app.crud import create_tasks
 
-json_path = Path(sys.argv[1])
-task_data = json.loads(json_path.read_text(encoding="utf-8"))
+if len(sys.argv) == 2:
+    task_data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+elif len(sys.argv) == 1 and (raw_task_data := os.getenv("TASK_DATA")):
+    task_data = json.loads(raw_task_data)
+else:
+    print("Usage: create_tasks.py <task.json> (or set TASK_DATA to the JSON string)")
+    sys.exit(1)
+
 with Session(engine) as session:
     with session.begin():
         create_tasks(session=session, data=task_data)
