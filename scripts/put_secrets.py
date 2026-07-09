@@ -38,9 +38,13 @@ secret_arns = json.loads(
 client = boto3.client("secretsmanager")
 settings = Settings(_env_file=env_file)
 for key, secret_id in secret_arns.items():
+    # Avoid uploading default values when a key isn't present in the provided env file.
+    if key not in settings.model_fields_set:
+        print(f"skip: [{key}] not set in [{env_file}]")
+        continue
     value = getattr(settings, key, None)
-    if not value:
-        print(f"skip: [{key}] no value in [{env_file}]")
+    if value is None:
+        print(f"skip: [{key}] value is None in [{env_file}]")
         continue
     client.put_secret_value(SecretId=secret_id, SecretString=value)
     print(f"Put {key}")
