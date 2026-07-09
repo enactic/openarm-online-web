@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-*.env
-!example.env
-
-.env
-db/
+# It outputs key + ARN pairs, not the secret values.
+output "secret_arn_map" {
+  value = module.stack.secret_arn_map
+}

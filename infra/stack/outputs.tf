@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-*.env
-!example.env
-
-.env
-db/
+output "secret_arn_map" {
+  value = module.secrets.secret_arn_map
+}
