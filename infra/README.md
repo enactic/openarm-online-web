@@ -75,3 +75,23 @@ scripts/put_secrets.py infra/environments/staging staging.env
 ```
 
 This sets the Secrets Manager values from `staging.env`.
+
+### Create the database and user for each environment
+
+Create the database and user for the target environment with the RDS admin user.
+
+Example of running in the staging environment:
+
+```bash
+scripts/run_ecs_task.py infra/environments/staging scripts/setup_db.py
+```
+
+### Database migration
+
+If you omit the command option of `run_ecs_task.py`, the task definition's default command runs, which is the database migration.
+
+Example of running in the staging environment:
+
+```bash
+scripts/run_ecs_task.py infra/environments/staging
+```

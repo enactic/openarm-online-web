@@ -12,26 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-output "secret_arn_map" {
-  value = module.secrets.secret_arn_map
+output "cluster_name" {
+  value = aws_ecs_cluster.this.name
 }
 
-output "ecs_cluster" {
-  value = module.ecs.cluster_name
+output "run_task_definition_arn" {
+  value = aws_ecs_task_definition.run.arn
 }
 
-output "ecs_run_task_definition" {
-  value = module.ecs.run_task_definition_arn
+output "run_container_name" {
+  value = local.run_container_name
 }
 
-output "ecs_run_container_name" {
-  value = module.ecs.run_container_name
+output "subnet_ids" {
+  value = var.subnet_ids
 }
 
-output "ecs_subnet_ids" {
-  value = module.ecs.subnet_ids
-}
-
-output "ecs_task_security_group_ids" {
-  value = module.ecs.security_group_ids
+output "security_group_ids" {
+  value = var.security_group_ids
 }

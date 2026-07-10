@@ -16,3 +16,23 @@
 output "secret_arn_map" {
   value = module.stack.secret_arn_map
 }
+
+output "ecs_cluster" {
+  value = module.stack.ecs_cluster
+}
+
+output "ecs_run_task_definition" {
+  value = module.stack.ecs_run_task_definition
+}
+
+output "ecs_run_container_name" {
+  value = module.stack.ecs_run_container_name
+}
+
+output "ecs_subnet_ids" {
+  value = module.stack.ecs_subnet_ids
+}
+
+output "ecs_task_security_group_ids" {
+  value = module.stack.ecs_task_security_group_ids
+}
