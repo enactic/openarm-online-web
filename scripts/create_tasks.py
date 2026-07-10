@@ -24,8 +24,15 @@ from sqlmodel import Session
 from app.db import engine
 from app.crud import create_tasks
 
-json_path = Path(sys.argv[1])
-task_data = json.loads(json_path.read_text(encoding="utf-8"))
+if len(sys.argv) == 2:
+    arg = sys.argv[1]
+    if Path(arg).is_file():
+        task_data = json.loads(Path(arg).read_text(encoding="utf-8"))
+    else:
+        task_data = json.loads(arg)
+else:
+    sys.exit("Usage: create_tasks.py <JSON file | JSON string>")
+
 with Session(engine) as session:
     with session.begin():
         create_tasks(session=session, data=task_data)
