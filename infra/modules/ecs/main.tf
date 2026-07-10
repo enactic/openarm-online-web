@@ -14,6 +14,10 @@
 
 data "aws_region" "current" {}
 
+locals {
+  run_container_name = "run"
+}
+
 resource "aws_ecs_cluster" "this" {
   name = var.name
 }
@@ -74,7 +78,7 @@ resource "aws_ecs_service" "fastapi" {
 }
 
 resource "aws_ecs_task_definition" "run" {
-  family                   = "${var.name}-run"
+  family                   = "${var.name}-${local.run_container_name}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = var.cpu
@@ -83,7 +87,7 @@ resource "aws_ecs_task_definition" "run" {
 
   container_definitions = jsonencode([
     {
-      name      = "run"
+      name      = local.run_container_name
       image     = var.image
       essential = true
 
@@ -98,7 +102,7 @@ resource "aws_ecs_task_definition" "run" {
         options = {
           "awslogs-group"         = var.log_group_name
           "awslogs-region"        = data.aws_region.current.region
-          "awslogs-stream-prefix" = "run"
+          "awslogs-stream-prefix" = local.run_container_name
         }
       }
 
