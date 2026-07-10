@@ -56,13 +56,24 @@ if command:
         ]
     }
 
-task_arn = ecs.run_task(**run_args)["tasks"][0]["taskArn"]
+response = ecs.run_task(**run_args)
+if response["failures"]:
+    sys.exit(f"Failed to start task: {response['failures']}")
+if not response["tasks"]:
+    sys.exit("Failed to start task: no tasks returned")
+
+task_arn = response["tasks"][0]["taskArn"]
 print(f"Start task: {task_arn}")
 
-ecs.get_waiter("tasks_stopped").wait(cluster=cluster, tasks=[task_arn])
+ecs.get_waiter("tasks_stopped").wait(
+    cluster=cluster,
+    tasks=[task_arn],
+    WaiterConfig={"Delay": 10, "MaxAttempts": 60},  # 10 min
+)
 
 task = ecs.describe_tasks(cluster=cluster, tasks=[task_arn])["tasks"][0]
-exit_code = task["containers"][0].get("exitCode")
+containers = task.get("containers")
+exit_code = containers[0].get("exitCode") if containers else None
 print(f"End exitCode={exit_code}, reason={task.get('stoppedReason')}")
 
 if exit_code is None:
