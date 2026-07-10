@@ -85,6 +85,7 @@ locals {
     { name = "POSTGRES_USER", value = var.db_username },
     { name = "S3_BUCKET_NAME", value = var.s3_bucket_name },
     { name = "S3_ENDPOINT_URL", value = var.s3_endpoint_url },
+    { name = "FORWARDED_ALLOW_IPS", value = join(",", var.forwarded_allow_ips) },
   ]
   container_secrets = [
     for key, arn in module.secrets.secret_arn_map : { name = key, value_from = arn }
