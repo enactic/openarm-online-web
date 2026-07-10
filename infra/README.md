@@ -27,6 +27,8 @@ See also: https://opentofu.org/docs/language/values/variables/#variable-definiti
 
 ## Usage
 
+### Create AWS resources
+
 First, create the shared resources.
 
 ```bash
@@ -47,3 +49,29 @@ tofu init -backend-config=backend.hcl
 tofu plan
 tofu apply
 ```
+
+### Set the Secrets Manager values
+
+Create the `staging.env` and `production.env` for your environment.
+
+**Do not commit these files.**
+
+Example:
+
+```bash
+GITHUB_CLIENT_ID=aaa
+GITHUB_CLIENT_SECRET=bbb
+SECRET_KEY=ccc
+HMAC_KEY=ddd
+S3_ACCESS_KEY_ID=eee
+S3_SECRET_ACCESS_KEY=fff
+POSTGRES_PASSWORD=ggg
+```
+
+Example of running in the staging environment:
+
+```bash
+scripts/put_secrets.py infra/environments/staging staging.env
+```
+
+This sets the Secrets Manager values from `staging.env`.
