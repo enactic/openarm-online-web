@@ -44,6 +44,7 @@ module "stack" {
 
   # ECS
   private_subnet_ids    = data.terraform_remote_state.shared.outputs.private_subnet_ids
+  forwarded_allow_ips   = data.terraform_remote_state.shared.outputs.public_subnet_cidrs
   rds_host              = data.terraform_remote_state.shared.outputs.rds_host
   rds_master_secret_arn = data.terraform_remote_state.shared.outputs.rds_master_secret_arn
   db_name               = "${var.project}_${var.environment}"

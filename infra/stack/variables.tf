@@ -84,6 +84,10 @@ variable "private_subnet_ids" {
   type = list(string)
 }
 
+variable "forwarded_allow_ips" {
+  type = list(string)
+}
+
 variable "rds_host" {
   type = string
 }
