@@ -24,14 +24,21 @@ from sqlmodel import Session
 from app.db import engine
 from app.crud import create_tasks
 
-if len(sys.argv) == 2:
-    arg = sys.argv[1]
-    if Path(arg).is_file():
-        task_data = json.loads(Path(arg).read_text(encoding="utf-8"))
+if len(sys.argv) != 2:
+    sys.exit("Usage: create_tasks.py <JSON file | JSON string>")
+
+arg = sys.argv[1]
+path = Path(arg)
+try:
+    if path.is_file():
+        task_data = json.loads(path.read_text(encoding="utf-8"))
     else:
         task_data = json.loads(arg)
-else:
-    sys.exit("Usage: create_tasks.py <JSON file | JSON string>")
+except (OSError, json.JSONDecodeError) as e:
+    sys.exit(f"Failed to load task data: {e}")
+
+if not isinstance(task_data, list) or not all(isinstance(d, dict) for d in task_data):
+    sys.exit("Task data must be a JSON array of objects")
 
 with Session(engine) as session:
     with session.begin():
