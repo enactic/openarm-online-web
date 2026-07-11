@@ -71,7 +71,11 @@ ecs.get_waiter("tasks_stopped").wait(
     WaiterConfig={"Delay": 10, "MaxAttempts": 60},  # 10 min
 )
 
-task = ecs.describe_tasks(cluster=cluster, tasks=[task_arn])["tasks"][0]
+described = ecs.describe_tasks(cluster=cluster, tasks=[task_arn])
+if described["failures"] or not described["tasks"]:
+    sys.exit(f"Failed to describe task: {described['failures'] or 'no tasks'}")
+
+task = described["tasks"][0]
 containers = task.get("containers")
 exit_code = containers[0].get("exitCode") if containers else None
 print(f"End exitCode={exit_code}, reason={task.get('stoppedReason')}")
