@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, Text
+from sqlalchemy import ARRAY, DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
 
 
@@ -45,6 +45,12 @@ class UserGitHub(SQLModel, table=True):
     github_id: int = Field(unique=True, index=True)
     login_name: str | None = Field(default=None, max_length=255)
     name: str | None = Field(default=None, max_length=255)
+    organizations: list[str] = Field(
+        default_factory=list,
+        sa_type=ARRAY(Text),
+        nullable=False,
+        sa_column_kwargs={"server_default": "{}"},
+    )
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
