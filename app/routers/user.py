@@ -16,7 +16,12 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from app import crud
-from app.deps import CurrentUserOptional, PaginationDep, SessionDep
+from app.deps import (
+    CurrentUserOptional,
+    PaginationDep,
+    SessionDep,
+    is_submission_allowed,
+)
 from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
@@ -55,7 +60,7 @@ def list_submissions_by_user_page(
     paginator = crud.get_paginated_submissions_with_statistics_by_user_id(
         session=session, params=params, user_id=id
     )
-    if current_user and id == current_user.id:
+    if current_user and id == current_user.id and is_submission_allowed(user):
         tasks = crud.get_tasks(session=session)
     else:
         tasks = None

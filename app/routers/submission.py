@@ -16,7 +16,12 @@ from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import crud, job_queue
-from app.deps import CurrentUser, CurrentUserOptional, PaginationDep, SessionDep
+from app.deps import (
+    CurrentUserOptional,
+    PaginationDep,
+    SessionDep,
+    SubmissionAllowedUser,
+)
 from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
@@ -77,7 +82,7 @@ def submission_page(
 def create_submission_page(
     request: Request,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: SubmissionAllowedUser,
     task_id: int = Form(),
     docker_tag: str = Form(),
 ):
