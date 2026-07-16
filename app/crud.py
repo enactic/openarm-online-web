@@ -23,10 +23,11 @@ from sqlmodel import Session, select, func, case, cast, Float
 
 from app.models import (
     ApiKey,
+    GitHubOrganization,
     JobFailure,
-    Submission,
     Rollout,
     RolloutCreate,
+    Submission,
     Task,
     User,
     UserGitHub,
@@ -56,17 +57,51 @@ def find_user_by_github_id(*, session: Session, github_id: int) -> User | None:
     ).first()
 
 
+def _upsert_organizations(
+    *, session: Session, organizations: list[dict] | None
+) -> list[GitHubOrganization]:
+    if not organizations:
+        return []
+
+    organizations_by_github_id = {org["github_id"]: org for org in organizations}
+    existing = {
+        org.github_id: org
+        for org in session.exec(
+            select(GitHubOrganization).where(
+                GitHubOrganization.github_id.in_(organizations_by_github_id.keys())
+            )
+        ).all()
+    }
+    github_organizations = []
+    new_organizations = []
+    for id, org in organizations_by_github_id.items():
+        organization = existing.get(id)
+        if organization is None:
+            organization = GitHubOrganization(github_id=id, login=org["login"])
+            new_organizations.append(organization)
+        else:
+            # It is updated at commit.
+            organization.login = org["login"]
+        github_organizations.append(organization)
+    session.add_all(new_organizations)
+    return github_organizations
+
+
 def create_user(
     *,
     session: Session,
     github_id: int,
     login_name: str | None = None,
     name: str | None = None,
+    organizations: list[dict] | None = None,
 ) -> User:
     user_github = UserGitHub(
         github_id=github_id,
         login_name=login_name,
         name=name,
+    )
+    user_github.organizations = _upsert_organizations(
+        session=session, organizations=organizations
     )
     user = User(github=user_github)
     session.add(user)
@@ -80,9 +115,14 @@ def update_user_github(
     user: User,
     login_name: str | None = None,
     name: str | None = None,
+    organizations: list[dict] | None = None,
 ):
     user.github.login_name = login_name
     user.github.name = name
+    if organizations is not None:
+        user.github.organizations = _upsert_organizations(
+            session=session, organizations=organizations
+        )
     session.add(user)
     session.flush()
 

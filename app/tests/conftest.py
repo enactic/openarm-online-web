@@ -41,6 +41,8 @@ from app.models import (
     ApiKey,
     ClaimedExecution,
     FailedExecution,
+    GitHubOrganization,
+    GitHubOrganizationMembership,
     Job,
     JobFailure,
     ReadyExecution,
@@ -88,6 +90,8 @@ def fixture_session() -> Generator[Session, None, None]:
         session.exec(delete(ReadyExecution))
         session.exec(delete(Job))
         session.exec(delete(Submission))
+        session.exec(delete(GitHubOrganizationMembership))
+        session.exec(delete(GitHubOrganization))
         session.exec(delete(UserGitHub))
         session.exec(delete(User))
         session.exec(delete(ApiKey))
@@ -130,7 +134,12 @@ def fixture_api_key(session: Session) -> ApiKey:
 
 @pytest.fixture(name="user")
 def fixture_user(session: Session) -> User:
-    user = crud.create_user(session=session, github_id=1, login_name="testuser")
+    user = crud.create_user(
+        session=session,
+        github_id=1,
+        login_name="testuser",
+        organizations=[{"github_id": 10, "login": "testorg"}],
+    )
     session.commit()
     return user
 
