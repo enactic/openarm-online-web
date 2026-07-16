@@ -37,6 +37,15 @@ class User(SQLModel, table=True):
     submissions: list["Submission"] = Relationship(back_populates="user")
 
 
+class GitHubOrganizationMembership(SQLModel, table=True):
+    __tablename__ = "github_organization_membership"
+
+    user_github_id: int = Field(foreign_key="user_github.id", primary_key=True)
+    organization_id: int = Field(
+        foreign_key="github_organization.id", primary_key=True, index=True
+    )
+
+
 class UserGitHub(SQLModel, table=True):
     __tablename__ = "user_github"
 
@@ -62,6 +71,30 @@ class UserGitHub(SQLModel, table=True):
     )
 
     user: User = Relationship(back_populates="github")
+    organizations: list["GitHubOrganization"] = Relationship(
+        back_populates="user_githubs",
+        link_model=GitHubOrganizationMembership,
+    )
+
+
+class GitHubOrganization(SQLModel, table=True):
+    __tablename__ = "github_organization"
+
+    id: int = Field(primary_key=True)
+    github_id: int = Field(unique=True, index=True)
+    login: str = Field(max_length=255)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    user_githubs: list["UserGitHub"] = Relationship(
+        back_populates="organizations",
+        link_model=GitHubOrganizationMembership,
+    )
 
 
 class ApiKey(SQLModel, table=True):
