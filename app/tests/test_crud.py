@@ -99,3 +99,100 @@ def test_top_submissions_filter_by_task(
     assert page.items == [
         (target.id, user.id, "testuser", "target", 3, 1.0),
     ]
+
+
+def test_create_user_with_organizations(session: Session):
+    user = crud.create_user(
+        session=session,
+        github_id=100,
+        login_name="dummy-login_name",
+        name="dummy-name",
+        organizations=[
+            {"github_id": 10, "login": "org-a"},
+            {"github_id": 20, "login": "org-b"},
+        ],
+    )
+    session.commit()
+
+    assert user.github.model_dump(
+        exclude={"id", "user_id", "created_at", "updated_at"}
+    ) == {
+        "github_id": 100,
+        "login_name": "dummy-login_name",
+        "name": "dummy-name",
+    }
+    assert [
+        org.model_dump(exclude={"id", "created_at"})
+        for org in user.github.organizations
+    ] == [
+        {"github_id": 10, "login": "org-a"},
+        {"github_id": 20, "login": "org-b"},
+    ]
+
+
+def test_create_user_no_organizations(session: Session):
+    user = crud.create_user(
+        session=session,
+        github_id=100,
+        login_name="dummy-login_name",
+        name="dummy-name",
+    )
+    session.commit()
+
+    assert user.github.model_dump(
+        exclude={"id", "user_id", "created_at", "updated_at"}
+    ) == {
+        "github_id": 100,
+        "login_name": "dummy-login_name",
+        "name": "dummy-name",
+    }
+    assert user.github.organizations == []
+
+
+def test_update_user_github_with_organizations(session: Session, user: User):
+    crud.update_user_github(
+        session=session,
+        user=user,
+        login_name="update-login_name",
+        name="update-name",
+        organizations=[{"github_id": 100, "login": "org-a"}],
+    )
+    session.commit()
+
+    assert user.github.model_dump(
+        exclude={"id", "user_id", "created_at", "updated_at"}
+    ) == {
+        "github_id": 1,
+        "login_name": "update-login_name",
+        "name": "update-name",
+    }
+    assert [
+        org.model_dump(exclude={"id", "created_at"})
+        for org in user.github.organizations
+    ] == [
+        {"github_id": 100, "login": "org-a"},
+    ]
+
+
+def test_update_user_github_no_organizations(session: Session, user: User):
+    crud.update_user_github(
+        session=session,
+        user=user,
+        login_name="update-login_name",
+        name="update-name",
+    )
+    session.commit()
+
+    assert user.github.model_dump(
+        exclude={"id", "user_id", "created_at", "updated_at"}
+    ) == {
+        "github_id": 1,
+        "login_name": "update-login_name",
+        "name": "update-name",
+    }
+    assert [
+        org.model_dump(exclude={"id", "created_at"})
+        for org in user.github.organizations
+    ] == [
+        {"github_id": 10, "login": "testorg"},
+    ]

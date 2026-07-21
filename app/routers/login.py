@@ -45,7 +45,7 @@ def login_github(request: Request):
     state = secrets.token_urlsafe(32)
     params = {
         "client_id": settings.GITHUB_CLIENT_ID,
-        "scope": "read:user",
+        "scope": "read:user read:org",
         "state": state,
     }
     response = RedirectResponse(
@@ -113,6 +113,28 @@ def login_github_callback(
     github_id = github_user["id"]
     login_name = github_user.get("login")
     name = github_user.get("name")
+    # Fetch GitHub user organizations info
+    organizations = None
+    try:
+        github_orgs_response = httpx.get(
+            settings.GITHUB_USER_URL + "/orgs",
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json",
+            },
+            params={"per_page": 100},
+            timeout=10.0,
+        )
+        github_orgs_response.raise_for_status()
+        orgs_payload = github_orgs_response.json()
+        if isinstance(orgs_payload, list):
+            organizations = [
+                {"github_id": org["id"], "login": org["login"]}
+                for org in orgs_payload
+                if "id" in org and "login" in org
+            ]
+    except (httpx.HTTPError, ValueError):
+        organizations = None
     # Create user
     user = crud.find_user_by_github_id(session=session, github_id=github_id)
     if user:
@@ -121,6 +143,7 @@ def login_github_callback(
             user=user,
             login_name=login_name,
             name=name,
+            organizations=organizations,
         )
     else:
         user = crud.create_user(
@@ -128,6 +151,7 @@ def login_github_callback(
             github_id=github_id,
             login_name=login_name,
             name=name,
+            organizations=organizations,
         )
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="oauth_state", path="/")
