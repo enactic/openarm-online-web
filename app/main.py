@@ -21,7 +21,12 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from fastapi_pagination import add_pagination
 
-from app.deps import CurrentUser, CurrentUserOptional, NotLoggedIn
+from app.deps import (
+    CurrentUser,
+    CurrentUserOptional,
+    NotLoggedIn,
+    NotSubmissionAllowed,
+)
 from app.routers import api, job, leaderboard, login, rollout, submission, task, user
 from app.scheduler import timeout_worker
 from app.settings import settings
@@ -55,6 +60,21 @@ app.include_router(user.router)
 @app.exception_handler(NotLoggedIn)
 async def requires_login_handler(request: Request, exc: NotLoggedIn):
     return RedirectResponse(url="/login", status_code=303)
+
+
+@app.exception_handler(NotSubmissionAllowed)
+async def requires_submission_allowed_handler(
+    request: Request, exc: NotSubmissionAllowed
+):
+    return templates.TemplateResponse(
+        request,
+        "403.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "message": "You are not allowed to register submissions.",
+        },
+        status_code=403,
+    )
 
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)

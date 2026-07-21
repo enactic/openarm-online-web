@@ -34,6 +34,10 @@ class NotLoggedIn(Exception):
     pass
 
 
+class NotSubmissionAllowed(Exception):
+    pass
+
+
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         with session.begin():
@@ -85,3 +89,28 @@ def get_pagination_params(
 
 
 PaginationDep = Annotated[Params, Depends(get_pagination_params)]
+
+
+def is_submission_allowed(user: Optional[User]) -> bool:
+    if not user or not user.github:
+        return False
+
+    allowed_orgs = settings.submission.allowed_orgs
+    allowed_users = settings.submission.allowed_users
+    # No settings.
+    if not allowed_orgs and not allowed_users:
+        return True
+
+    if user.github.login_name and user.github.login_name.lower() in allowed_users:
+        return True
+    orgs = {org.login.lower() for org in user.github.organizations}
+    return bool(orgs & allowed_orgs)
+
+
+def require_submission_allowed(user: CurrentUser) -> User:
+    if not is_submission_allowed(user):
+        raise NotSubmissionAllowed()
+    return user
+
+
+SubmissionAllowedUser = Annotated[User, Depends(require_submission_allowed)]

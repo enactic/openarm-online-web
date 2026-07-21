@@ -28,6 +28,7 @@ services:
     volumes:
       - ./app:/src/app
       - ./scripts:/src/scripts
+      - ./config.yaml:/src/config.yaml
     environment:
       - PYTHONPATH=/src
     env_file:

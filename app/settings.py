@@ -14,8 +14,23 @@
 
 from urllib.parse import quote
 
-from pydantic import Field, PostgresDsn, computed_field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, PostgresDsn, computed_field, field_validator
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
+
+
+class SubmissionSettings(BaseModel):
+    allowed_orgs: set[str] = Field(default_factory=set)
+    allowed_users: set[str] = Field(default_factory=set)
+
+    @field_validator("allowed_orgs", "allowed_users", mode="after")
+    @classmethod
+    def _to_lower(cls, value: set[str]) -> set[str]:
+        return {v.lower() for v in value}
 
 
 class Settings(BaseSettings):
@@ -23,6 +38,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_ignore_empty=True,
         extra="ignore",
+        yaml_file="config.yaml",
     )
 
     # These are the default values.
@@ -65,6 +81,10 @@ class Settings(BaseSettings):
     CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
     CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
 
+    # Allow list for who may register submissions.
+    # When both are empty, every logged-in user is allowed.
+    submission: SubmissionSettings = Field(default_factory=SubmissionSettings)
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
@@ -77,6 +97,23 @@ class Settings(BaseSettings):
                 port=self.POSTGRES_PORT,
                 path=self.POSTGRES_DB,
             )
+        )
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            init_settings,
+            env_settings,
+            dotenv_settings,
+            YamlConfigSettingsSource(settings_cls),
+            file_secret_settings,
         )
 
 

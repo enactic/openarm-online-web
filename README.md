@@ -13,7 +13,9 @@ cd openeval-web
 
 From here on, work in the `openeval-web` directory.
 
-#### 2. Configure `.env`
+#### 2. Configure
+
+##### `.env`
 
 ```bash
 cp example.env .env
@@ -27,6 +29,17 @@ Please configure the following variables according to the comments in `.env`.
 * `HMAC_KEY`
 
 For environments launched with Docker Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
+
+##### `config.yaml`
+
+Please copy the example file.
+
+```bash
+cp config.yaml.example config.yaml
+```
+
+By default, any logged-in user can register submissions.
+To restrict registration to specific GitHub users or organizations, edit `config.yaml` and fill in the allow lists.
 
 #### 3. Initial Setup
 
