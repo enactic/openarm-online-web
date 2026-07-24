@@ -43,4 +43,5 @@ module "stack" {
   image_tag             = var.image_tag
   s3_endpoint_url       = var.s3_endpoint_url
   s3_bucket_name        = var.s3_bucket_name
+  submission_allowlist  = var.submission_allowlist
 }

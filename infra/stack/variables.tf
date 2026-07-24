@@ -130,3 +130,14 @@ variable "desired_count" {
   type    = number
   default = 1
 }
+
+variable "submission_allowlist" {
+  type = object({
+    allowed_orgs  = list(string)
+    allowed_users = list(string)
+  })
+  default = {
+    allowed_orgs  = []
+    allowed_users = []
+  }
+}
