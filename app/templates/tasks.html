@@ -9,6 +9,7 @@
         <th>ID</th>
         <th>Name</th>
         <th>Prompt</th>
+        <th>Runtime</th>
         <th>Created</th>
         <th>Submissions</th>
         <th>Leaderboard</th>
@@ -20,6 +21,7 @@
           <td>{{ task.id }}</td>
           <td>{{ task.name }}</td>
           <td>{{ task.prompt }}</td>
+          <td>{{ task.runtime }}</td>
           <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
           <td>
             <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
