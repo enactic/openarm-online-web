@@ -76,6 +76,7 @@ def api_claim_job(id: int, session: SessionDep, api_key: CurrentApiKey):
         docker_tag=submission.docker_tag,
         reset_docker_tag=submission.task.reset_docker_tag,
         prompt=submission.task.prompt,
+        runtime=submission.task.runtime,
     )
 
 

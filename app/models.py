@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from datetime import datetime, timezone
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -112,11 +113,24 @@ class ApiKey(SQLModel, table=True):
     )
 
 
+class Runtime(StrEnum):
+    OPENARM_CELL = "OpenArm Cell"
+    MUJOCO = "MuJoCo"
+
+
 class Task(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str | None = Field(default=None, max_length=255)
     prompt: str = Field(sa_type=Text)
     reset_docker_tag: str = Field(max_length=255)
+    runtime: Runtime = Field(
+        default=Runtime.OPENARM_CELL,
+        sa_column=Column(
+            Text,
+            nullable=False,
+            server_default=Runtime.OPENARM_CELL,
+        ),
+    )
     created_at: datetime | None = Field(
         default=None,
         sa_column=Column(
@@ -264,6 +278,7 @@ class ClaimedJob(BaseModel):
     docker_tag: str
     reset_docker_tag: str
     prompt: str
+    runtime: str
 
 
 class CompleteJobRequest(BaseModel):
