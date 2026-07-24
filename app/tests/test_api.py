@@ -78,6 +78,7 @@ def test_claim_job(
         "docker_tag": "test/image:latest",
         "reset_docker_tag": tasks[0].reset_docker_tag,
         "prompt": tasks[0].prompt,
+        "runtime": "OpenArm Cell",
     }
 
     assert session.exec(
