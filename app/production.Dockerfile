@@ -45,6 +45,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-workspace --no-dev
 
 COPY app /openeval/app
-COPY scripts/create_api_keys.py scripts/create_tasks.py scripts/setup_db.py /openeval/scripts/
+COPY scripts/create_api_keys.py scripts/create_tasks.py scripts/update_tasks.py scripts/setup_db.py /openeval/scripts/
 
 CMD ["fastapi", "run", "/openeval/app/main.py", "--host", "0.0.0.0", "--port", "8000"]

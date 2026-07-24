@@ -16,7 +16,7 @@ from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate as alchemy_paginate
 from fastapi_pagination.ext.sqlmodel import paginate as model_paginate
 
-from sqlalchemy import Select
+from sqlalchemy import Select, update
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
@@ -130,6 +130,13 @@ def update_user_github(
 def create_tasks(*, session: Session, data: list[dict]):
     tasks = [Task.model_validate(d) for d in data]
     session.add_all(tasks)
+    session.flush()
+
+
+def update_tasks(*, session: Session, data: list[dict]):
+    for v in data:
+        Task.model_validate(v)
+    session.execute(update(Task), data)
     session.flush()
 
 
