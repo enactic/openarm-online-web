@@ -2,23 +2,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <title>
       {% block title %}{{ site_name }}{% endblock %}
     </title>
   </head>
   <body>
-    <nav>
-      <a href="{{ url_for('top_page') }}">TOP</a>
-      {% if current_user %}
-        <a href="{{ url_for('user_page', id=current_user.id) }}">Profile</a>
-        <a href="{{ url_for('list_submissions_by_user_page', id=current_user.id) }}">My Submissions</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('login_page') }}">Login</a>
-      {% endif %}
-    </nav>
-    <div class="container">
+    <header class="container">
+      <nav>
+        <ul>
+          <li>
+            <a href="{{ url_for('top_page') }}">TOP</a>
+          </li>
+        </ul>
+        <ul>
+          {% if current_user %}
+            <li>
+              <a href="{{ url_for('user_page', id=current_user.id) }}">Profile</a>
+            </li>
+            <li>
+              <a href="{{ url_for('list_submissions_by_user_page', id=current_user.id) }}">My Submissions</a>
+            </li>
+            <li>
+              <a href="{{ url_for('logout') }}">Logout</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ url_for('login_page') }}">Login</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+    <main class="container">
       {% block content %}{% endblock %}
-    </div>
+    </main>
   </body>
 </html>
