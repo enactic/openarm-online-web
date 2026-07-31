@@ -12,7 +12,7 @@
     Task name: <a href="{{ url_for('task_page', id=submission.task.id) }}">{{ submission.task.name }}</a>
   </div>
   {% if paginator.items %}
-    <table border="1">
+    <table>
       <thead>
         <tr>
           <th>ID</th>
@@ -43,7 +43,7 @@
   {% if is_owner %}
     <h2>Jobs</h2>
     {% if jobs %}
-      <table border="1">
+      <table>
         <thead>
           <tr>
             <th>ID</th>
