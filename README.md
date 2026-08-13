@@ -41,6 +41,9 @@ cp config.yaml.example config.yaml
 By default, any logged-in user can register submissions.
 To restrict registration to specific GitHub users or organizations, edit `config.yaml` and fill in the allow lists.
 
+By default, nobody can use admin features.
+To use admin features, edit `config.yaml` and fill in the `admin` allow lists.
+
 #### 3. Initial Setup
 
 ```bash

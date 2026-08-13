@@ -38,6 +38,10 @@ class NotSubmissionAllowed(Exception):
     pass
 
 
+class NotAdmin(Exception):
+    pass
+
+
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         with session.begin():
@@ -114,3 +118,25 @@ def require_submission_allowed(user: CurrentUser) -> User:
 
 
 SubmissionAllowedUser = Annotated[User, Depends(require_submission_allowed)]
+
+
+def is_admin(user: Optional[User]) -> bool:
+    if not user or not user.github:
+        return False
+
+    # Unlike is_submission_allowed(), empty allow lists mean nobody is
+    # an admin.
+    allowed_users = settings.admin.allowed_users
+    if user.github.login_name and user.github.login_name.lower() in allowed_users:
+        return True
+    orgs = {org.login.lower() for org in user.github.organizations}
+    return bool(orgs & settings.admin.allowed_orgs)
+
+
+def require_admin(user: CurrentUser) -> User:
+    if not is_admin(user):
+        raise NotAdmin()
+    return user
+
+
+AdminUser = Annotated[User, Depends(require_admin)]

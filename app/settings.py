@@ -23,7 +23,7 @@ from pydantic_settings import (
 )
 
 
-class SubmissionSettings(BaseModel):
+class AllowListSettings(BaseModel):
     allowed_orgs: set[str] = Field(default_factory=set)
     allowed_users: set[str] = Field(default_factory=set)
 
@@ -83,7 +83,11 @@ class Settings(BaseSettings):
 
     # Allow list for who may register submissions.
     # When both are empty, every logged-in user is allowed.
-    submission: SubmissionSettings = Field(default_factory=SubmissionSettings)
+    submission: AllowListSettings = Field(default_factory=AllowListSettings)
+
+    # Allow list for who may use admin features.
+    # When both are empty, nobody is allowed.
+    admin: AllowListSettings = Field(default_factory=AllowListSettings)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
