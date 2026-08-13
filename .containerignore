@@ -18,8 +18,9 @@
 **/.pytest_cache/
 **/.venv/
 **/__pycache__/
-.git/
-db/
+/.git/
+/db/
+/storage/
 
 app/*.Containerfile
 app/.gitignore

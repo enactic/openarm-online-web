@@ -45,6 +45,16 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-workspace --no-dev
 
 COPY app /openeval/app
-COPY scripts/create_api_keys.py scripts/create_tasks.py scripts/update_tasks.py scripts/setup_db.py /openeval/scripts/
+COPY scripts/create_api_keys.py \
+     scripts/create_tasks.py \
+     scripts/update_tasks.py \
+     scripts/setup_db.py \
+     /openeval/scripts/
+
+# The Git commit ID of the source. .git/ isn't available in the build
+# context, so it must be passed explicitly:
+#   --build-arg REVISION=$(git rev-parse --short HEAD)
+ARG REVISION=
+ENV REVISION=$REVISION
 
 CMD ["fastapi", "run", "/openeval/app/main.py", "--host", "0.0.0.0", "--port", "8000"]

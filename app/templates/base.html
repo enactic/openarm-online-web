@@ -45,5 +45,10 @@
     <main class="container">
       {% block content %}{% endblock %}
     </main>
+    {% if revision %}
+      <footer class="container">
+        <small>Revision: {{ revision }}</small>
+      </footer>
+    {% endif %}
   </body>
 </html>
