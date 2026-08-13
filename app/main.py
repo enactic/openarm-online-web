@@ -24,6 +24,7 @@ from fastapi_pagination import add_pagination
 from app.deps import (
     CurrentUser,
     CurrentUserOptional,
+    NotAdmin,
     NotLoggedIn,
     NotSubmissionAllowed,
 )
@@ -72,6 +73,19 @@ async def requires_submission_allowed_handler(
         {
             "site_name": settings.SITE_NAME,
             "message": "You are not allowed to register submissions.",
+        },
+        status_code=403,
+    )
+
+
+@app.exception_handler(NotAdmin)
+async def requires_admin_handler(request: Request, exc: NotAdmin):
+    return templates.TemplateResponse(
+        request,
+        "403.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "message": "You are not allowed to use admin features.",
         },
         status_code=403,
     )

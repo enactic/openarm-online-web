@@ -15,3 +15,6 @@
 submission:
   allowed_orgs: []
   allowed_users: []
+admin:
+  allowed_orgs: []
+  allowed_users: []
