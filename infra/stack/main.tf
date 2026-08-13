@@ -87,6 +87,7 @@ locals {
     { name = "S3_ENDPOINT_URL", value = var.s3_endpoint_url },
     { name = "FORWARDED_ALLOW_IPS", value = join(",", var.forwarded_allow_ips) },
     { name = "SUBMISSION", value = jsonencode(var.submission_allowlist) },
+    { name = "ADMIN", value = jsonencode(var.admin_allowlist) },
   ]
   container_secrets = [
     for key, arn in module.secrets.secret_arn_map : { name = key, value_from = arn }

@@ -70,3 +70,14 @@ variable "submission_allowlist" {
     allowed_users = []
   }
 }
+
+variable "admin_allowlist" {
+  type = object({
+    allowed_orgs  = list(string)
+    allowed_users = list(string)
+  })
+  default = {
+    allowed_orgs  = []
+    allowed_users = []
+  }
+}
