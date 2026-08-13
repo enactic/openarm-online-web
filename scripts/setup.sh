@@ -18,9 +18,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-docker compose run --rm app alembic -c /src/app/alembic.ini upgrade head
-docker compose run --rm app /src/scripts/create_bucket.py
-docker compose run --rm app /src/scripts/create_tasks.py /src/app/tests/fixtures/task.json
-docker compose run --rm app /src/scripts/create_api_keys.py test-key
+podman-compose run --rm app alembic -c /src/app/alembic.ini upgrade head
+podman-compose run --rm app /src/scripts/create_bucket.py
+podman-compose run --rm app /src/scripts/create_tasks.py /src/app/tests/fixtures/task.json
+podman-compose run --rm app /src/scripts/create_api_keys.py test-key
 
-echo "Configure 'OPENEVAL_API_KEY' in .env and start it with 'docker compose up -d'."
+echo "Configure 'OPENEVAL_API_KEY' in .env.runner and start it with 'podman-compose up -d'."

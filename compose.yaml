@@ -12,11 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+x-condition: &condition
+  # healthcheck doesn't work in Podman in Podman because "podman wait"
+  # requires systemd's timer. systemd isn't executed in Podman in Podman.
+  # See also: https://github.com/podman-container-tools/podman/issues/28192
+  condition: service_started
+  # condition: service_healthy
+
 services:
   app:
     build:
       context: .
-      dockerfile: app/develop.Dockerfile
+      dockerfile: app/develop.Containerfile
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 5s
@@ -24,7 +31,9 @@ services:
       retries: 10
       start_period: 20s
     ports:
-      - 127.0.0.1:8000:8000
+      # We want to use 127.0.0.1:8000:8000 here but it doesn't work in
+      # Podman in Podman. So we don't specify 127.0.0.1 here.
+      - 8000:8000
     volumes:
       - ./app:/src/app
       - ./scripts:/src/scripts
@@ -35,12 +44,12 @@ services:
       - .env
     depends_on:
       db:
-        condition: service_healthy
+        <<: *condition
         restart: true
       s3:
-        condition: service_healthy
+        <<: *condition
   db:
-    image: postgres:18
+    image: docker.io/library/postgres:18
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -48,6 +57,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    userns_mode: "keep-id:uid=999,gid=999"
     volumes:
       - ./db/data:/var/lib/postgresql/data/pgdata
     env_file:
@@ -58,12 +68,14 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_DB=${POSTGRES_DB?Variable not set}
   s3:
-    image: rustfs/rustfs:latest
+    image: docker.io/rustfs/rustfs:latest
     security_opt:
       - "no-new-privileges:true"
     ports:
-      - 127.0.0.1:9000:9000
-      - 127.0.0.1:9001:9001
+      # We want to use 127.0.0.1:9000:9000 here but it doesn't work in
+      # Podman in Podman. So we don't specify 127.0.0.1 here.
+      - 9000:9000
+      - 9001:9001
     environment:
       - RUSTFS_VOLUMES=/data
       - RUSTFS_ADDRESS=0.0.0.0:9000
@@ -74,8 +86,9 @@ services:
       - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY:-openeval-secret}
       - RUSTFS_OBS_LOGGER_LEVEL=info
       - RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true
+    userns_mode: "keep-id:uid=10001,gid=10001"
     volumes:
-      - s3:/data
+      - ./storage/data:/data
     restart: unless-stopped
     healthcheck:
       test:
@@ -91,7 +104,7 @@ services:
   runner:
     build:
       context: .
-      dockerfile: e2e/runner.Dockerfile
+      dockerfile: e2e/runner.Containerfile
     shm_size: 512mb
     env_file:
       - .env.runner
@@ -101,7 +114,4 @@ services:
     restart: unless-stopped
     depends_on:
       app:
-        condition: service_healthy
-
-volumes:
-  s3:
+        <<: *condition
