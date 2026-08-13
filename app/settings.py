@@ -45,6 +45,12 @@ class Settings(BaseSettings):
     # They are overridden by the values of environment variables.
     SITE_NAME: str = "OpenEval"
 
+    # Deployed application version shown in the footer. Normally a Git
+    # commit ID baked into the production image via the REVISION build
+    # argument. Empty means the footer shows no version (e.g. in
+    # development).
+    REVISION: str = ""
+
     POSTGRES_SERVER: str = "db"
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "openeval"
