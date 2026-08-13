@@ -108,9 +108,6 @@ services:
     shm_size: 512mb
     env_file:
       - .env.runner
-    environment:
-      - OPENEVAL_API_URL=http://app:8000
-      - OPENEVAL_TASK_ID=1
     restart: unless-stopped
     depends_on:
       app:
