@@ -20,6 +20,11 @@
         </ul>
         <ul>
           {% if current_user %}
+            {% if is_admin(current_user) %}
+              <li>
+                <a href="{{ url_for('list_api_keys_page') }}">API keys</a>
+              </li>
+            {% endif %}
             <li>
               <a href="{{ url_for('user_page', id=current_user.id) }}">Profile</a>
             </li>

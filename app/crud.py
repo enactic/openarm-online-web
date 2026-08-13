@@ -23,6 +23,7 @@ from sqlmodel import Session, select, func, case, cast, Float
 
 from app.models import (
     ApiKey,
+    ClaimedExecution,
     GitHubOrganization,
     JobFailure,
     Rollout,
@@ -45,6 +46,25 @@ def create_api_key(*, session: Session, name: str) -> str:
 
 def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:
     return session.exec(select(ApiKey).where(ApiKey.hashed_key == hashed_key)).first()
+
+
+def find_api_key(*, session: Session, id: int) -> ApiKey | None:
+    return session.get(ApiKey, id)
+
+
+def get_paginated_api_keys(*, session: Session, params: Params) -> Page[Row]:
+    statement = (
+        select(
+            ApiKey.id,
+            ApiKey.name,
+            ApiKey.created_at,
+            func.count(ClaimedExecution.id).label("running_count"),
+        )
+        .outerjoin(ClaimedExecution, ClaimedExecution.api_key_id == ApiKey.id)
+        .group_by(ApiKey.id)
+        .order_by(ApiKey.id)
+    )
+    return alchemy_paginate(session, statement, params)
 
 
 def find_user(*, session, id: int) -> User | None:

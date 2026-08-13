@@ -20,6 +20,7 @@ from fastapi.templating import Jinja2Templates
 
 from jinja2 import pass_context
 
+from app.deps import is_admin
 from app.s3 import generate_presigned_download_url
 from app.settings import settings
 
@@ -54,6 +55,7 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 templates.env.globals["format_rate"] = format_rate
 templates.env.globals["is_active_user"] = is_active_user
+templates.env.globals["is_admin"] = is_admin
 templates.env.globals["rerun_viewer_url"] = rerun_viewer_url
 templates.env.globals["total_pages"] = total_pages
 templates.env.globals["update_query_params"] = update_query_params
