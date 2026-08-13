@@ -94,7 +94,7 @@ services:
       dockerfile: e2e/runner.Dockerfile
     shm_size: 512mb
     env_file:
-      - .env
+      - .env.runner
     environment:
       - OPENEVAL_API_URL=http://app:8000
       - OPENEVAL_TASK_ID=1
