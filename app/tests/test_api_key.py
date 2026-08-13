@@ -17,6 +17,7 @@ import re
 import pytest
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from app import crud, job_queue
@@ -67,6 +68,31 @@ def test_create_api_key(admin, session: Session, client: TestClient):
     key = re.search(r"openeval-key-[\w-]+", response.text).group(0)
     created = session.exec(select(ApiKey).where(ApiKey.name == "runner-1")).first()
     assert created.hashed_key == get_hex_digest(key)
+
+
+def test_create_api_key_with_empty_name(admin, client: TestClient):
+    assert client.post("/api-keys/", data={"name": ""}).status_code == 422
+
+
+def test_create_api_key_with_too_long_name(admin, client: TestClient):
+    assert client.post("/api-keys/", data={"name": "x" * 256}).status_code == 422
+
+
+def test_create_api_key_with_duplicated_name(
+    admin, session: Session, api_key: ApiKey, client: TestClient
+):
+    response = client.post("/api-keys/", data={"name": api_key.name})
+    assert response.status_code == 422
+    assert "already exists" in response.text
+    assert (
+        len(session.exec(select(ApiKey).where(ApiKey.name == api_key.name)).all()) == 1
+    )
+
+
+def test_create_api_key_with_duplicated_name_in_db(session: Session, api_key: ApiKey):
+    with pytest.raises(IntegrityError):
+        crud.create_api_key(session=session, name=api_key.name)
+    session.rollback()
 
 
 def test_delete_api_key_by_non_admin(api_key: ApiKey, client: TestClient):

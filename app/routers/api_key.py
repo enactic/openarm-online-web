@@ -14,6 +14,7 @@
 
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy.exc import IntegrityError
 
 from app import crud, job_queue
 from app.deps import AdminUser, PaginationDep, SessionDep
@@ -48,9 +49,28 @@ def create_api_key_page(
     request: Request,
     session: SessionDep,
     current_user: AdminUser,
-    name: str = Form(),
+    params: PaginationDep,
+    name: str = Form(min_length=1, max_length=255),
 ):
-    api_key, key = crud.create_api_key(session=session, name=name)
+    try:
+        # Use a savepoint to keep the transaction usable for rendering
+        # the error page when the unique constraint on name is
+        # violated.
+        with session.begin_nested():
+            api_key, key = crud.create_api_key(session=session, name=name)
+    except IntegrityError:
+        paginator = crud.get_paginated_api_keys(session=session, params=params)
+        return templates.TemplateResponse(
+            request,
+            "api_keys.html",
+            {
+                "site_name": settings.SITE_NAME,
+                "current_user": current_user,
+                "paginator": paginator,
+                "error": f"API key '{name}' already exists.",
+            },
+            status_code=422,
+        )
     return templates.TemplateResponse(
         request,
         "api_key_created.html",

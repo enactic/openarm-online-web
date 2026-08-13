@@ -4,10 +4,15 @@
 {% block content %}
   <h1>API keys</h1>
   <h2>New API key</h2>
+  {% if error %}
+    <p>
+      <mark>{{ error }}</mark>
+    </p>
+  {% endif %}
   <form method="post" action="{{ url_for('create_api_key_page') }}">
     <label>
       Name
-      <input type="text" name="name" required>
+      <input type="text" name="name" maxlength="255" required>
     </label>
     <button type="submit">Create</button>
   </form>

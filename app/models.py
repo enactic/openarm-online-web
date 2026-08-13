@@ -103,7 +103,7 @@ class ApiKey(SQLModel, table=True):
 
     id: int = Field(primary_key=True)
     hashed_key: str = Field(unique=True, index=True)
-    name: str = Field(max_length=255)
+    name: str = Field(unique=True, index=True, max_length=255)
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
