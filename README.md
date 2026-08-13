@@ -80,6 +80,14 @@ openeval-key-xxx
 
 An API key is generated and displayed on stdout, use it when accessing the API.
 
+### Before commit
+
+Run pre-commit before committing:
+
+```bash
+pre-commit run --show-diff-on-failure --color=always --all-files
+```
+
 ## License
 
 Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
