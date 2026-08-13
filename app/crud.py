@@ -53,8 +53,14 @@ def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:
     return session.exec(select(ApiKey).where(ApiKey.hashed_key == hashed_key)).first()
 
 
-def find_api_key(*, session: Session, id: int) -> ApiKey | None:
-    return session.get(ApiKey, id)
+def find_api_key(
+    *, session: Session, id: int, for_update: bool = False
+) -> ApiKey | None:
+    if for_update:
+        statement = select(ApiKey).where(ApiKey.id == id).with_for_update()
+        return session.exec(statement).first()
+    else:
+        return session.get(ApiKey, id)
 
 
 def get_paginated_api_keys(*, session: Session, params: Params) -> Page[Row]:

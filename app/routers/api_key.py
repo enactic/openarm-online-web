@@ -70,7 +70,11 @@ def delete_api_key_page(
     session: SessionDep,
     current_user: AdminUser,
 ):
-    api_key = crud.find_api_key(session=session, id=id)
+    # Lock the API key row to block concurrent claims. Without this, a
+    # claim between requeueing and deleting adds a new claimed
+    # execution that makes the delete fail with a foreign key
+    # violation.
+    api_key = crud.find_api_key(session=session, id=id, for_update=True)
     if api_key is None:
         return not_found(request, current_user)
     # Claimed jobs refer to the API key. Requeue them before deleting
