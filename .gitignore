@@ -17,4 +17,5 @@
 
 config.yaml
 .env
+.env.runner
 db/
