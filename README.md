@@ -18,7 +18,7 @@ From here on, work in the `openeval-web` directory.
 ##### `.env`
 
 ```bash
-cp example.env .env
+cp .env.example .env
 ```
 
 Please configure the following variables according to the comments in `.env`.
@@ -28,7 +28,7 @@ Please configure the following variables according to the comments in `.env`.
 * `SECRET_KEY`
 * `HMAC_KEY`
 
-For environments launched with Docker Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
+For environments launched with Podman Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
 
 ##### `config.yaml`
 
@@ -50,15 +50,20 @@ scripts/setup.sh
 ```
 ...
 openeval-key-xxx
-Configure 'OPENEVAL_API_KEY' in .env and start it with 'docker compose up -d'.
+Configure 'OPENEVAL_API_KEY' in .env.runner and start it with 'podman-compose up -d'.
 ```
 
-Finally, an API key will be displayed. Set it in the `.env` file.
+Finally, an API key will be displayed. Set it in the `.env.runner` file.
+
+```bash
+cp .env.runner.example .env.runner
+editor .env.runner
+```
 
 #### 4. Start up
 
 ```bash
-docker compose up -d
+podman-compose up -d
 ```
 
 The server has started and can be accessed at http://localhost:8000/ .
@@ -66,7 +71,7 @@ The server has started and can be accessed at http://localhost:8000/ .
 #### 5. Generate an API key
 
 ```console
-$ docker compose exec app /src/scripts/create_api_keys.py demo-key
+$ podman-compose exec app /src/scripts/create_api_keys.py demo-key
 openeval-key-xxx
 ```
 

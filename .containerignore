@@ -21,6 +21,6 @@
 .git/
 db/
 
-app/*.Dockerfile
+app/*.Containerfile
 app/.gitignore
 app/tests/

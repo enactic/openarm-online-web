@@ -18,9 +18,9 @@ set -euo pipefail
 
 test_db=openeval_test
 
-docker compose exec db createdb -U openeval "${test_db}" 2>&1 | grep -v "already exists" || :
+podman-compose exec db createdb -U openeval "${test_db}" 2>&1 | grep -v "already exists" || :
 
-docker compose exec \
+podman-compose exec \
   --env POSTGRES_DB="${test_db}" \
   --workdir /src/app \
   app \
