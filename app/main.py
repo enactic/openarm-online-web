@@ -28,7 +28,17 @@ from app.deps import (
     NotLoggedIn,
     NotSubmissionAllowed,
 )
-from app.routers import api, job, leaderboard, login, rollout, submission, task, user
+from app.routers import (
+    api,
+    api_key,
+    job,
+    leaderboard,
+    login,
+    rollout,
+    submission,
+    task,
+    user,
+)
 from app.scheduler import timeout_worker
 from app.settings import settings
 from app.templates import templates
@@ -49,6 +59,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(api.router)
+app.include_router(api_key.router)
 app.include_router(job.router)
 app.include_router(leaderboard.router)
 app.include_router(login.router)

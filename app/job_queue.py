@@ -55,6 +55,22 @@ def find_jobs_by_submission_id(*, session: Session, submission_id: int) -> list[
     return session.exec(statement).all()
 
 
+def find_claimed_executions_by_api_key_id(
+    *, session: Session, api_key_id: int
+) -> list[ClaimedExecution]:
+    statement = (
+        select(ClaimedExecution)
+        .where(ClaimedExecution.api_key_id == api_key_id)
+        .options(
+            selectinload(ClaimedExecution.job)
+            .selectinload(Job.submission)
+            .selectinload(Submission.task)
+        )
+        .order_by(ClaimedExecution.id)
+    )
+    return session.exec(statement).all()
+
+
 def enqueue(*, session: Session, submission_id: int) -> Job:
     job = Job(submission_id=submission_id)
     session.add(job)
