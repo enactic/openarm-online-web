@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}API key created - {{ api_key.name }} - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>API key created</h1>
+  <p>
+    Store this API key now.
+    It won't be shown again.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>API key</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ api_key.id }}</td>
+        <td>{{ api_key.name }}</td>
+        <td>
+          <code>{{ key }}</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <a href="{{ url_for('list_api_keys_page') }}">Back to API keys</a>
+  </p>
+{% endblock %}

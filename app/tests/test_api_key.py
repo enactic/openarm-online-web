@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-from fastapi.testclient import TestClient
-from sqlmodel import Session
+import re
 
-from app import job_queue
-from app.models import ApiKey, Submission
+import pytest
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
+from sqlmodel import Session, select
+
+from app import crud, job_queue
+from app.deps import find_current_api_key
+from app.models import ApiKey, ClaimedExecution, ReadyExecution, Submission
+from app.security import get_hex_digest
 from app.settings import AllowListSettings, settings
 
 
@@ -50,6 +55,70 @@ def test_api_key(admin, api_key: ApiKey, client: TestClient):
     response = client.get(f"/api-keys/{api_key.id}")
     assert response.status_code == 200
     assert "No running jobs." in response.text
+
+
+def test_create_api_key_by_non_admin(client: TestClient):
+    assert client.post("/api-keys/", data={"name": "runner-1"}).status_code == 403
+
+
+def test_create_api_key(admin, session: Session, client: TestClient):
+    response = client.post("/api-keys/", data={"name": "runner-1"})
+    assert response.status_code == 200
+    key = re.search(r"openeval-key-[\w-]+", response.text).group(0)
+    created = session.exec(select(ApiKey).where(ApiKey.name == "runner-1")).first()
+    assert created.hashed_key == get_hex_digest(key)
+
+
+def test_delete_api_key_by_non_admin(api_key: ApiKey, client: TestClient):
+    assert client.post(f"/api-keys/{api_key.id}/delete").status_code == 403
+
+
+def test_delete_api_key_not_found(admin, client: TestClient):
+    assert client.post("/api-keys/9999/delete").status_code == 404
+
+
+def test_delete_api_key(admin, session: Session, api_key: ApiKey, client: TestClient):
+    response = client.post(f"/api-keys/{api_key.id}/delete")
+    assert response.status_code == 303
+    assert session.exec(select(ApiKey).where(ApiKey.id == api_key.id)).first() is None
+
+
+def test_delete_api_key_with_running_job(
+    admin,
+    session: Session,
+    submission: Submission,
+    api_key: ApiKey,
+    client: TestClient,
+):
+    job = job_queue.enqueue(session=session, submission_id=submission.id)
+    job_queue.claim_next_job(
+        session=session, api_key_id=api_key.id, task_id=submission.task_id
+    )
+    session.commit()
+
+    assert client.post(f"/api-keys/{api_key.id}/delete").status_code == 303
+    assert session.exec(select(ApiKey).where(ApiKey.id == api_key.id)).first() is None
+    assert (
+        session.exec(
+            select(ClaimedExecution).where(ClaimedExecution.job_id == job.id)
+        ).first()
+        is None
+    )
+    assert session.exec(
+        select(ReadyExecution).where(ReadyExecution.job_id == job.id)
+    ).first().model_dump(exclude={"id", "created_at"}) == {"job_id": job.id}
+
+
+def test_deleted_api_key_is_rejected(session: Session):
+    api_key, key = crud.create_api_key(session=session, name="deleted")
+    session.commit()
+    assert find_current_api_key(session=session, key=key).id == api_key.id
+
+    crud.delete_api_key(session=session, api_key=api_key)
+    session.commit()
+    with pytest.raises(HTTPException) as exc_info:
+        find_current_api_key(session=session, key=key)
+    assert exc_info.value.status_code == 401
 
 
 def test_api_key_with_running_job(

@@ -36,12 +36,17 @@ from app.models import (
 from app.security import generate_api_key, get_hex_digest
 
 
-def create_api_key(*, session: Session, name: str) -> str:
+def create_api_key(*, session: Session, name: str) -> tuple[ApiKey, str]:
     key = generate_api_key()
     api_key = ApiKey(hashed_key=get_hex_digest(key), name=name)
     session.add(api_key)
     session.flush()
-    return key
+    return api_key, key
+
+
+def delete_api_key(*, session: Session, api_key: ApiKey):
+    session.delete(api_key)
+    session.flush()
 
 
 def find_api_key_by_hash(*, session: Session, hashed_key: str) -> ApiKey | None:

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app import crud, job_queue
 from app.deps import AdminUser, PaginationDep, SessionDep
@@ -40,6 +40,48 @@ def list_api_keys_page(
             "current_user": current_user,
             "paginator": paginator,
         },
+    )
+
+
+@router.post("/", response_class=HTMLResponse)
+def create_api_key_page(
+    request: Request,
+    session: SessionDep,
+    current_user: AdminUser,
+    name: str = Form(),
+):
+    api_key, key = crud.create_api_key(session=session, name=name)
+    return templates.TemplateResponse(
+        request,
+        "api_key_created.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "api_key": api_key,
+            "key": key,
+        },
+    )
+
+
+@router.post("/{id}/delete", response_class=HTMLResponse)
+def delete_api_key_page(
+    id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: AdminUser,
+):
+    api_key = crud.find_api_key(session=session, id=id)
+    if api_key is None:
+        return not_found(request, current_user)
+    # Claimed jobs refer to the API key. Requeue them before deleting
+    # the API key. The runner that uses the deleted API key can't
+    # complete/fail them because the runner can't use all APIs after
+    # this.
+    job_queue.release_jobs_claimed_by_api_key_id(session=session, api_key_id=api_key.id)
+    crud.delete_api_key(session=session, api_key=api_key)
+    return RedirectResponse(
+        url=request.url_for("list_api_keys_page"),
+        status_code=303,
     )
 
 
