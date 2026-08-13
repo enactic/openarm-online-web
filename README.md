@@ -28,6 +28,15 @@ Please configure the following variables according to the comments in `.env`.
 * `SECRET_KEY`
 * `HMAC_KEY`
 
+To get the values for `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`,
+you need to [create a GitHub OAuth
+app](https://docs.github.com/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
+Here are the recommended OAuth app settings for the local environment:
+
+* Application name: `OpenEval local`
+* Homepage URL: `http://127.0.0.1:8000/`
+* Authorization callback URL: `http://127.0.0.1:8000/login/github/callback`
+
 For environments launched with Podman Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
 
 ##### `config.yaml`
@@ -69,7 +78,7 @@ editor .env.runner
 podman-compose up -d
 ```
 
-The server has started and can be accessed at http://localhost:8000/ .
+The server has started and can be accessed at http://127.0.0.1:8000/ .
 
 #### 5. Generate an API key
 
