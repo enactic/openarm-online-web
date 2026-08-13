@@ -55,6 +55,18 @@ def find_jobs_by_submission_id(*, session: Session, submission_id: int) -> list[
     return session.exec(statement).all()
 
 
+def release_jobs_claimed_by_api_key_id(*, session: Session, api_key_id: int) -> None:
+    claimed_executions = session.exec(
+        select(ClaimedExecution)
+        .where(ClaimedExecution.api_key_id == api_key_id)
+        .with_for_update()
+    ).all()
+    for claimed in claimed_executions:
+        session.delete(claimed)
+        session.add(ReadyExecution(job_id=claimed.job_id))
+    session.flush()
+
+
 def find_claimed_executions_by_api_key_id(
     *, session: Session, api_key_id: int
 ) -> list[ClaimedExecution]:
