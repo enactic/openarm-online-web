@@ -65,7 +65,7 @@ def test_create_api_key_by_non_admin(client: TestClient):
 def test_create_api_key(admin, session: Session, client: TestClient):
     response = client.post("/api-keys/", data={"name": "runner-1"})
     assert response.status_code == 200
-    key = re.search(r"openeval-key-[\w-]+", response.text).group(0)
+    key = re.search(r"openarm-online-key-[\w-]+", response.text).group(0)
     created = session.exec(select(ApiKey).where(ApiKey.name == "runner-1")).first()
     assert created.hashed_key == get_hex_digest(key)
 

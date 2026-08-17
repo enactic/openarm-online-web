@@ -16,7 +16,7 @@ FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /openeval
+WORKDIR /openarm-online
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
@@ -32,10 +32,10 @@ ENV UV_LINK_MODE=copy
 
 # Place executables in the environment at the front of the path
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
-ENV PATH="/openeval/.venv/bin:$PATH"
+ENV PATH="/openarm-online/.venv/bin:$PATH"
 
-# The app is imported as `app.*`, so /openeval must be on the path.
-ENV PYTHONPATH=/openeval
+# The app is imported as `app.*`, so /openarm-online must be on the path.
+ENV PYTHONPATH=/openarm-online
 
 # Install dependencies
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
@@ -44,12 +44,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=app/pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-workspace --no-dev
 
-COPY app /openeval/app
+COPY app /openarm-online/app
 COPY scripts/create_api_keys.py \
      scripts/create_tasks.py \
      scripts/update_tasks.py \
      scripts/setup_db.py \
-     /openeval/scripts/
+     /openarm-online/scripts/
 
 # The Git commit ID of the source. .git/ isn't available in the build
 # context, so it must be passed explicitly:
@@ -57,4 +57,4 @@ COPY scripts/create_api_keys.py \
 ARG REVISION=
 ENV REVISION=$REVISION
 
-CMD ["fastapi", "run", "/openeval/app/main.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "run", "/openarm-online/app/main.py", "--host", "0.0.0.0", "--port", "8000"]

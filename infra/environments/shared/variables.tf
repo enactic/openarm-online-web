@@ -24,13 +24,13 @@ variable "environment" {
 
 variable "project" {
   type    = string
-  default = "openeval"
+  default = "openarm-online"
 }
 
 # --- Route53 ---
 variable "route53_zone_name" {
   type    = string
-  default = "run.example.com"
+  default = "online.example.com"
 }
 
 # --- Networking (staging and production) ---
@@ -57,12 +57,12 @@ variable "private_subnet_cidrs" {
 # --- RDS (staging and production) ---
 variable "db_name" {
   type    = string
-  default = "openeval"
+  default = "openarm_online"
 }
 
 variable "db_username" {
   type    = string
-  default = "openeval"
+  default = "openarm_online"
 }
 
 variable "db_engine_version" {

@@ -74,5 +74,5 @@ variable "target_group_arn" {
 
 variable "run_command" {
   type    = list(string)
-  default = ["alembic", "-c", "/openeval/app/alembic.ini", "upgrade", "head"]
+  default = ["alembic", "-c", "/openarm-online/app/alembic.ini", "upgrade", "head"]
 }

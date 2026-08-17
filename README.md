@@ -7,11 +7,11 @@
 #### 1. Clone the repository
 
 ```bash
-git clone git@github.com:enactic/openeval-web.git
-cd openeval-web
+git clone git@github.com:enactic/openarm-online-web.git
+cd openarm-online-web
 ```
 
-From here on, work in the `openeval-web` directory.
+From here on, work in the `openarm-online-web` directory.
 
 #### 2. Configure
 
@@ -33,7 +33,7 @@ you need to [create a GitHub OAuth
 app](https://docs.github.com/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
 Here are the recommended OAuth app settings for the local environment:
 
-* Application name: `OpenEval local`
+* Application name: `OpenArm Online local`
 * Homepage URL: `http://127.0.0.1:8000/`
 * Authorization callback URL: `http://127.0.0.1:8000/login/github/callback`
 
@@ -61,8 +61,8 @@ scripts/setup.sh
 
 ```
 ...
-openeval-key-xxx
-Configure 'OPENEVAL_API_KEY' in .env.runner and start it with 'podman-compose up -d'.
+openarm-online-key-xxx
+Configure 'OPENARM_ONLINE_API_KEY' in .env.runner and start it with 'podman-compose up -d'.
 ```
 
 Finally, an API key will be displayed. Set it in the `.env.runner` file.
@@ -84,7 +84,7 @@ The server has started and can be accessed at http://127.0.0.1:8000/ .
 
 ```console
 $ podman-compose exec app /src/scripts/create_api_keys.py demo-key
-openeval-key-xxx
+openarm-online-key-xxx
 ```
 
 An API key is generated and displayed on stdout, use it when accessing the API.

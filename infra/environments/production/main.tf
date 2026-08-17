@@ -47,8 +47,8 @@ module "stack" {
   forwarded_allow_ips   = data.terraform_remote_state.shared.outputs.public_subnet_cidrs
   rds_host              = data.terraform_remote_state.shared.outputs.rds_host
   rds_master_secret_arn = data.terraform_remote_state.shared.outputs.rds_master_secret_arn
-  db_name               = "${var.project}_${var.environment}"
-  db_username           = "${var.project}_${var.environment}"
+  db_name               = replace("${var.project}-${var.environment}", "-", "_")
+  db_username           = replace("${var.project}-${var.environment}", "-", "_")
   image_tag             = var.image_tag
   s3_endpoint_url       = var.s3_endpoint_url
   s3_bucket_name        = var.s3_bucket_name

@@ -24,11 +24,11 @@ os.environ.setdefault("GITHUB_CLIENT_ID", "test-github-client-id")
 os.environ.setdefault("GITHUB_CLIENT_SECRET", "test-github-client-secret")
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("HMAC_KEY", "test-hmac-key")
-os.environ.setdefault("POSTGRES_DB", "openeval_test")
+os.environ.setdefault("POSTGRES_DB", "openarm_online_test")
 os.environ.setdefault("S3_ENDPOINT_URL", "http://s3:9000")
-os.environ.setdefault("S3_BUCKET_NAME", "openeval-test")
-os.environ.setdefault("S3_ACCESS_KEY_ID", "openeval-access")
-os.environ.setdefault("S3_SECRET_ACCESS_KEY", "openeval-secret")
+os.environ.setdefault("S3_BUCKET_NAME", "openarm-online-test")
+os.environ.setdefault("S3_ACCESS_KEY_ID", "openarm-online-access")
+os.environ.setdefault("S3_SECRET_ACCESS_KEY", "openarm-online-secret")
 
 
 from fastapi.testclient import TestClient
