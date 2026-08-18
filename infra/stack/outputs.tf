@@ -20,6 +20,10 @@ output "ecs_cluster" {
   value = module.ecs.cluster_name
 }
 
+output "ecs_service" {
+  value = module.ecs.service_name
+}
+
 output "ecs_run_task_definition" {
   value = module.ecs.run_task_definition_arn
 }
