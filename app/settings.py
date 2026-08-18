@@ -53,9 +53,9 @@ class Settings(BaseSettings):
 
     POSTGRES_SERVER: str = "db"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "openeval"
-    POSTGRES_USER: str = "openeval"
-    POSTGRES_PASSWORD: str = "openeval"
+    POSTGRES_DB: str = "openarm_online"
+    POSTGRES_USER: str = "openarm_online"
+    POSTGRES_PASSWORD: str = "openarm-online"
 
     GITHUB_AUTHORIZE_URL: str = "https://github.com/login/oauth/authorize"
     GITHUB_TOKEN_URL: str = "https://github.com/login/oauth/access_token"
@@ -66,7 +66,7 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
 
-    API_KEY_PREFIX: str = "openeval-key-"
+    API_KEY_PREFIX: str = "openarm-online-key-"
     HMAC_KEY: str
 
     API_KEY_HEADER_NAME: str = "X-API-KEY"
@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY_ID: str | None = None
     S3_SECRET_ACCESS_KEY: str | None = None
     S3_REGION: str = "us-east-1"
-    S3_BUCKET_NAME: str = "openeval"
+    S3_BUCKET_NAME: str = "openarm-online"
 
     # Base URL of the Rerun web viewer.
     # The version should match the Rerun SDK version used by

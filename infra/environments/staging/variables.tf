@@ -24,12 +24,12 @@ variable "environment" {
 
 variable "project" {
   type    = string
-  default = "openeval"
+  default = "openarm-online"
 }
 
 variable "domain_name" {
   type    = string
-  default = "dev.run.example.com"
+  default = "dev.online.example.com"
 }
 
 variable "shared_state_config" {
@@ -57,7 +57,7 @@ variable "s3_endpoint_url" {
 
 variable "s3_bucket_name" {
   type    = string
-  default = "openeval-staging"
+  default = "openarm-online-staging"
 }
 
 variable "submission_allowlist" {

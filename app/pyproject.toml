@@ -1,7 +1,7 @@
 [project]
-name = "openeval-website"
+name = "openarm-online-web"
 version = "0.1.0"
-description = "This is the OpenEval website."
+description = "The web part of OpenArm Online"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [

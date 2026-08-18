@@ -27,13 +27,13 @@ jobs:
       db:
         image: postgres:18
         env:
-          POSTGRES_USER: openeval
-          POSTGRES_PASSWORD: openeval
-          POSTGRES_DB: openeval_test
+          POSTGRES_USER: openarm_online
+          POSTGRES_PASSWORD: openarm-online
+          POSTGRES_DB: openarm_online_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U openeval -d openeval_test"
+          --health-cmd "pg_isready -U openarm_online -d openarm_online_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -42,8 +42,8 @@ jobs:
         env:
           RUSTFS_VOLUMES: /data
           RUSTFS_ADDRESS: 0.0.0.0:9000
-          RUSTFS_ACCESS_KEY: openeval-access
-          RUSTFS_SECRET_KEY: openeval-secret
+          RUSTFS_ACCESS_KEY: openarm-online-access
+          RUSTFS_SECRET_KEY: openarm-online-secret
           RUSTFS_UNSAFE_BYPASS_DISK_CHECK: true
         ports:
           - 9000:9000
@@ -59,12 +59,12 @@ jobs:
       - name: Run tests
         env:
           POSTGRES_SERVER: localhost
-          POSTGRES_USER: openeval
-          POSTGRES_PASSWORD: openeval
-          POSTGRES_DB: openeval_test
+          POSTGRES_USER: openarm_online
+          POSTGRES_PASSWORD: openarm-online
+          POSTGRES_DB: openarm_online_test
           PYTHONPATH: ${{ github.workspace }}
           S3_ENDPOINT_URL: http://localhost:9000
-          S3_ACCESS_KEY_ID: openeval-access
-          S3_SECRET_ACCESS_KEY: openeval-secret
+          S3_ACCESS_KEY_ID: openarm-online-access
+          S3_SECRET_ACCESS_KEY: openarm-online-secret
         working-directory: app
         run: uv run pytest tests/

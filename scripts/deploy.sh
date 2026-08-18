@@ -36,7 +36,7 @@ if [ ! -f "${auth_json}" ] || \
     podman login --username AWS --password-stdin "${registry}"
 fi
 
-tag="${registry}/openeval-${environment}:latest"
+tag="${registry}/openarm-online-${environment}:latest"
 podman image build \
   --build-arg "REVISION=$(git rev-parse --short HEAD)" \
   --file "app/${environment}.Containerfile" \
@@ -45,6 +45,6 @@ podman image build \
 podman image push "${tag}"
 
 aws ecs update-service \
-  --cluster "openeval-${environment}" \
-  --service "openeval-${environment}" \
+  --cluster "openarm-online-${environment}" \
+  --service "openarm-online-${environment}" \
   --force-new-deployment

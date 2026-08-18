@@ -48,7 +48,7 @@ ENV PYTHONPATH="/runner/src"
 RUN uv python install 3.14
 
 RUN git clone --recurse-submodules --shallow-submodules --depth 1 \
-    https://github.com/enactic/openeval-runner.git /runner
+    https://github.com/enactic/openarm-online-runner.git /runner
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
@@ -58,4 +58,4 @@ ENV RECORDER_BASE_DIRECTORY=/runner/tmp
 
 RUN uv run dora build "${DATAFLOW_FILE}" --uv
 
-CMD ["uv", "run", "python", "-m", "openeval_runner.runner"]
+CMD ["uv", "run", "python", "-m", "openarm_online_runner.runner"]
