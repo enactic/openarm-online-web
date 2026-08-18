@@ -52,29 +52,33 @@ tofu apply
 
 ### Set the Secrets Manager values
 
-Create the `staging.env` and `production.env` for your environment.
-
-**Do not commit these files.**
-
-Example:
-
-```bash
-GITHUB_CLIENT_ID=aaa
-GITHUB_CLIENT_SECRET=bbb
-SECRET_KEY=ccc
-HMAC_KEY=ddd
-S3_ACCESS_KEY_ID=eee
-S3_SECRET_ACCESS_KEY=fff
-POSTGRES_PASSWORD=ggg
-```
+Initialize the auto-generated secrets (`SECRET_KEY`, `HMAC_KEY` and
+`POSTGRES_PASSWORD`). This generates a sufficiently secure random
+string for each of them.
 
 Example of running in the staging environment:
 
 ```bash
-scripts/put_secrets.py infra/environments/staging staging.env
+scripts/initialize_secrets.py infra/environments/staging
 ```
 
-This sets the Secrets Manager values from `staging.env`.
+Set the GitHub OAuth secrets (`GITHUB_CLIENT_ID` and
+`GITHUB_CLIENT_SECRET`). This prompts for each value.
+
+Example of running in the staging environment:
+
+```bash
+scripts/put_github_secrets.py infra/environments/staging
+```
+
+Set the S3 access key secrets (`S3_ACCESS_KEY_ID` and
+`S3_SECRET_ACCESS_KEY`). This prompts for each value.
+
+Example of running in the staging environment:
+
+```bash
+scripts/put_s3_secrets.py infra/environments/staging
+```
 
 ### Create the database and user for each environment
 
