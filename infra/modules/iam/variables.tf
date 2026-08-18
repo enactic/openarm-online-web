@@ -20,10 +20,6 @@ variable "log_group_arn" {
   type = string
 }
 
-variable "ecr_repository_arn" {
-  type = string
-}
-
 variable "secret_arns" {
   type = list(string)
 }

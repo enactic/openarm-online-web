@@ -16,12 +16,6 @@ locals {
   name = "${var.project}-${var.environment}"
 }
 
-module "ecr" {
-  source               = "../modules/ecr"
-  name                 = local.name
-  image_tag_mutability = var.image_tag_mutability
-}
-
 module "logs" {
   source            = "../modules/logs"
   name              = local.name
@@ -39,7 +33,6 @@ module "iam" {
   source             = "../modules/iam"
   name               = local.name
   log_group_arn      = module.logs.arn
-  ecr_repository_arn = module.ecr.repository_arn
   secret_arns = concat(
     values(module.secrets.secret_arn_map),
     [var.rds_master_secret_arn],
@@ -97,7 +90,7 @@ locals {
 module "ecs" {
   source         = "../modules/ecs"
   name           = local.name
-  image          = "${module.ecr.repository_url}:${var.image_tag}"
+  image          = "${var.image_name}:${var.image_tag}"
   container_port = var.container_port
   environment    = local.container_environment
   secrets        = local.container_secrets

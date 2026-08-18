@@ -23,9 +23,6 @@ module "stack" {
   environment = var.environment
   domain_name = var.domain_name
 
-  # ECR
-  image_tag_mutability = "IMMUTABLE"
-
   # Logs
   log_retention_days = 365
 
