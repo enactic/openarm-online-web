@@ -1,0 +1,73 @@
+# Copyright 2026 Enactic, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Image
+on:
+  push:
+    branches-ignore:
+      - 'copilot/**'
+      - 'dependabot/**'
+    tags:
+      - '**'
+  pull_request:
+concurrency:
+  group: ${{ github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Prepare
+        run: |
+          set -x
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            version="${GITHUB_REF_NAME}"
+          else
+            version=latest
+          fi
+          image="ghcr.io/${GITHUB_REPOSITORY}"
+          tag="${image}:${version}"
+          tags="${tag}"
+          if [ "${version}" != "latest" ]; then
+            tags="${tags},${image}:latest"
+          fi
+
+          need_push="no"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && \
+             [ "${GITHUB_REPOSITORY}" = "enactic/openarm-online-web" ]; then
+            need_push="yes"
+          fi
+          echo "TAG=${tag}" >> ${GITHUB_ENV}
+          echo "TAGS=${tags}" >> ${GITHUB_ENV}
+          echo "NEED_PUSH=${need_push}" >> ${GITHUB_ENV}
+          echo "REVISION=$(git rev-parse --short HEAD)" >> "${GITHUB_ENV}"
+      - uses: docker/login-action@v4
+        if: env.NEED_PUSH == 'yes'
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v4
+        id: buildx
+      - uses: docker/build-push-action@v7
+        id: docker_build
+        with:
+          build-args: |
+            REVISION=${{ env.REVISION }}
+          context: .
+          file: app/production.Containerfile
+          push: ${{ env.NEED_PUSH == 'yes' }}
+          load: ${{ env.NEED_PUSH != 'yes' }}
+          tags: ${{ env.TAGS }}

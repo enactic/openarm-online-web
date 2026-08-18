@@ -32,19 +32,15 @@ ENV UV_LINK_MODE=copy
 
 # Place executables in the environment at the front of the path
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
-ENV PATH="/openarm-online/.venv/bin:$PATH"
+ENV PATH="/openarm-online/app/.venv/bin:$PATH"
 
 # The app is imported as `app.*`, so /openarm-online must be on the path.
 ENV PYTHONPATH=/openarm-online
 
-# Install dependencies
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
+RUN mkdir /openarm-online/app
+COPY app /openarm-online/app/
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=app/uv.lock,target=uv.lock \
-    --mount=type=bind,source=app/pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-workspace --no-dev
-
-COPY app /openarm-online/app
+    uv --directory app sync --frozen --no-install-workspace --no-dev
 COPY scripts/create_api_keys.py \
      scripts/create_tasks.py \
      scripts/update_tasks.py \
