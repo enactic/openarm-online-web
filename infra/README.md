@@ -99,3 +99,15 @@ Example of running in the staging environment:
 ```bash
 scripts/run_ecs_task.py infra/environments/staging
 ```
+
+### Deploy the image
+
+The Docker image is built and pushed by GitHub Actions. To deploy the
+latest image, force a new deployment of the ECS service. It restarts
+the ECS tasks with the latest image.
+
+Example of running in the staging environment:
+
+```bash
+scripts/deploy.py infra/environments/staging
+```

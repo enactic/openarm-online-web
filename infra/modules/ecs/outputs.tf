@@ -16,6 +16,10 @@ output "cluster_name" {
   value = aws_ecs_cluster.this.name
 }
 
+output "service_name" {
+  value = aws_ecs_service.fastapi.name
+}
+
 output "run_task_definition_arn" {
   value = aws_ecs_task_definition.run.arn
 }

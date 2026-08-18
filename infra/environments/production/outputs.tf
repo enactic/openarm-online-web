@@ -21,6 +21,10 @@ output "ecs_cluster" {
   value = module.stack.ecs_cluster
 }
 
+output "ecs_service" {
+  value = module.stack.ecs_service
+}
+
 output "ecs_run_task_definition" {
   value = module.stack.ecs_run_task_definition
 }
