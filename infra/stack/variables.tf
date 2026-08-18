@@ -20,12 +20,6 @@ variable "environment" {
   type = string
 }
 
-# ECR
-variable "image_tag_mutability" {
-  type    = string
-  default = "MUTABLE"
-}
-
 # Logs
 variable "log_retention_days" {
   type    = number
@@ -94,6 +88,11 @@ variable "rds_host" {
 
 variable "rds_master_secret_arn" {
   type = string
+}
+
+variable "image_name" {
+  type = string
+  default = "ghcr.io/enactic/openarm-online-web"
 }
 
 variable "image_tag" {

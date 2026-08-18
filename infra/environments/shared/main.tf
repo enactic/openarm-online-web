@@ -136,8 +136,6 @@ resource "aws_security_group" "vpce" {
 
 resource "aws_vpc_endpoint" "interface" {
   for_each = toset([
-    "ecr.api",
-    "ecr.dkr",
     "secretsmanager",
     "logs",
   ])
