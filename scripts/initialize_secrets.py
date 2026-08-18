@@ -14,19 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Initialize auto-generated secrets in Secrets Manager."""
+
 import json
+import secrets
 import subprocess
 import sys
 
 import boto3
 
-from app.settings import Settings
-
-if len(sys.argv) != 3:
-    raise SystemExit("usage: put_secrets.py <tofu-env-dir> <env-file>")
+if len(sys.argv) != 2:
+    raise SystemExit("usage: initialize_secrets.py <tofu-env-dir>")
 env_dir = sys.argv[1]
-env_file = sys.argv[2]
-
 
 secret_arns = json.loads(
     subprocess.check_output(
@@ -36,15 +35,9 @@ secret_arns = json.loads(
 )
 
 client = boto3.client("secretsmanager")
-settings = Settings(_env_file=env_file)
-for key, secret_id in secret_arns.items():
-    # Avoid uploading default values when a key isn't present in the provided env file.
-    if key not in settings.model_fields_set:
-        print(f"skip: [{key}] not set in [{env_file}]")
-        continue
-    value = getattr(settings, key, None)
-    if value is None:
-        print(f"skip: [{key}] value is None in [{env_file}]")
-        continue
-    client.put_secret_value(SecretId=secret_id, SecretString=value)
+for key in ["SECRET_KEY", "HMAC_KEY", "POSTGRES_PASSWORD"]:
+    client.put_secret_value(
+        SecretId=secret_arns[key],
+        SecretString=secrets.token_urlsafe(32),
+    )
     print(f"Put {key}")
