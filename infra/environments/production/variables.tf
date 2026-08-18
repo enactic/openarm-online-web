@@ -24,7 +24,7 @@ variable "environment" {
 
 variable "project" {
   type    = string
-  default = "openeval"
+  default = "openarm-online"
 }
 
 variable "domain_name" {
@@ -57,7 +57,7 @@ variable "s3_endpoint_url" {
 
 variable "s3_bucket_name" {
   type    = string
-  default = "openeval-production"
+  default = "openarm-online-production"
 }
 
 variable "submission_allowlist" {
