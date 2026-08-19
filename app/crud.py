@@ -334,3 +334,10 @@ def find_webrtc_answer_by_offer_id(
 ) -> WebRTCAnswer | None:
     statement = select(WebRTCAnswer).where(WebRTCAnswer.offer_id == offer_id)
     return session.exec(statement).one_or_none()
+
+
+def create_webrtc_answer(*, session: Session, offer_id: int, sdp: str) -> WebRTCAnswer:
+    answer = WebRTCAnswer(offer_id=offer_id, sdp=sdp)
+    session.add(answer)
+    session.flush()
+    return answer

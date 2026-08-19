@@ -19,6 +19,8 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 from fastapi_pagination import Page
 
+from sqlalchemy.exc import IntegrityError
+
 from typing import Optional
 
 from app import crud, job_queue
@@ -33,6 +35,8 @@ from app.models import (
     Submission,
     Task,
     UploadUrlResponse,
+    WebRTCAnswer,
+    WebRTCAnswerRequest,
 )
 from app.s3 import generate_presigned_upload_url
 from app.settings import settings
@@ -128,6 +132,27 @@ def api_fail_job(
         submission_id=job.submission_id,
         reason=payload.reason,
     )
+
+
+@router.post("/teleoperation/offers/{id}/answer", response_model=WebRTCAnswer)
+def api_create_webrtc_answer(
+    id: int, payload: WebRTCAnswerRequest, session: SessionDep, api_key: CurrentApiKey
+):
+    offer = crud.find_webrtc_offer(session=session, id=id)
+    if offer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"WebRTC offer({id}) not found",
+        )
+    try:
+        return crud.create_webrtc_answer(session=session, offer_id=id, sdp=payload.sdp)
+    except IntegrityError as err:
+        # The unique index on offer_id rejects a second answer, including
+        # one from a concurrent runner.
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"WebRTC offer({id}) is already answered",
+        ) from err
 
 
 @router.get("/rrd/upload-url", response_model=UploadUrlResponse)

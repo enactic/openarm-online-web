@@ -342,5 +342,9 @@ class WebRTCOfferResponse(BaseModel):
     id: int
 
 
+class WebRTCAnswerRequest(BaseModel):
+    sdp: str
+
+
 class WebRTCAnswerResponse(BaseModel):
     sdp: str
