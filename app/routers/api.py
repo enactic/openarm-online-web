@@ -37,6 +37,7 @@ from app.models import (
     UploadUrlResponse,
     WebRTCAnswer,
     WebRTCAnswerRequest,
+    WebRTCOffer,
 )
 from app.s3 import generate_presigned_upload_url
 from app.settings import settings
@@ -132,6 +133,16 @@ def api_fail_job(
         submission_id=job.submission_id,
         reason=payload.reason,
     )
+
+
+@router.get("/tasks/{id}/teleoperation/offers", response_model=list[WebRTCOffer])
+def api_get_pending_webrtc_offers(id: int, session: SessionDep, api_key: CurrentApiKey):
+    task = crud.find_task(session=session, id=id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Task({id}) not found"
+        )
+    return crud.get_pending_webrtc_offers(session=session, task_id=id)
 
 
 @router.post("/teleoperation/offers/{id}/answer", response_model=WebRTCAnswer)
