@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Teleoperation - {{ task.name }} - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>Teleoperation - {{ task.name }}</h1>
+  <p>{{ task.prompt }}</p>
+  <p>
+    <button id="connect" type="button">Connect</button>
+  </p>
+  <p>
+    <span id="status">not connected</span>
+    <span id="held"></span>
+  </p>
+  <video id="video"
+         autoplay
+         muted
+         playsinline
+         style="width: 100%;
+                aspect-ratio: 16 / 9;
+                background: #000">
+  </video>
+  <p>
+    <small>
+      Hold keys to move; release to stop.
+      Keys only work while this page has focus.
+    </small>
+  </p>
+  <script src="{{ url_for('static', path='teleoperation.js') }}" defer></script>
+{% endblock %}

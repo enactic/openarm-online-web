@@ -332,3 +332,15 @@ class FailJobRequest(BaseModel):
 class UploadUrlResponse(BaseModel):
     url: str
     s3_key: str
+
+
+class WebRTCOfferRequest(BaseModel):
+    sdp: str
+
+
+class WebRTCOfferResponse(BaseModel):
+    id: int
+
+
+class WebRTCAnswerResponse(BaseModel):
+    sdp: str
