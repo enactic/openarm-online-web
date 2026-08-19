@@ -28,3 +28,10 @@ updates:
     commit-message:
       prefix: "app: "
     open-pull-requests-limit: 10
+    groups:
+      # fastapi-pagination uses FastAPI's internal APIs, so updating
+      # only one of them may break the other.
+      fastapi:
+        patterns:
+          - "fastapi"
+          - "fastapi-pagination"
