@@ -336,6 +336,17 @@ def find_webrtc_answer_by_offer_id(
     return session.exec(statement).one_or_none()
 
 
+def get_pending_webrtc_offers(*, session: Session, task_id: int) -> list[WebRTCOffer]:
+    statement = (
+        select(WebRTCOffer)
+        .outerjoin(WebRTCAnswer, WebRTCAnswer.offer_id == WebRTCOffer.id)
+        .where(WebRTCOffer.task_id == task_id)
+        .where(WebRTCAnswer.id == None)  # noqa: E711
+        .order_by(WebRTCOffer.id)
+    )
+    return session.exec(statement).all()
+
+
 def create_webrtc_answer(*, session: Session, offer_id: int, sdp: str) -> WebRTCAnswer:
     answer = WebRTCAnswer(offer_id=offer_id, sdp=sdp)
     session.add(answer)
