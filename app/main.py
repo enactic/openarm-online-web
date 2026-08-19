@@ -15,9 +15,11 @@
 import asyncio
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from fastapi_pagination import add_pagination
 
@@ -37,6 +39,7 @@ from app.routers import (
     rollout,
     submission,
     task,
+    teleoperation,
     user,
 )
 from app.scheduler import timeout_worker
@@ -66,7 +69,13 @@ app.include_router(login.router)
 app.include_router(rollout.router)
 app.include_router(submission.router)
 app.include_router(task.router)
+app.include_router(teleoperation.router)
 app.include_router(user.router)
+app.mount(
+    "/static",
+    StaticFiles(directory=Path(__file__).parent / "static"),
+    name="static",
+)
 
 
 @app.exception_handler(NotLoggedIn)

@@ -17,6 +17,10 @@ repos:
     rev: 26.1.0
     hooks:
       - id: black
+  - repo: https://github.com/biomejs/pre-commit
+    rev: v2.5.3
+    hooks:
+      - id: biome-check
   - repo: https://github.com/djlint/djLint
     rev: v1.36.4
     hooks:

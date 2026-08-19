@@ -32,6 +32,8 @@ from app.models import (
     Task,
     User,
     UserGitHub,
+    WebRTCAnswer,
+    WebRTCOffer,
 )
 from app.security import generate_api_key, get_hex_digest
 
@@ -314,3 +316,21 @@ def create_job_failure(
     session.add(failure)
     session.flush()
     return failure
+
+
+def create_webrtc_offer(*, session: Session, task_id: int, sdp: str) -> WebRTCOffer:
+    offer = WebRTCOffer(task_id=task_id, sdp=sdp)
+    session.add(offer)
+    session.flush()
+    return offer
+
+
+def find_webrtc_offer(*, session: Session, id: int) -> WebRTCOffer | None:
+    return session.get(WebRTCOffer, id)
+
+
+def find_webrtc_answer_by_offer_id(
+    *, session: Session, offer_id: int
+) -> WebRTCAnswer | None:
+    statement = select(WebRTCAnswer).where(WebRTCAnswer.offer_id == offer_id)
+    return session.exec(statement).one_or_none()

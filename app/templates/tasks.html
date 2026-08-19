@@ -13,6 +13,7 @@
         <th>Created</th>
         <th>Submissions</th>
         <th>Leaderboard</th>
+        <th>Teleoperation</th>
       </tr>
     </thead>
     <tbody>
@@ -28,6 +29,9 @@
           </td>
           <td>
             <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
+          </td>
+          <td>
+            <a href="{{ url_for('teleoperation_page', task_id=task.id) }}">Teleoperation</a>
           </td>
         </tr>
       {% endfor %}
