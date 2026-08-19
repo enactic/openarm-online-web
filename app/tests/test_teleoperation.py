@@ -93,37 +93,48 @@ def test_create_offer_deletes_stale_offers(session: Session, tasks: list[Task]):
     assert session.exec(select(WebRTCAnswer)).all() == []
 
 
-def test_get_answer_pending(session: Session, tasks: list[Task]):
+def test_claim_answer_pending(session: Session, tasks: list[Task]):
     offer = _create_offer(session, tasks[0])
-    response = _anonymous_client().get(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer"
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer/claim"
     )
     assert response.status_code == 204
 
 
-def test_get_answer(session: Session, tasks: list[Task]):
+def test_claim_answer(session: Session, tasks: list[Task]):
     offer = _create_offer(session, tasks[0])
-    crud.create_webrtc_answer(session=session, offer_id=offer.id, sdp="answer-sdp")
+    offer_id = offer.id
+    crud.create_webrtc_answer(session=session, offer_id=offer_id, sdp="answer-sdp")
     session.commit()
 
-    response = _anonymous_client().get(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer"
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer_id}/answer/claim"
     )
     assert response.status_code == 200
     assert response.json() == {"sdp": "answer-sdp"}
 
+    # Signaling is done, so the offer and the answer must be deleted.
+    session.expire_all()
+    assert session.exec(select(WebRTCOffer)).all() == []
+    assert session.exec(select(WebRTCAnswer)).all() == []
 
-def test_get_answer_wrong_task(session: Session, tasks: list[Task]):
-    offer = _create_offer(session, tasks[0])
-    response = _anonymous_client().get(
-        f"/tasks/{tasks[1].id}/teleoperation/offers/{offer.id}/answer"
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer_id}/answer/claim"
     )
     assert response.status_code == 404
 
 
-def test_get_answer_missing_offer(session: Session, tasks: list[Task]):
-    response = _anonymous_client().get(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/9999/answer"
+def test_claim_answer_wrong_task(session: Session, tasks: list[Task]):
+    offer = _create_offer(session, tasks[0])
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[1].id}/teleoperation/offers/{offer.id}/answer/claim"
+    )
+    assert response.status_code == 404
+
+
+def test_claim_answer_missing_offer(session: Session, tasks: list[Task]):
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers/9999/answer/claim"
     )
     assert response.status_code == 404
 

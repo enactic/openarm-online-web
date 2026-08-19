@@ -95,8 +95,11 @@ async function fetchAnswer(offerId) {
   const intervalMs = 1000;
   const timeoutMs = 60000;
   for (let elapsed = 0; elapsed < timeoutMs; elapsed += intervalMs) {
+    // POST, not GET: claiming the answer also deletes the offer and the
+    // answer on the server.
     const response = await fetch(
-      `${location.pathname}/offers/${offerId}/answer`,
+      `${location.pathname}/offers/${offerId}/answer/claim`,
+      { method: "POST" },
     );
     if (response.status === 200) return response.json();
     if (response.status !== 204) {

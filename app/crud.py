@@ -359,6 +359,14 @@ def get_pending_webrtc_offers(*, session: Session, task_id: int) -> list[WebRTCO
     return session.exec(statement).all()
 
 
+def delete_webrtc_offer(*, session: Session, offer: WebRTCOffer):
+    answer = find_webrtc_answer_by_offer_id(session=session, offer_id=offer.id)
+    if answer is not None:
+        session.delete(answer)
+    session.delete(offer)
+    session.flush()
+
+
 def create_webrtc_answer(*, session: Session, offer_id: int, sdp: str) -> WebRTCAnswer:
     answer = WebRTCAnswer(offer_id=offer_id, sdp=sdp)
     session.add(answer)
