@@ -21,3 +21,10 @@ updates:
     commit-message:
       prefix: "ci: "
     open-pull-requests-limit: 10
+  - package-ecosystem: "uv"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "app: "
+    open-pull-requests-limit: 10
