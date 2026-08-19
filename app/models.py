@@ -140,6 +140,7 @@ class Task(SQLModel, table=True):
         ),
     )
     submissions: list["Submission"] = Relationship(back_populates="task")
+    webrtc_offers: list["WebRTCOffer"] = Relationship(back_populates="task")
 
 
 class Submission(SQLModel, table=True):
@@ -271,6 +272,44 @@ class JobFailure(SQLModel, table=True):
             server_default=func.now(),
         )
     )
+
+
+class WebRTCOffer(SQLModel, table=True):
+    __tablename__ = "webrtc_offer"
+
+    id: int | None = Field(default=None, primary_key=True)
+    task_id: int = Field(foreign_key="task.id", index=True)
+    sdp: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    task: Task = Relationship(back_populates="webrtc_offers")
+    answer: Optional["WebRTCAnswer"] = Relationship(
+        back_populates="offer",
+        sa_relationship_kwargs={"uselist": False},
+    )
+
+
+class WebRTCAnswer(SQLModel, table=True):
+    __tablename__ = "webrtc_answer"
+
+    id: int | None = Field(default=None, primary_key=True)
+    offer_id: int = Field(foreign_key="webrtc_offer.id", unique=True, index=True)
+    sdp: str = Field(sa_type=Text)
+    created_at: datetime = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        )
+    )
+
+    offer: WebRTCOffer = Relationship(back_populates="answer")
 
 
 class ClaimedJob(BaseModel):
