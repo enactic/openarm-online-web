@@ -16,9 +16,9 @@
 
 set -euo pipefail
 
-test_db=openarm-online-test
+test_db=openarm_online_test
 
-podman-compose exec db createdb -U openarm-online "${test_db}" 2>&1 | grep -v "already exists" || :
+podman-compose exec db createdb -U openarm_online "${test_db}" 2>&1 | grep -v "already exists" || :
 
 podman-compose exec \
   --env POSTGRES_DB="${test_db}" \

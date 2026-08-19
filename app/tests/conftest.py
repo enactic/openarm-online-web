@@ -51,6 +51,8 @@ from app.models import (
     Task,
     User,
     UserGitHub,
+    WebRTCAnswer,
+    WebRTCOffer,
 )
 from app.s3 import _client
 from app.settings import settings
@@ -83,6 +85,8 @@ def fixture_session() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
         session.rollback()
+        session.exec(delete(WebRTCAnswer))
+        session.exec(delete(WebRTCOffer))
         session.exec(delete(Rollout))
         session.exec(delete(JobFailure))
         session.exec(delete(FailedExecution))

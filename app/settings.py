@@ -87,6 +87,11 @@ class Settings(BaseSettings):
     CLAIM_TIMEOUT: int = Field(default=30, ge=1)  # minutes
     CLAIM_TIMEOUT_CHECK_INTERVAL: int = Field(default=5, ge=1)  # minutes
 
+    # WebRTC offers older than this are stale: the browser stops polling
+    # for an answer after about a minute, so nobody is waiting for them
+    # anymore.
+    WEBRTC_OFFER_TTL: int = Field(default=120, ge=1)  # seconds
+
     # Allow list for who may register submissions.
     # When both are empty, every logged-in user is allowed.
     submission: AllowListSettings = Field(default_factory=AllowListSettings)
