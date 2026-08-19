@@ -64,12 +64,18 @@ def create_webrtc_offer(
     return WebRTCOfferResponse(id=offer.id)
 
 
-@router.get("/offers/{offer_id}/answer")
-def get_webrtc_answer(task_id: int, offer_id: int, session: SessionDep):
+# This is not GET even though it retrieves the answer: retrieving also
+# deletes the offer and the answer, so it must not be a safe method.
+@router.post("/offers/{offer_id}/answer/claim")
+def claim_webrtc_answer(task_id: int, offer_id: int, session: SessionDep):
     offer = crud.find_webrtc_offer(session=session, id=offer_id)
     if offer is None or offer.task_id != task_id:
         raise HTTPException(status_code=404, detail="Offer not found")
     answer = crud.find_webrtc_answer_by_offer_id(session=session, offer_id=offer_id)
     if answer is None:
         return Response(status_code=204)
-    return WebRTCAnswerResponse(sdp=answer.sdp)
+    # Signaling is done once the browser has the answer, so the rows are
+    # no longer needed.
+    sdp = answer.sdp
+    crud.delete_webrtc_offer(session=session, offer=offer)
+    return WebRTCAnswerResponse(sdp=sdp)
