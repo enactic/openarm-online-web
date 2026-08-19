@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import timedelta
+
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 
@@ -55,6 +57,9 @@ def create_webrtc_offer(
     task = crud.find_task(session=session, id=task_id)
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    crud.delete_stale_webrtc_offers(
+        session=session, ttl=timedelta(seconds=settings.WEBRTC_OFFER_TTL)
+    )
     offer = crud.create_webrtc_offer(session=session, task_id=task_id, sdp=body.sdp)
     return WebRTCOfferResponse(id=offer.id)
 

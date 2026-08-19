@@ -16,7 +16,9 @@ from fastapi_pagination import Page, Params
 from fastapi_pagination.ext.sqlalchemy import paginate as alchemy_paginate
 from fastapi_pagination.ext.sqlmodel import paginate as model_paginate
 
-from sqlalchemy import Select, update
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import Select, delete, update
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select, func, case, cast, Float
@@ -316,6 +318,16 @@ def create_job_failure(
     session.add(failure)
     session.flush()
     return failure
+
+
+def delete_stale_webrtc_offers(*, session: Session, ttl: timedelta):
+    cutoff = datetime.now(timezone.utc) - ttl
+    stale_offer_ids = select(WebRTCOffer.id).where(WebRTCOffer.created_at < cutoff)
+    session.execute(
+        delete(WebRTCAnswer).where(WebRTCAnswer.offer_id.in_(stale_offer_ids))
+    )
+    session.execute(delete(WebRTCOffer).where(WebRTCOffer.created_at < cutoff))
+    session.flush()
 
 
 def create_webrtc_offer(*, session: Session, task_id: int, sdp: str) -> WebRTCOffer:
