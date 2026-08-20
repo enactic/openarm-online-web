@@ -36,7 +36,7 @@
         <td>{{ task.id }}</td>
         <td>{{ task.name }}</td>
         <td>{{ task.prompt }}</td>
-        <td>{{ task.reset_docker_tag }}</td>
+        <td>{{ task.reset_docker_tag or "-" }}</td>
         <td>{{ task.runtime }}</td>
         <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
         <td>

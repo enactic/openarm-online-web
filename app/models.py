@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, model_validator
 from sqlalchemy import DateTime, Text
 from sqlmodel import Column, Field, Relationship, SQLModel, func
 
@@ -118,11 +118,18 @@ class Runtime(StrEnum):
     MUJOCO = "MuJoCo"
 
 
+# MuJoCo runs in simulation, so it doesn't need a Docker image to reset
+# the environment; every other runtime does.
+def _check_reset_docker_tag(runtime: Runtime, reset_docker_tag: str | None):
+    if runtime != Runtime.MUJOCO and reset_docker_tag is None:
+        raise ValueError(f"reset_docker_tag is required for the {runtime} runtime")
+
+
 class Task(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(min_length=1, max_length=255)
     prompt: str = Field(sa_type=Text)
-    reset_docker_tag: str = Field(max_length=255)
+    reset_docker_tag: str | None = Field(default=None, max_length=255)
     runtime: Runtime = Field(
         default=Runtime.OPENARM_CELL,
         sa_column=Column(
@@ -141,6 +148,13 @@ class Task(SQLModel, table=True):
     )
     submissions: list["Submission"] = Relationship(back_populates="task")
     webrtc_offers: list["WebRTCOffer"] = Relationship(back_populates="task")
+
+    # Runs on model_validate() (e.g. scripts/create_tasks.py), not on
+    # plain construction: SQLModel table models skip validation there.
+    @model_validator(mode="after")
+    def _validate_reset_docker_tag(self):
+        _check_reset_docker_tag(self.runtime, self.reset_docker_tag)
+        return self
 
 
 class Submission(SQLModel, table=True):
@@ -315,7 +329,7 @@ class WebRTCAnswer(SQLModel, table=True):
 class ClaimedJob(BaseModel):
     job_id: int
     docker_tag: str
-    reset_docker_tag: str
+    reset_docker_tag: str | None
     prompt: str
     runtime: str
 
@@ -337,8 +351,21 @@ class UploadUrlResponse(BaseModel):
 class TaskForm(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     prompt: str = Field(min_length=1)
-    reset_docker_tag: str = Field(min_length=1, max_length=255)
+    reset_docker_tag: str | None = Field(default=None, min_length=1, max_length=255)
     runtime: Runtime
+
+    # The form sends an empty string when the field is left blank.
+    @field_validator("reset_docker_tag", mode="before")
+    @classmethod
+    def _empty_reset_docker_tag_to_none(cls, value):
+        if value == "":
+            return None
+        return value
+
+    @model_validator(mode="after")
+    def _validate_reset_docker_tag(self):
+        _check_reset_docker_tag(self.runtime, self.reset_docker_tag)
+        return self
 
 
 class WebRTCOfferRequest(BaseModel):
