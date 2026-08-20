@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import Select, delete, update
 from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, select, func, case, cast, Float
+from sqlmodel import Session, select, func, case, cast, exists, Float
 
 from app.models import (
     ApiKey,
@@ -172,6 +172,53 @@ def update_tasks(*, session: Session, data: list[dict]):
     for v in data:
         Task.model_validate(v)
     session.execute(update(Task), data)
+    session.flush()
+
+
+def create_task(
+    *, session: Session, name: str, prompt: str, reset_docker_tag: str, runtime: str
+) -> Task:
+    task = Task(
+        name=name,
+        prompt=prompt,
+        reset_docker_tag=reset_docker_tag,
+        runtime=runtime,
+    )
+    session.add(task)
+    session.flush()
+    return task
+
+
+def update_task(
+    *,
+    session: Session,
+    task: Task,
+    name: str,
+    prompt: str,
+    reset_docker_tag: str,
+    runtime: str,
+) -> Task:
+    task.name = name
+    task.prompt = prompt
+    task.reset_docker_tag = reset_docker_tag
+    task.runtime = runtime
+    session.add(task)
+    session.flush()
+    return task
+
+
+def task_has_submissions(*, session: Session, task_id: int) -> bool:
+    statement = select(exists().where(Submission.task_id == task_id))
+    return session.exec(statement).one()
+
+
+def delete_task(*, session: Session, task: Task):
+    # WebRTC offers are transient signaling data, so they don't block
+    # deleting the task; delete them (and their answers) first.
+    offer_ids = select(WebRTCOffer.id).where(WebRTCOffer.task_id == task.id)
+    session.execute(delete(WebRTCAnswer).where(WebRTCAnswer.offer_id.in_(offer_ids)))
+    session.execute(delete(WebRTCOffer).where(WebRTCOffer.task_id == task.id))
+    session.delete(task)
     session.flush()
 
 
