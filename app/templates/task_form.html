@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if task %}
+    Edit task - {{ task.name }} - {{ site_name }}
+  {% else %}
+    New task - {{ site_name }}
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <h1>
+    {% if task %}
+      Edit task
+    {% else %}
+      New task
+    {% endif %}
+  </h1>
+  {% if locked %}
+    <p>
+      <small>This task has submissions, so only its name can be edited.</small>
+    </p>
+  {% endif %}
+  <form method="post"
+        action="{{ url_for('update_task_page', id=task.id) if task else url_for('create_task_page') }}">
+    <label>
+      Name
+      <input type="text"
+             name="name"
+             maxlength="255"
+             required
+             value="{{ task.name if task else '' }}">
+    </label>
+    <label>
+      Prompt
+      <textarea name="prompt" required {% if locked %}readonly{% endif %}>{{ task.prompt if task else '' }}</textarea>
+    </label>
+    <label>
+      Reset Docker tag
+      <input type="text"
+             name="reset_docker_tag"
+             maxlength="255"
+             required
+             {% if locked %}readonly{% endif %}
+             value="{{ task.reset_docker_tag if task else '' }}">
+    </label>
+    <label>
+      Runtime
+      {% if locked %}
+        {# A disabled select isn't submitted, so submit the value here. #}
+        <input type="hidden" name="runtime" value="{{ task.runtime }}">
+      {% endif %}
+      <select name="runtime" {% if locked %}disabled{% endif %}>
+        {% for runtime in runtimes %}
+          <option value="{{ runtime }}"
+                  {% if task and task.runtime == runtime %}selected{% endif %}>{{ runtime }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">
+      {% if task %}
+        Update
+      {% else %}
+        Create
+      {% endif %}
+    </button>
+  </form>
+{% endblock %}

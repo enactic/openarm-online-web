@@ -120,7 +120,7 @@ class Runtime(StrEnum):
 
 class Task(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str | None = Field(default=None, max_length=255)
+    name: str = Field(min_length=1, max_length=255)
     prompt: str = Field(sa_type=Text)
     reset_docker_tag: str = Field(max_length=255)
     runtime: Runtime = Field(
@@ -332,6 +332,13 @@ class FailJobRequest(BaseModel):
 class UploadUrlResponse(BaseModel):
     url: str
     s3_key: str
+
+
+class TaskForm(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    prompt: str = Field(min_length=1)
+    reset_docker_tag: str = Field(min_length=1, max_length=255)
+    runtime: Runtime
 
 
 class WebRTCOfferRequest(BaseModel):
