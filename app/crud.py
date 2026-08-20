@@ -176,7 +176,12 @@ def update_tasks(*, session: Session, data: list[dict]):
 
 
 def create_task(
-    *, session: Session, name: str, prompt: str, reset_docker_tag: str, runtime: str
+    *,
+    session: Session,
+    name: str,
+    prompt: str,
+    reset_docker_tag: str | None,
+    runtime: str,
 ) -> Task:
     task = Task(
         name=name,
@@ -195,7 +200,7 @@ def update_task(
     task: Task,
     name: str,
     prompt: str,
-    reset_docker_tag: str,
+    reset_docker_tag: str | None,
     runtime: str,
 ) -> Task:
     task.name = name

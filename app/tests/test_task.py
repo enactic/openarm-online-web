@@ -97,6 +97,46 @@ def test_create_task_with_empty_name(admin, client: TestClient):
     assert response.status_code == 422
 
 
+def test_create_mujoco_task_without_reset_docker_tag(
+    admin, session: Session, client: TestClient
+):
+    response = client.post(
+        "/tasks/",
+        data={
+            "name": "sim-task",
+            "prompt": "Pick up the cube",
+            "reset_docker_tag": "",
+            "runtime": "MuJoCo",
+        },
+    )
+    assert response.status_code == 303
+
+    task = session.exec(select(Task).where(Task.name == "sim-task")).one()
+    assert task.reset_docker_tag is None
+
+
+def test_create_openarm_cell_task_without_reset_docker_tag(admin, client: TestClient):
+    response = client.post(
+        "/tasks/",
+        data={
+            "name": "real-task",
+            "prompt": "Pick up the cube",
+            "reset_docker_tag": "",
+            "runtime": "OpenArm Cell",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_task_model_requires_reset_docker_tag_unless_mujoco():
+    with pytest.raises(ValueError):
+        Task.model_validate(
+            {"name": "real-task", "prompt": "p", "runtime": "OpenArm Cell"}
+        )
+    task = Task.model_validate({"name": "sim-task", "prompt": "p", "runtime": "MuJoCo"})
+    assert task.reset_docker_tag is None
+
+
 def test_create_task_with_unknown_runtime(admin, client: TestClient):
     response = client.post(
         "/tasks/",

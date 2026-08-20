@@ -38,9 +38,8 @@
       <input type="text"
              name="reset_docker_tag"
              maxlength="255"
-             required
              {% if locked %}readonly{% endif %}
-             value="{{ task.reset_docker_tag if task else '' }}">
+             value="{{ (task.reset_docker_tag or '') if task else '' }}">
     </label>
     <label>
       Runtime
