@@ -14,6 +14,7 @@
 
 const statusElement = document.getElementById("status");
 const heldElement = document.getElementById("held");
+const helpElement = document.getElementById("help");
 const connectButton = document.getElementById("connect");
 const video = document.getElementById("video");
 
@@ -128,6 +129,17 @@ async function connect() {
   pc.addTransceiver("video", { direction: "recvonly" });
   pc.ontrack = (event) => {
     video.srcObject = event.streams[0];
+  };
+
+  // The key bindings arrive over a WebRTC "help" data channel the runner
+  // opens, not over HTTP: the help text lives in the runner's keymap, and
+  // this page has no copy of it.
+  pc.ondatachannel = (event) => {
+    if (event.channel.label === "help") {
+      event.channel.onmessage = (message) => {
+        helpElement.textContent = message.data;
+      };
+    }
   };
 
   await pc.setLocalDescription(await pc.createOffer());

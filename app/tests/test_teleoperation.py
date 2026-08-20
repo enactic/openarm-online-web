@@ -49,6 +49,8 @@ def test_teleoperation_page(session: Session, tasks: list[Task]):
     assert response.status_code == 200
     assert tasks[0].name in response.text
     assert tasks[0].prompt in response.text
+    # The key bindings are filled in over WebRTC after connecting.
+    assert 'id="help"' in response.text
 
 
 def test_teleoperation_page_missing_task(session: Session, tasks: list[Task]):
