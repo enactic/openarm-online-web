@@ -39,12 +39,12 @@ jobs:
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             version="${GITHUB_REF_NAME}"
           else
-            version=latest
+            version=main
           fi
           image="ghcr.io/${GITHUB_REPOSITORY}"
           tag="${image}:${version}"
           tags="${tag}"
-          if [ "${version}" != "latest" ]; then
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             tags="${tags},${image}:latest"
           fi
 

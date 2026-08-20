@@ -97,6 +97,7 @@ variable "image_name" {
 
 variable "image_tag" {
   type = string
+  default = "main"
 }
 
 variable "db_name" {
