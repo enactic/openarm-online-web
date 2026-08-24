@@ -75,6 +75,7 @@ def test_claim_job(
     job = session.exec(select(Job).where(Job.submission_id == submission.id)).first()
     assert response.json() == {
         "job_id": job.id,
+        "task_id": tasks[0].id,
         "docker_tag": "test/image:latest",
         "reset_docker_tag": tasks[0].reset_docker_tag,
         "prompt": tasks[0].prompt,

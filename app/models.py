@@ -328,6 +328,7 @@ class WebRTCAnswer(SQLModel, table=True):
 
 class ClaimedJob(BaseModel):
     job_id: int
+    task_id: int
     docker_tag: str
     reset_docker_tag: str | None
     prompt: str

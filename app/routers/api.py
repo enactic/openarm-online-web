@@ -78,6 +78,7 @@ def api_claim_job(id: int, session: SessionDep, api_key: CurrentApiKey):
     submission = crud.find_submission(session=session, id=job.submission_id)
     return ClaimedJob(
         job_id=job.id,
+        task_id=submission.task_id,
         docker_tag=submission.docker_tag,
         reset_docker_tag=submission.task.reset_docker_tag,
         prompt=submission.task.prompt,
