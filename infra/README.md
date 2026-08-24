@@ -1,4 +1,4 @@
-# OpenEval infrastructure
+# OpenArm Online Web infrastructure
 
 Build the environment on AWS.
 

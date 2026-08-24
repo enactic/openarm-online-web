@@ -23,4 +23,4 @@ podman-compose run --rm app /src/scripts/create_bucket.py
 podman-compose run --rm app /src/scripts/create_tasks.py /src/app/tests/fixtures/task.json
 podman-compose run --rm app /src/scripts/create_api_keys.py test-key
 
-echo "Configure 'OPENEVAL_API_KEY' in .env.runner and start it with 'podman-compose up -d'."
+echo "Configure 'OPENARM_ONLINE_API_KEY' in .env.runner and start it with 'podman-compose up -d'."
