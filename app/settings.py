@@ -43,7 +43,7 @@ class Settings(BaseSettings):
 
     # These are the default values.
     # They are overridden by the values of environment variables.
-    SITE_NAME: str = "OpenEval"
+    SITE_NAME: str = "OpenArm Online"
 
     # Deployed application version shown in the footer. Normally a Git
     # commit ID baked into the production image via the REVISION build
