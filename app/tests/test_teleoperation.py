@@ -150,9 +150,11 @@ def test_api_get_pending_offers(
 
     response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/offers")
     assert response.status_code == 200
-    assert [(o["id"], o["sdp"]) for o in response.json()] == [
-        (offer1.id, "sdp1"),
-        (offer2.id, "sdp2"),
+    assert [
+        (o["id"], o["task_id"], o["sdp"], o["runtime"]) for o in response.json()
+    ] == [
+        (offer1.id, tasks[0].id, "sdp1", "OpenArm Cell"),
+        (offer2.id, tasks[0].id, "sdp2", "OpenArm Cell"),
     ]
 
 

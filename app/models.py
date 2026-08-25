@@ -369,6 +369,14 @@ class TaskForm(BaseModel):
         return self
 
 
+class PendingWebRTCOffer(BaseModel):
+    id: int
+    task_id: int
+    sdp: str
+    created_at: datetime
+    runtime: str
+
+
 class WebRTCOfferRequest(BaseModel):
     sdp: str
 
