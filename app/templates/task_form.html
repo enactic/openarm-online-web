@@ -19,6 +19,11 @@
       <small>This task has submissions, so only its name can be edited.</small>
     </p>
   {% endif %}
+  {% for error in errors %}
+    <p>
+      <mark>{{ error }}</mark>
+    </p>
+  {% endfor %}
   <form method="post"
         action="{{ url_for('update_task_page', id=task.id) if task else url_for('create_task_page') }}">
     <label>
@@ -27,11 +32,11 @@
              name="name"
              maxlength="255"
              required
-             value="{{ task.name if task else '' }}">
+             value="{{ values.name }}">
     </label>
     <label>
       Prompt
-      <textarea name="prompt" required {% if locked %}readonly{% endif %}>{{ task.prompt if task else '' }}</textarea>
+      <textarea name="prompt" required {% if locked %}readonly{% endif %}>{{ values.prompt }}</textarea>
     </label>
     <label>
       Reset Docker tag
@@ -39,7 +44,7 @@
              name="reset_docker_tag"
              maxlength="255"
              {% if locked %}readonly{% endif %}
-             value="{{ (task.reset_docker_tag or '') if task else '' }}">
+             value="{{ values.reset_docker_tag }}">
     </label>
     <label>
       Runtime
@@ -50,7 +55,7 @@
       <select name="runtime" {% if locked %}disabled{% endif %}>
         {% for runtime in runtimes %}
           <option value="{{ runtime }}"
-                  {% if task and task.runtime == runtime %}selected{% endif %}>{{ runtime }}</option>
+                  {% if values.runtime == runtime %}selected{% endif %}>{{ runtime }}</option>
         {% endfor %}
       </select>
     </label>

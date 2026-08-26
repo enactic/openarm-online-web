@@ -95,6 +95,11 @@ def test_create_task_with_empty_name(admin, client: TestClient):
         },
     )
     assert response.status_code == 422
+    assert response.headers["content-type"].startswith("text/html")
+    assert "<mark>" in response.text
+    # The form is re-rendered with the submitted values preserved.
+    assert "Pick up the cube" in response.text
+    assert 'value="reset:latest"' in response.text
 
 
 def test_create_mujoco_task_without_reset_docker_tag(
@@ -126,6 +131,8 @@ def test_create_openarm_cell_task_without_reset_docker_tag(admin, client: TestCl
         },
     )
     assert response.status_code == 422
+    assert response.headers["content-type"].startswith("text/html")
+    assert "reset_docker_tag is required for the OpenArm Cell runtime" in response.text
 
 
 def test_task_model_requires_reset_docker_tag_unless_mujoco():
@@ -196,6 +203,28 @@ def test_update_task(admin, session: Session, tasks: list[Task], client: TestCli
     assert task.prompt == "Open the drawer"
     assert task.reset_docker_tag == "reset:v2"
     assert task.runtime == "MuJoCo"
+
+
+def test_update_task_with_empty_name(
+    admin, session: Session, tasks: list[Task], client: TestClient
+):
+    task_id = tasks[0].id
+    response = client.post(
+        f"/tasks/{task_id}/edit",
+        data={
+            "name": "",
+            "prompt": "Open the drawer",
+            "reset_docker_tag": "reset:v2",
+            "runtime": "MuJoCo",
+        },
+    )
+    assert response.status_code == 422
+    assert response.headers["content-type"].startswith("text/html")
+    assert "<mark>" in response.text
+
+    session.expire_all()
+    task = session.get(Task, task_id)
+    assert task.name == tasks[0].name
 
 
 def test_update_task_by_non_admin(tasks: list[Task], client: TestClient):
