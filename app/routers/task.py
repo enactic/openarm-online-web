@@ -17,6 +17,8 @@ from typing import Annotated
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from pydantic import ValidationError
+
 from app import crud
 from app.deps import AdminUser, CurrentUserOptional, PaginationDep, SessionDep
 from app.models import Runtime, TaskForm
@@ -46,12 +48,26 @@ def list_tasks_page(
     )
 
 
-# Registered before "/{id}" so that "new" isn't parsed as an id.
-@router.get("/new", response_class=HTMLResponse)
-def new_task_page(
-    request: Request,
-    session: SessionDep,
-    current_user: AdminUser,
+# TaskForm is validated manually in the POST handlers so that invalid input
+# re-renders the HTML form instead of returning FastAPI's default JSON 422.
+def _validation_errors(error: ValidationError) -> list[str]:
+    messages = []
+    for err in error.errors():
+        message = err["msg"].removeprefix("Value error, ")
+        fields = ", ".join(str(part) for part in err["loc"])
+        messages.append(f"{fields}: {message}" if fields else message)
+    return messages
+
+
+def _task_form_response(
+    request,
+    current_user,
+    *,
+    task,
+    values,
+    locked,
+    errors=None,
+    status_code=200,
 ):
     return templates.TemplateResponse(
         request,
@@ -59,10 +75,40 @@ def new_task_page(
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
-            "task": None,
+            "task": task,
+            "values": values,
             "runtimes": list(Runtime),
-            "locked": False,
+            "locked": locked,
+            "errors": errors or [],
         },
+        status_code=status_code,
+    )
+
+
+def _task_values(task) -> dict:
+    if task is None:
+        return {"name": "", "prompt": "", "reset_docker_tag": "", "runtime": ""}
+    return {
+        "name": task.name,
+        "prompt": task.prompt,
+        "reset_docker_tag": task.reset_docker_tag or "",
+        "runtime": task.runtime,
+    }
+
+
+# Registered before "/{id}" so that "new" isn't parsed as an id.
+@router.get("/new", response_class=HTMLResponse)
+def new_task_page(
+    request: Request,
+    session: SessionDep,
+    current_user: AdminUser,
+):
+    return _task_form_response(
+        request,
+        current_user,
+        task=None,
+        values=_task_values(None),
+        locked=False,
     )
 
 
@@ -71,8 +117,29 @@ def create_task_page(
     request: Request,
     session: SessionDep,
     current_user: AdminUser,
-    form: Annotated[TaskForm, Form()],
+    name: Annotated[str, Form()] = "",
+    prompt: Annotated[str, Form()] = "",
+    reset_docker_tag: Annotated[str, Form()] = "",
+    runtime: Annotated[str, Form()] = "",
 ):
+    values = {
+        "name": name,
+        "prompt": prompt,
+        "reset_docker_tag": reset_docker_tag,
+        "runtime": runtime,
+    }
+    try:
+        form = TaskForm.model_validate(values)
+    except ValidationError as error:
+        return _task_form_response(
+            request,
+            current_user,
+            task=None,
+            values=values,
+            locked=False,
+            errors=_validation_errors(error),
+            status_code=422,
+        )
     task = crud.create_task(
         session=session,
         name=form.name,
@@ -126,16 +193,12 @@ def edit_task_page(
     task = crud.find_task(session=session, id=id)
     if task is None:
         return not_found(request, current_user)
-    return templates.TemplateResponse(
+    return _task_form_response(
         request,
-        "task_form.html",
-        {
-            "site_name": settings.SITE_NAME,
-            "current_user": current_user,
-            "task": task,
-            "runtimes": list(Runtime),
-            "locked": _is_task_locked(session=session, task=task),
-        },
+        current_user,
+        task=task,
+        values=_task_values(task),
+        locked=_is_task_locked(session=session, task=task),
     )
 
 
@@ -145,14 +208,34 @@ def update_task_page(
     request: Request,
     session: SessionDep,
     current_user: AdminUser,
-    form: Annotated[TaskForm, Form()],
+    name: Annotated[str, Form()] = "",
+    prompt: Annotated[str, Form()] = "",
+    reset_docker_tag: Annotated[str, Form()] = "",
+    runtime: Annotated[str, Form()] = "",
 ):
     task = crud.find_task(session=session, id=id)
     if task is None:
         return not_found(request, current_user)
-    if _is_task_locked(session=session, task=task) and _changes_locked_fields(
-        task, form
-    ):
+    locked = _is_task_locked(session=session, task=task)
+    values = {
+        "name": name,
+        "prompt": prompt,
+        "reset_docker_tag": reset_docker_tag,
+        "runtime": runtime,
+    }
+    try:
+        form = TaskForm.model_validate(values)
+    except ValidationError as error:
+        return _task_form_response(
+            request,
+            current_user,
+            task=task,
+            values=values,
+            locked=locked,
+            errors=_validation_errors(error),
+            status_code=422,
+        )
+    if locked and _changes_locked_fields(task, form):
         return _reject_locked_task(
             request,
             current_user,
