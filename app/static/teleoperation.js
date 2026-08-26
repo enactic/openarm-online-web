@@ -37,11 +37,14 @@ function send(type, key) {
   }
 }
 
-// Only forward keys the runner can use: printable characters and Backspace.
-// Modifier chords (Cmd+R, Ctrl+W, …) pass through untouched.
+// Only forward keys the runner can use: printable characters plus Shift
+// (rotation modifier) and Escape (quit). Modifier chords (Cmd+R, Ctrl+W, …)
+// pass through untouched. Printable keys are lowercased so a key held across
+// a Shift press pairs its keydown ("w") with its keyup ("W" → "w").
 function usableKey(event) {
   if (event.metaKey || event.ctrlKey || event.altKey) return null;
-  if (event.key.length === 1 || event.key === "Backspace") return event.key;
+  if (event.key.length === 1) return event.key.toLowerCase();
+  if (event.key === "Shift" || event.key === "Escape") return event.key;
   return null;
 }
 
