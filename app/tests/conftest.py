@@ -55,7 +55,7 @@ from app.models import (
     WebRTCOffer,
 )
 from app.s3 import _client
-from app.settings import settings
+from app.settings import AllowListSettings, settings
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -117,6 +117,14 @@ def fixture_client(session: Session, user: User, api_key: ApiKey):
     app.dependency_overrides[find_current_api_key] = override_find_current_api_key
     yield TestClient(app, follow_redirects=False)
     app.dependency_overrides.clear()
+
+
+# Makes "testuser" (the `client` fixture's logged-in user) an admin.
+@pytest.fixture(name="admin")
+def fixture_admin(monkeypatch):
+    monkeypatch.setattr(
+        settings, "admin", AllowListSettings(allowed_users={"testuser"})
+    )
 
 
 @pytest.fixture(name="tasks")

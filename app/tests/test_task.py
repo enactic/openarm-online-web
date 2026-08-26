@@ -18,14 +18,6 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.models import Submission, Task, WebRTCAnswer, WebRTCOffer
-from app.settings import AllowListSettings, settings
-
-
-@pytest.fixture(name="admin")
-def fixture_admin(monkeypatch):
-    monkeypatch.setattr(
-        settings, "admin", AllowListSettings(allowed_users={"testuser"})
-    )
 
 
 def test_list_tasks_with_admin_links(admin, tasks: list[Task], client: TestClient):
@@ -40,6 +32,24 @@ def test_list_tasks_without_admin_links(tasks: list[Task], client: TestClient):
     assert response.status_code == 200
     assert f"/tasks/{tasks[0].id}/edit" not in response.text
     assert "/tasks/new" not in response.text
+
+
+# The fixture tasks all use the OpenArm Cell runtime, whose
+# teleoperation is admin only, so non-admins get no teleoperation link.
+def test_list_tasks_teleoperation_link_for_non_admin(
+    tasks: list[Task], client: TestClient
+):
+    response = client.get("/tasks/")
+    assert response.status_code == 200
+    assert "teleoperation" not in response.text
+
+
+def test_list_tasks_teleoperation_link_for_admin(
+    admin, tasks: list[Task], client: TestClient
+):
+    response = client.get("/tasks/")
+    assert response.status_code == 200
+    assert f"/tasks/{tasks[0].id}/teleoperation" in response.text
 
 
 def test_new_task_page_by_non_admin(client: TestClient):

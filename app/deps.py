@@ -23,7 +23,7 @@ from starlette import status
 
 from app import crud
 from app.db import engine
-from app.models import ApiKey, User
+from app.models import ApiKey, Runtime, Task, User
 from app.security import get_hex_digest, get_sub
 from app.settings import settings
 
@@ -140,3 +140,9 @@ def require_admin(user: CurrentUser) -> User:
 
 
 AdminUser = Annotated[User, Depends(require_admin)]
+
+
+# MuJoCo runs in simulation, so anyone may teleoperate it; every other
+# runtime drives a real robot, so only admins may.
+def may_teleoperate(task: Task, user: Optional[User]) -> bool:
+    return task.runtime == Runtime.MUJOCO or is_admin(user)
