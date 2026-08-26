@@ -18,7 +18,13 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 
 from app import crud
-from app.deps import CurrentUserOptional, SessionDep
+from app.deps import (
+    CurrentUserOptional,
+    NotAdmin,
+    NotLoggedIn,
+    SessionDep,
+    may_teleoperate,
+)
 from app.models import WebRTCAnswerResponse, WebRTCOfferRequest, WebRTCOfferResponse
 from app.responses import not_found
 from app.settings import settings
@@ -37,6 +43,10 @@ def teleoperation_page(
     task = crud.find_task(session=session, id=task_id)
     if task is None:
         return not_found(request, current_user)
+    if not may_teleoperate(task, current_user):
+        if current_user is None:
+            raise NotLoggedIn()
+        raise NotAdmin()
     return templates.TemplateResponse(
         request,
         "teleoperation.html",
@@ -53,10 +63,15 @@ def create_webrtc_offer(
     task_id: int,
     body: WebRTCOfferRequest,
     session: SessionDep,
+    current_user: CurrentUserOptional,
 ) -> WebRTCOfferResponse:
     task = crud.find_task(session=session, id=task_id)
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found")
+    if not may_teleoperate(task, current_user):
+        raise HTTPException(
+            status_code=403, detail="Teleoperation of this task is admin only"
+        )
     crud.delete_stale_webrtc_offers(
         session=session, ttl=timedelta(seconds=settings.WEBRTC_OFFER_TTL)
     )
@@ -67,10 +82,19 @@ def create_webrtc_offer(
 # This is not GET even though it retrieves the answer: retrieving also
 # deletes the offer and the answer, so it must not be a safe method.
 @router.post("/offers/{offer_id}/answer/claim")
-def claim_webrtc_answer(task_id: int, offer_id: int, session: SessionDep):
+def claim_webrtc_answer(
+    task_id: int,
+    offer_id: int,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+):
     offer = crud.find_webrtc_offer(session=session, id=offer_id)
     if offer is None or offer.task_id != task_id:
         raise HTTPException(status_code=404, detail="Offer not found")
+    if not may_teleoperate(offer.task, current_user):
+        raise HTTPException(
+            status_code=403, detail="Teleoperation of this task is admin only"
+        )
     answer = crud.find_webrtc_answer_by_offer_id(session=session, offer_id=offer_id)
     if answer is None:
         return Response(status_code=204)

@@ -37,7 +37,9 @@
             <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
           </td>
           <td>
-            <a href="{{ url_for('teleoperation_page', task_id=task.id) }}">Teleoperation</a>
+            {% if may_teleoperate(task, current_user) %}
+              <a href="{{ url_for('teleoperation_page', task_id=task.id) }}">Teleoperation</a>
+            {% endif %}
           </td>
           {% if is_admin(current_user) %}
             <td>

@@ -19,13 +19,22 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.main import app
-from app.models import ApiKey, Task, WebRTCAnswer, WebRTCOffer
+from app.models import ApiKey, Runtime, Task, WebRTCAnswer, WebRTCOffer
 
 
-# Teleoperation must be usable without logging in, so use a client
+# MuJoCo teleoperation must be usable without logging in, so use a client
 # without the authentication overrides of the `client` fixture.
 def _anonymous_client() -> TestClient:
     return TestClient(app, follow_redirects=False)
+
+
+# The `tasks` fixture defaults to the OpenArm Cell runtime, whose
+# teleoperation is admin only. Turn a task into a MuJoCo one to
+# exercise the open path.
+def _make_mujoco(session: Session, task: Task) -> None:
+    task.runtime = Runtime.MUJOCO
+    session.add(task)
+    session.commit()
 
 
 def _create_offer(
@@ -45,6 +54,7 @@ def _create_offer(
 
 
 def test_teleoperation_page(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
     response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation")
     assert response.status_code == 200
     assert tasks[0].name in response.text
@@ -58,7 +68,59 @@ def test_teleoperation_page_missing_task(session: Session, tasks: list[Task]):
     assert response.status_code == 404
 
 
+# OpenArm Cell teleoperation drives a real robot, so it is admin only.
+def test_teleoperation_page_openarm_cell_by_anonymous(
+    session: Session, tasks: list[Task]
+):
+    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation")
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_teleoperation_page_openarm_cell_by_non_admin(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation")
+    assert response.status_code == 403
+
+
+def test_teleoperation_page_openarm_cell_by_admin(
+    admin, session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation")
+    assert response.status_code == 200
+
+
+def test_create_offer_openarm_cell_by_non_admin(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+    )
+    assert response.status_code == 403
+
+
+def test_create_offer_openarm_cell_by_admin(
+    admin, session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+    )
+    assert response.status_code == 200
+
+
+def test_claim_answer_openarm_cell_by_non_admin(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    offer = _create_offer(session, tasks[0])
+    response = client.post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer/claim"
+    )
+    assert response.status_code == 403
+
+
 def test_create_offer(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
     response = _anonymous_client().post(
         f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
     )
@@ -77,6 +139,7 @@ def test_create_offer_missing_task(session: Session, tasks: list[Task]):
 
 
 def test_create_offer_deletes_stale_offers(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
     stale_unanswered = _create_offer(session, tasks[0], age=timedelta(minutes=10))
     stale_answered = _create_offer(session, tasks[1], age=timedelta(minutes=10))
     crud.create_webrtc_answer(
@@ -96,6 +159,7 @@ def test_create_offer_deletes_stale_offers(session: Session, tasks: list[Task]):
 
 
 def test_claim_answer_pending(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
     offer = _create_offer(session, tasks[0])
     response = _anonymous_client().post(
         f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer/claim"
@@ -104,6 +168,7 @@ def test_claim_answer_pending(session: Session, tasks: list[Task]):
 
 
 def test_claim_answer(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
     offer = _create_offer(session, tasks[0])
     offer_id = offer.id
     crud.create_webrtc_answer(session=session, offer_id=offer_id, sdp="answer-sdp")
