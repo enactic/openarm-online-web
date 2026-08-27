@@ -20,3 +20,9 @@ config.yaml
 .env.runner
 db/
 storage/
+
+# TLS files for the local HTTPS reverse proxy (scripts/prepare_tls.sh).
+/https/*.crt
+/https/*.csr
+/https/*.key
+/https/*.srl
