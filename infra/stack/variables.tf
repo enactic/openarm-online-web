@@ -37,6 +37,8 @@ variable "secret_keys" {
     "S3_ACCESS_KEY_ID",
     "S3_SECRET_ACCESS_KEY",
     "POSTGRES_PASSWORD",
+    "CLOUDFLARE_TURN_KEY_ID",
+    "CLOUDFLARE_TURN_API_TOKEN",
   ]
 }
 

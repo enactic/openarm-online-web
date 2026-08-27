@@ -15,9 +15,10 @@
 import { connect } from "./connection.js";
 import { createInstructionPanel } from "./instructions.js";
 import { createCameraPanel } from "./panel.js";
-// Vendored from dora-openarm-webxr; the one local change is signaling
-// through this site instead of the node's own HTTPS server (signal.js).
-import { signal } from "./signal.js";
+// Vendored from dora-openarm-webxr; the local changes route signaling
+// and ICE server discovery through this site instead of the node's own
+// HTTPS server (signal.js).
+import { iceServers, signal } from "./signal.js";
 import { createStereoPanel } from "./stereo.js";
 
 // Used only when the node's view configuration cannot be read.
@@ -50,7 +51,7 @@ if (navigator.xr) {
   // than a page-load side effect, so merely opening the page does not
   // make the runner start a node.
   function openConnection() {
-    return connect({ signal }).then((opened) => {
+    return connect({ signal, iceServers: iceServers() }).then((opened) => {
       connection = opened;
       configuration = opened.configuration || FALLBACK_CONFIGURATION;
 

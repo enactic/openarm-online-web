@@ -80,6 +80,20 @@ Example of running in the staging environment:
 scripts/put_s3_secrets.py infra/environments/staging
 ```
 
+Set the Cloudflare Realtime TURN secrets (`CLOUDFLARE_TURN_KEY_ID` and
+`CLOUDFLARE_TURN_API_TOKEN`), used to mint short-lived TURN credentials
+for teleoperation between peers that can't connect directly. Create a
+TURN key on the Cloudflare dashboard (Realtime) first:
+https://developers.cloudflare.com/realtime/turn/
+This prompts for each value. Leave a value empty to store `disabled`,
+which turns TURN off for the environment (STUN only).
+
+Example of running in the staging environment:
+
+```bash
+scripts/put_cloudflare_turn_secrets.py infra/environments/staging
+```
+
 ### Create the database and user for each environment
 
 Create the database and user for the target environment with the RDS admin user.

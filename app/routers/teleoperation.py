@@ -17,7 +17,7 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse
 
-from app import crud
+from app import crud, turn
 from app.deps import (
     CurrentUserOptional,
     NotAdmin,
@@ -59,6 +59,10 @@ def teleoperation_keyboard_page(
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
             "task": task,
+            # Embedded into the page: TURN credentials are short-lived
+            # secrets minted by the server (app/turn.py), so its script
+            # cannot carry them itself.
+            "ice_servers": turn.get_ice_servers(),
         },
     )
 
@@ -88,6 +92,7 @@ def teleoperation_webxr_page(
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
             "task": task,
+            "ice_servers": turn.get_ice_servers(),
         },
     )
 

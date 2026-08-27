@@ -71,6 +71,9 @@ def test_teleoperation_keyboard_page(session: Session, tasks: list[Task]):
     assert tasks[0].prompt in response.text
     # The key bindings are filled in over WebRTC after connecting.
     assert 'id="help"' in response.text
+    # The ICE servers are embedded into the page for teleoperation.js.
+    assert 'id="ice-servers"' in response.text
+    assert "stun:stun.cloudflare.com:3478" in response.text
 
 
 def test_teleoperation_keyboard_page_missing_task(session: Session, tasks: list[Task]):
@@ -90,6 +93,8 @@ def test_teleoperation_webxr_page(session: Session, tasks: list[Task]):
     # connection is made beforehand by Connect.
     assert 'id="connect"' in response.text
     assert 'id="start"' in response.text
+    # The ICE servers are embedded into the page for signal.js.
+    assert 'id="ice-servers"' in response.text
 
 
 def test_teleoperation_webxr_page_missing_task(session: Session, tasks: list[Task]):
@@ -314,9 +319,15 @@ def test_api_get_pending_offers(
     # answer.
     response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/keyboard/offers")
     assert response.status_code == 200
+    # The ICE servers ride along so the runner builds the node's peer
+    # with the same servers as the page. No Cloudflare TURN key is
+    # configured in tests, so this is the STUN-only fallback.
+    assert response.json()["ice_servers"] == [
+        {"urls": ["stun:stun.cloudflare.com:3478"]}
+    ]
     assert [
         (o["id"], o["task_id"], o["kind"], o["sdp"], o["runtime"])
-        for o in response.json()
+        for o in response.json()["offers"]
     ] == [
         (offer1.id, tasks[0].id, "keyboard", "sdp1", "OpenArm Cell"),
         (offer3.id, tasks[0].id, "keyboard", "sdp3", "OpenArm Cell"),
@@ -324,7 +335,7 @@ def test_api_get_pending_offers(
 
     response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/webxr/offers")
     assert response.status_code == 200
-    assert [o["id"] for o in response.json()] == [offer2.id]
+    assert [o["id"] for o in response.json()["offers"]] == [offer2.id]
 
 
 def test_api_get_pending_offers_unknown_kind(
@@ -343,7 +354,7 @@ def test_api_get_pending_offers_excludes_answered(
     session.commit()
 
     response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/keyboard/offers")
-    assert [o["id"] for o in response.json()] == [offer2.id]
+    assert [o["id"] for o in response.json()["offers"]] == [offer2.id]
 
 
 def test_api_get_pending_offers_missing_task(

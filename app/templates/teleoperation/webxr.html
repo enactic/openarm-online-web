@@ -18,5 +18,8 @@
     </small>
   </p>
   <pre id="log"></pre>
+  {# ICE servers, including short-lived TURN credentials when a TURN
+     key is configured; read by signal.js. #}
+  <script id="ice-servers" type="application/json">{{ ice_servers | tojson }}</script>
   <script type="module" src="{{ url_for('static', path='webxr/ar.js') }}"></script>
 {% endblock %}

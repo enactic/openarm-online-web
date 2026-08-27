@@ -29,13 +29,11 @@
 // not be lost: the node's configuration push, session-start, the select
 // and squeeze events, and what came of a calibration run.
 
-const CONFIGURATION = {
-  iceServers: [
-    {
-      urls: ["stun:stun.cloudflare.com:3478"],
-    },
-  ],
-};
+const ICE_SERVERS = [
+  {
+    urls: ["stun:stun.cloudflare.com:3478"],
+  },
+];
 
 // The node decides how many eyes it draws, but this page has to make the
 // offer before it can be told, and the signaling here is a single
@@ -77,9 +75,11 @@ function gathered(pc) {
 //
 // `signal` takes the offer SDP and resolves with the answer SDP, so a
 // differently hosted page can broker signaling its own way without
-// changing anything else here.
-export async function connect({ signal = postOffer } = {}) {
-  const pc = new RTCPeerConnection(CONFIGURATION);
+// changing anything else here. `iceServers` likewise lets the hosting
+// page hand in servers of its own (e.g. TURN credentials minted by its
+// server); without it the default STUN-only servers are used.
+export async function connect({ signal = postOffer, iceServers = null } = {}) {
+  const pc = new RTCPeerConnection({ iceServers: iceServers || ICE_SERVERS });
   const received = [];
   const handlers = { calibrationResult: null, close: null };
   let control = null;

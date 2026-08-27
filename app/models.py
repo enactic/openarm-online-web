@@ -394,6 +394,14 @@ class PendingWebRTCOffer(BaseModel):
     runtime: str
 
 
+class PendingWebRTCOffers(BaseModel):
+    # Handed along with the offers so that the runner builds the node's
+    # peer with the same servers (including short-lived TURN credentials
+    # when a TURN key is configured) as the page.
+    ice_servers: list[dict]
+    offers: list[PendingWebRTCOffer]
+
+
 # The offer's kind comes from the URL it is posted to, not the body.
 class WebRTCOfferRequest(BaseModel):
     sdp: str

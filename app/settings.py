@@ -92,6 +92,17 @@ class Settings(BaseSettings):
     # anymore.
     WEBRTC_OFFER_TTL: int = Field(default=120, ge=1)  # seconds
 
+    # Cloudflare Realtime TURN. When both are set, the teleoperation
+    # pages and the runner are handed short-lived TURN credentials
+    # minted through the Cloudflare API, so teleoperation also works
+    # between peers that cannot connect directly. Empty or "disabled"
+    # means STUN only ("disabled" stands in for empty in Secrets
+    # Manager, which cannot store an empty value).
+    CLOUDFLARE_TURN_KEY_ID: str = ""
+    CLOUDFLARE_TURN_API_TOKEN: str = ""
+    # Lifetime of the minted TURN credentials.
+    TURN_CREDENTIAL_TTL: int = Field(default=86400, ge=600)  # seconds
+
     # Allow list for who may register submissions.
     # When both are empty, every logged-in user is allowed.
     submission: AllowListSettings = Field(default_factory=AllowListSettings)
