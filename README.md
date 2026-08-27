@@ -89,6 +89,34 @@ openarm-online-key-xxx
 
 An API key is generated and displayed on stdout, use it when accessing the API.
 
+### HTTPS for WebXR testing
+
+WebXR only runs in a secure context, so testing the VR teleoperation
+page from a VR device needs HTTPS. An optional TLS-terminating reverse
+proxy is provided as the `https` compose service.
+
+Generate a self-signed certificate for a host name that the VR device
+can resolve. A `.local` host name configured automatically by Avahi is
+a convenient choice:
+
+```bash
+scripts/prepare_tls.sh $(hostname).local
+```
+
+Then start the proxy:
+
+```bash
+podman-compose --profile https up -d
+```
+
+The server can now be accessed at `https://$(hostname).local:8443/`
+from the VR device. The certificate is self-signed, so the browser
+shows a warning to step through once.
+
+Note that logging in over HTTPS needs the GitHub OAuth app's callback
+URL to match, so use a MuJoCo runtime task, whose teleoperation needs
+no login, unless you have set that up.
+
 ### Before commit
 
 Run pre-commit before committing:
