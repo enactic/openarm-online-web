@@ -78,7 +78,7 @@ services:
       timeout: 10s
     userns_mode: "keep-id:uid=999,gid=999"
     volumes:
-      - ./db/data:/var/lib/postgresql/data/pgdata
+      - ${LOCAL_DB_DATA_DIR:-./db/data}:/var/lib/postgresql/data/pgdata
     env_file:
       - .env
     environment:
@@ -107,7 +107,7 @@ services:
       - RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true
     userns_mode: "keep-id:uid=10001,gid=10001"
     volumes:
-      - ./storage/data:/data
+      - ${LOCAL_STORAGE_DATA_DIR:-./storage/data}:/data
     restart: unless-stopped
     healthcheck:
       test:
