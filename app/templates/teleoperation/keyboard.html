@@ -28,5 +28,8 @@
       Keys only work while this page has focus.
     </small>
   </p>
+  {# ICE servers, including short-lived TURN credentials when a TURN
+     key is configured; read by teleoperation.js. #}
+  <script id="ice-servers" type="application/json">{{ ice_servers | tojson }}</script>
   <script src="{{ url_for('static', path='keyboard/teleoperation.js') }}" defer></script>
 {% endblock %}

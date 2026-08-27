@@ -116,15 +116,15 @@ async function fetchAnswer(offerId) {
   throw new Error("no answer from the runner");
 }
 
+// TURN credentials are short-lived secrets minted by the server, so the
+// ICE servers are embedded into the page by the server rather than
+// written here.
+const iceServers = JSON.parse(
+  document.getElementById("ice-servers").textContent,
+);
+
 async function connect() {
-  const configuration = {
-    iceServers: [
-      {
-        urls: ["stun:stun.cloudflare.com:3478"],
-      },
-    ],
-  };
-  const pc = new RTCPeerConnection(configuration);
+  const pc = new RTCPeerConnection({ iceServers });
 
   channel = pc.createDataChannel("keys");
   channel.onopen = () =>

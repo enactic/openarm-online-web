@@ -65,3 +65,10 @@ export async function signal(sdp) {
   const offerId = await postOffer(sdp);
   return fetchAnswer(offerId);
 }
+
+// TURN credentials are short-lived secrets minted by the server, so the
+// ICE servers are embedded into the page by the server rather than
+// written into this file.
+export function iceServers() {
+  return JSON.parse(document.getElementById("ice-servers").textContent);
+}

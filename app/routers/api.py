@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 
 from typing import Optional
 
-from app import crud, job_queue
+from app import crud, job_queue, turn
 from app.deps import CurrentApiKey, PaginationDep, SessionDep
 from app.models import (
     ClaimedJob,
@@ -31,6 +31,7 @@ from app.models import (
     FailJobRequest,
     JobFailure,
     PendingWebRTCOffer,
+    PendingWebRTCOffers,
     Rollout,
     RolloutCreate,
     Submission,
@@ -141,7 +142,7 @@ def api_fail_job(
 # endpoints: a runner polls for the kinds it can answer.
 @router.get(
     "/tasks/{id}/teleoperation/{kind}/offers",
-    response_model=list[PendingWebRTCOffer],
+    response_model=PendingWebRTCOffers,
 )
 def api_get_pending_webrtc_offers(
     id: int, kind: TeleoperationKind, session: SessionDep, api_key: CurrentApiKey
@@ -152,17 +153,20 @@ def api_get_pending_webrtc_offers(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Task({id}) not found"
         )
     offers = crud.get_pending_webrtc_offers(session=session, task_id=id, kind=kind)
-    return [
-        PendingWebRTCOffer(
-            id=offer.id,
-            task_id=offer.task_id,
-            kind=offer.kind,
-            sdp=offer.sdp,
-            created_at=offer.created_at,
-            runtime=task.runtime,
-        )
-        for offer in offers
-    ]
+    return PendingWebRTCOffers(
+        ice_servers=turn.get_ice_servers(),
+        offers=[
+            PendingWebRTCOffer(
+                id=offer.id,
+                task_id=offer.task_id,
+                kind=offer.kind,
+                sdp=offer.sdp,
+                created_at=offer.created_at,
+                runtime=task.runtime,
+            )
+            for offer in offers
+        ],
+    )
 
 
 @router.post("/teleoperation/offers/{id}/answer", response_model=WebRTCAnswer)
