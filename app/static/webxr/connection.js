@@ -39,7 +39,7 @@ const ICE_SERVERS = [
 // offer before it can be told, and the signaling here is a single
 // exchange with no renegotiation. So always offer this many and let the
 // node leave the ones it does not use inactive.
-const VIDEO_TRANSCEIVERS = 2;
+const VIDEO_TRANSCEIVERS = 1; // debug // = 2;
 
 // Signaling for the node's own HTTPS server: one POST, because both
 // sides gather all their ICE candidates before exchanging anything.
