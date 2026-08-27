@@ -32,6 +32,7 @@ from app.models import (
     RolloutCreate,
     Submission,
     Task,
+    TeleoperationKind,
     User,
     UserGitHub,
     WebRTCAnswer,
@@ -382,8 +383,10 @@ def delete_stale_webrtc_offers(*, session: Session, ttl: timedelta):
     session.flush()
 
 
-def create_webrtc_offer(*, session: Session, task_id: int, sdp: str) -> WebRTCOffer:
-    offer = WebRTCOffer(task_id=task_id, sdp=sdp)
+def create_webrtc_offer(
+    *, session: Session, task_id: int, sdp: str, kind: TeleoperationKind
+) -> WebRTCOffer:
+    offer = WebRTCOffer(task_id=task_id, sdp=sdp, kind=kind)
     session.add(offer)
     session.flush()
     return offer
@@ -400,11 +403,14 @@ def find_webrtc_answer_by_offer_id(
     return session.exec(statement).one_or_none()
 
 
-def get_pending_webrtc_offers(*, session: Session, task_id: int) -> list[WebRTCOffer]:
+def get_pending_webrtc_offers(
+    *, session: Session, task_id: int, kind: TeleoperationKind
+) -> list[WebRTCOffer]:
     statement = (
         select(WebRTCOffer)
         .outerjoin(WebRTCAnswer, WebRTCAnswer.offer_id == WebRTCOffer.id)
         .where(WebRTCOffer.task_id == task_id)
+        .where(WebRTCOffer.kind == kind)
         .where(WebRTCAnswer.id == None)  # noqa: E711
         .order_by(WebRTCOffer.id)
     )

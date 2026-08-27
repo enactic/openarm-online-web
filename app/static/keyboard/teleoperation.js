@@ -80,8 +80,10 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("pagehide", releaseAll);
 
-// The page lives at /tasks/{task_id}/teleoperation and the signaling
-// endpoints live under it, so build their URLs from the page's own path.
+// The page lives at /tasks/{task_id}/teleoperation/keyboard and the
+// signaling endpoints live under it, so build their URLs from the
+// page's own path; the path also tells the runner what kind of offer
+// this is.
 async function postOffer(description) {
   const response = await fetch(`${location.pathname}/offers`, {
     method: "POST",

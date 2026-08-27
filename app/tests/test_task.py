@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
 from app import crud
-from app.models import Submission, Task, WebRTCAnswer, WebRTCOffer
+from app.models import Submission, Task, TeleoperationKind, WebRTCAnswer, WebRTCOffer
 
 
 def test_list_tasks_with_admin_links(admin, tasks: list[Task], client: TestClient):
@@ -49,7 +49,8 @@ def test_list_tasks_teleoperation_link_for_admin(
 ):
     response = client.get("/tasks/")
     assert response.status_code == 200
-    assert f"/tasks/{tasks[0].id}/teleoperation" in response.text
+    assert f"/tasks/{tasks[0].id}/teleoperation/keyboard" in response.text
+    assert f"/tasks/{tasks[0].id}/teleoperation/webxr" in response.text
 
 
 def test_new_task_page_by_non_admin(client: TestClient):
@@ -314,7 +315,12 @@ def test_delete_task_by_non_admin(tasks: list[Task], client: TestClient):
 def test_delete_task(admin, session: Session, tasks: list[Task], client: TestClient):
     task_id = tasks[0].id
     # WebRTC offers/answers must not block deleting the task.
-    offer = crud.create_webrtc_offer(session=session, task_id=task_id, sdp="offer")
+    offer = crud.create_webrtc_offer(
+        session=session,
+        task_id=task_id,
+        sdp="offer",
+        kind=TeleoperationKind.KEYBOARD,
+    )
     crud.create_webrtc_answer(session=session, offer_id=offer.id, sdp="answer")
     session.commit()
 

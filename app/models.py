@@ -288,11 +288,27 @@ class JobFailure(SQLModel, table=True):
     )
 
 
+# What kind of client made a teleoperation offer, so the runner can
+# start the matching dora node to answer it.
+class TeleoperationKind(StrEnum):
+    KEYBOARD = "keyboard"
+    WEBXR = "webxr"
+
+
 class WebRTCOffer(SQLModel, table=True):
     __tablename__ = "webrtc_offer"
 
     id: int | None = Field(default=None, primary_key=True)
     task_id: int = Field(foreign_key="task.id", index=True)
+    kind: TeleoperationKind = Field(
+        sa_column=Column(
+            Text,
+            nullable=False,
+            # Only for rows that predate the column; new offers must
+            # say what kind they are.
+            server_default=TeleoperationKind.KEYBOARD,
+        ),
+    )
     sdp: str = Field(sa_type=Text)
     created_at: datetime = Field(
         sa_column=Column(
@@ -372,11 +388,13 @@ class TaskForm(BaseModel):
 class PendingWebRTCOffer(BaseModel):
     id: int
     task_id: int
+    kind: str
     sdp: str
     created_at: datetime
     runtime: str
 
 
+# The offer's kind comes from the URL it is posted to, not the body.
 class WebRTCOfferRequest(BaseModel):
     sdp: str
 

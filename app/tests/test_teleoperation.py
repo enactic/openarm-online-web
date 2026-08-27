@@ -19,7 +19,14 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.main import app
-from app.models import ApiKey, Runtime, Task, WebRTCAnswer, WebRTCOffer
+from app.models import (
+    ApiKey,
+    Runtime,
+    Task,
+    TeleoperationKind,
+    WebRTCAnswer,
+    WebRTCOffer,
+)
 
 
 # MuJoCo teleoperation must be usable without logging in, so use a client
@@ -43,8 +50,11 @@ def _create_offer(
     sdp: str = "offer-sdp",
     *,
     age: timedelta | None = None,
+    kind: TeleoperationKind = TeleoperationKind.KEYBOARD,
 ) -> WebRTCOffer:
-    offer = crud.create_webrtc_offer(session=session, task_id=task.id, sdp=sdp)
+    offer = crud.create_webrtc_offer(
+        session=session, task_id=task.id, sdp=sdp, kind=kind
+    )
     if age is not None:
         offer.created_at = datetime.now(timezone.utc) - age
         session.add(offer)
@@ -53,9 +63,9 @@ def _create_offer(
     return offer
 
 
-def test_teleoperation_page(session: Session, tasks: list[Task]):
+def test_teleoperation_keyboard_page(session: Session, tasks: list[Task]):
     _make_mujoco(session, tasks[0])
-    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation")
+    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation/keyboard")
     assert response.status_code == 200
     assert tasks[0].name in response.text
     assert tasks[0].prompt in response.text
@@ -63,31 +73,72 @@ def test_teleoperation_page(session: Session, tasks: list[Task]):
     assert 'id="help"' in response.text
 
 
-def test_teleoperation_page_missing_task(session: Session, tasks: list[Task]):
-    response = _anonymous_client().get("/tasks/9999/teleoperation")
+def test_teleoperation_keyboard_page_missing_task(session: Session, tasks: list[Task]):
+    response = _anonymous_client().get("/tasks/9999/teleoperation/keyboard")
     assert response.status_code == 404
 
 
-# OpenArm Cell teleoperation drives a real robot, so it is admin only.
-def test_teleoperation_page_openarm_cell_by_anonymous(
+def test_teleoperation_webxr_page(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
+    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation/webxr")
+    assert response.status_code == 200
+    assert tasks[0].name in response.text
+    assert tasks[0].prompt in response.text
+    assert "webxr/ar.js" in response.text
+    # Connecting and starting the session are separate steps: Start must
+    # call requestSession() directly in its click handler, so the
+    # connection is made beforehand by Connect.
+    assert 'id="connect"' in response.text
+    assert 'id="start"' in response.text
+
+
+def test_teleoperation_webxr_page_missing_task(session: Session, tasks: list[Task]):
+    response = _anonymous_client().get("/tasks/9999/teleoperation/webxr")
+    assert response.status_code == 404
+
+
+def test_teleoperation_webxr_page_openarm_cell_by_anonymous(
     session: Session, tasks: list[Task]
 ):
-    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation")
+    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation/webxr")
     assert response.status_code == 303
     assert response.headers["location"] == "/login"
 
 
-def test_teleoperation_page_openarm_cell_by_non_admin(
+def test_teleoperation_webxr_page_openarm_cell_by_non_admin(
     session: Session, tasks: list[Task], client: TestClient
 ):
-    response = client.get(f"/tasks/{tasks[0].id}/teleoperation")
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation/webxr")
     assert response.status_code == 403
 
 
-def test_teleoperation_page_openarm_cell_by_admin(
+def test_teleoperation_webxr_page_openarm_cell_by_admin(
     admin, session: Session, tasks: list[Task], client: TestClient
 ):
-    response = client.get(f"/tasks/{tasks[0].id}/teleoperation")
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation/webxr")
+    assert response.status_code == 200
+
+
+# OpenArm Cell teleoperation drives a real robot, so it is admin only.
+def test_teleoperation_keyboard_page_openarm_cell_by_anonymous(
+    session: Session, tasks: list[Task]
+):
+    response = _anonymous_client().get(f"/tasks/{tasks[0].id}/teleoperation/keyboard")
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_teleoperation_keyboard_page_openarm_cell_by_non_admin(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation/keyboard")
+    assert response.status_code == 403
+
+
+def test_teleoperation_keyboard_page_openarm_cell_by_admin(
+    admin, session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.get(f"/tasks/{tasks[0].id}/teleoperation/keyboard")
     assert response.status_code == 200
 
 
@@ -95,7 +146,8 @@ def test_create_offer_openarm_cell_by_non_admin(
     session: Session, tasks: list[Task], client: TestClient
 ):
     response = client.post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers",
+        json={"sdp": "offer-sdp"},
     )
     assert response.status_code == 403
 
@@ -104,7 +156,8 @@ def test_create_offer_openarm_cell_by_admin(
     admin, session: Session, tasks: list[Task], client: TestClient
 ):
     response = client.post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers",
+        json={"sdp": "offer-sdp"},
     )
     assert response.status_code == 200
 
@@ -114,7 +167,7 @@ def test_claim_answer_openarm_cell_by_non_admin(
 ):
     offer = _create_offer(session, tasks[0])
     response = client.post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer/claim"
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers/{offer.id}/answer/claim"
     )
     assert response.status_code == 403
 
@@ -122,18 +175,52 @@ def test_claim_answer_openarm_cell_by_non_admin(
 def test_create_offer(session: Session, tasks: list[Task]):
     _make_mujoco(session, tasks[0])
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers",
+        json={"sdp": "offer-sdp"},
     )
     assert response.status_code == 200
 
     offer = session.get(WebRTCOffer, response.json()["id"])
     assert offer.task_id == tasks[0].id
     assert offer.sdp == "offer-sdp"
+    assert offer.kind == TeleoperationKind.KEYBOARD
+
+
+def test_create_offer_webxr(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/webxr/offers",
+        json={"sdp": "offer-sdp"},
+    )
+    assert response.status_code == 200
+
+    offer = session.get(WebRTCOffer, response.json()["id"])
+    assert offer.kind == TeleoperationKind.WEBXR
+
+
+# The kind decides which dora node the runner starts, so the offer
+# endpoints only exist under a kind.
+def test_create_offer_missing_kind(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "offer-sdp"}
+    )
+    assert response.status_code == 404
+
+
+def test_create_offer_unknown_kind(session: Session, tasks: list[Task]):
+    _make_mujoco(session, tasks[0])
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/gamepad/offers",
+        json={"sdp": "offer-sdp"},
+    )
+    assert response.status_code == 422
 
 
 def test_create_offer_missing_task(session: Session, tasks: list[Task]):
     response = _anonymous_client().post(
-        "/tasks/9999/teleoperation/offers", json={"sdp": "offer-sdp"}
+        "/tasks/9999/teleoperation/keyboard/offers",
+        json={"sdp": "offer-sdp"},
     )
     assert response.status_code == 404
 
@@ -148,7 +235,8 @@ def test_create_offer_deletes_stale_offers(session: Session, tasks: list[Task]):
     fresh = _create_offer(session, tasks[0], "fresh-sdp")
 
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers", json={"sdp": "new-sdp"}
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers",
+        json={"sdp": "new-sdp"},
     )
     assert response.status_code == 200
 
@@ -162,7 +250,7 @@ def test_claim_answer_pending(session: Session, tasks: list[Task]):
     _make_mujoco(session, tasks[0])
     offer = _create_offer(session, tasks[0])
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer.id}/answer/claim"
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers/{offer.id}/answer/claim"
     )
     assert response.status_code == 204
 
@@ -175,7 +263,7 @@ def test_claim_answer(session: Session, tasks: list[Task]):
     session.commit()
 
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer_id}/answer/claim"
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers/{offer_id}/answer/claim"
     )
     assert response.status_code == 200
     assert response.json() == {"sdp": "answer-sdp"}
@@ -186,7 +274,7 @@ def test_claim_answer(session: Session, tasks: list[Task]):
     assert session.exec(select(WebRTCAnswer)).all() == []
 
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/{offer_id}/answer/claim"
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers/{offer_id}/answer/claim"
     )
     assert response.status_code == 404
 
@@ -194,14 +282,22 @@ def test_claim_answer(session: Session, tasks: list[Task]):
 def test_claim_answer_wrong_task(session: Session, tasks: list[Task]):
     offer = _create_offer(session, tasks[0])
     response = _anonymous_client().post(
-        f"/tasks/{tasks[1].id}/teleoperation/offers/{offer.id}/answer/claim"
+        f"/tasks/{tasks[1].id}/teleoperation/keyboard/offers/{offer.id}/answer/claim"
+    )
+    assert response.status_code == 404
+
+
+def test_claim_answer_wrong_kind(session: Session, tasks: list[Task]):
+    offer = _create_offer(session, tasks[0])
+    response = _anonymous_client().post(
+        f"/tasks/{tasks[0].id}/teleoperation/webxr/offers/{offer.id}/answer/claim"
     )
     assert response.status_code == 404
 
 
 def test_claim_answer_missing_offer(session: Session, tasks: list[Task]):
     response = _anonymous_client().post(
-        f"/tasks/{tasks[0].id}/teleoperation/offers/9999/answer/claim"
+        f"/tasks/{tasks[0].id}/teleoperation/keyboard/offers/9999/answer/claim"
     )
     assert response.status_code == 404
 
@@ -210,17 +306,32 @@ def test_api_get_pending_offers(
     session: Session, tasks: list[Task], client: TestClient
 ):
     offer1 = _create_offer(session, tasks[0], "sdp1")
-    offer2 = _create_offer(session, tasks[0], "sdp2")
-    _create_offer(session, tasks[1], "sdp3")
+    offer2 = _create_offer(session, tasks[0], "sdp2", kind=TeleoperationKind.WEBXR)
+    offer3 = _create_offer(session, tasks[0], "sdp3")
+    _create_offer(session, tasks[1], "sdp4")
 
-    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/offers")
+    # Each kind is its own queue: a runner polls for the kinds it can
+    # answer.
+    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/keyboard/offers")
     assert response.status_code == 200
     assert [
-        (o["id"], o["task_id"], o["sdp"], o["runtime"]) for o in response.json()
+        (o["id"], o["task_id"], o["kind"], o["sdp"], o["runtime"])
+        for o in response.json()
     ] == [
-        (offer1.id, tasks[0].id, "sdp1", "OpenArm Cell"),
-        (offer2.id, tasks[0].id, "sdp2", "OpenArm Cell"),
+        (offer1.id, tasks[0].id, "keyboard", "sdp1", "OpenArm Cell"),
+        (offer3.id, tasks[0].id, "keyboard", "sdp3", "OpenArm Cell"),
     ]
+
+    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/webxr/offers")
+    assert response.status_code == 200
+    assert [o["id"] for o in response.json()] == [offer2.id]
+
+
+def test_api_get_pending_offers_unknown_kind(
+    session: Session, tasks: list[Task], client: TestClient
+):
+    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/gamepad/offers")
+    assert response.status_code == 422
 
 
 def test_api_get_pending_offers_excludes_answered(
@@ -231,20 +342,20 @@ def test_api_get_pending_offers_excludes_answered(
     crud.create_webrtc_answer(session=session, offer_id=offer1.id, sdp="answer-sdp")
     session.commit()
 
-    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/offers")
+    response = client.get(f"/api/v1/tasks/{tasks[0].id}/teleoperation/keyboard/offers")
     assert [o["id"] for o in response.json()] == [offer2.id]
 
 
 def test_api_get_pending_offers_missing_task(
     session: Session, tasks: list[Task], client: TestClient
 ):
-    response = client.get("/api/v1/tasks/9999/teleoperation/offers")
+    response = client.get("/api/v1/tasks/9999/teleoperation/keyboard/offers")
     assert response.status_code == 404
 
 
 def test_api_get_pending_offers_requires_api_key(session: Session, tasks: list[Task]):
     response = _anonymous_client().get(
-        f"/api/v1/tasks/{tasks[0].id}/teleoperation/offers"
+        f"/api/v1/tasks/{tasks[0].id}/teleoperation/keyboard/offers"
     )
     assert response.status_code == 401
 

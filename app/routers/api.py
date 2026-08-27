@@ -35,6 +35,7 @@ from app.models import (
     RolloutCreate,
     Submission,
     Task,
+    TeleoperationKind,
     UploadUrlResponse,
     WebRTCAnswer,
     WebRTCAnswerRequest,
@@ -136,18 +137,26 @@ def api_fail_job(
     )
 
 
-@router.get("/tasks/{id}/teleoperation/offers", response_model=list[PendingWebRTCOffer])
-def api_get_pending_webrtc_offers(id: int, session: SessionDep, api_key: CurrentApiKey):
+# The kind is part of the path, mirroring the browser-facing signaling
+# endpoints: a runner polls for the kinds it can answer.
+@router.get(
+    "/tasks/{id}/teleoperation/{kind}/offers",
+    response_model=list[PendingWebRTCOffer],
+)
+def api_get_pending_webrtc_offers(
+    id: int, kind: TeleoperationKind, session: SessionDep, api_key: CurrentApiKey
+):
     task = crud.find_task(session=session, id=id)
     if task is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=f"Task({id}) not found"
         )
-    offers = crud.get_pending_webrtc_offers(session=session, task_id=id)
+    offers = crud.get_pending_webrtc_offers(session=session, task_id=id, kind=kind)
     return [
         PendingWebRTCOffer(
             id=offer.id,
             task_id=offer.task_id,
+            kind=offer.kind,
             sdp=offer.sdp,
             created_at=offer.created_at,
             runtime=task.runtime,

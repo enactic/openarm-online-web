@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}VR teleoperation - {{ task.name }} - {{ site_name }}{% endblock %}
+{% block content %}
+  <h1>VR teleoperation - {{ task.name }}</h1>
+  <p>{{ task.prompt }}</p>
+  <p>
+    <button id="connect" type="button">Connect</button>
+    <button id="start" type="button" disabled>Start</button>
+  </p>
+  <p>
+    <span id="status">not connected</span>
+  </p>
+  <p>
+    <small>
+      Open this page in the browser of a VR device such as Meta Quest 3
+      or PICO 4. Connect makes the connection to the robot, and Start
+      then enters the immersive session.
+    </small>
+  </p>
+  <pre id="log"></pre>
+  <script type="module" src="{{ url_for('static', path='webxr/ar.js') }}"></script>
+{% endblock %}
