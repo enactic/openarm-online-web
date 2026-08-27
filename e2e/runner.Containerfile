@@ -58,4 +58,4 @@ ENV RECORDER_BASE_DIRECTORY=/runner/tmp
 
 RUN uv run dora build "${DATAFLOW_FILE}" --uv
 
-CMD ["uv", "run", "python", "-m", "openarm_online_runner.runner"]
+CMD ["uv", "run", "openarm-online-runner"]
