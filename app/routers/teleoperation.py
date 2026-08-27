@@ -25,7 +25,12 @@ from app.deps import (
     SessionDep,
     may_teleoperate,
 )
-from app.models import WebRTCAnswerResponse, WebRTCOfferRequest, WebRTCOfferResponse
+from app.models import (
+    TeleoperationKind,
+    WebRTCAnswerResponse,
+    WebRTCOfferRequest,
+    WebRTCOfferResponse,
+)
 from app.responses import not_found
 from app.settings import settings
 from app.templates import templates
@@ -33,8 +38,8 @@ from app.templates import templates
 router = APIRouter(prefix="/tasks/{task_id}/teleoperation", include_in_schema=False)
 
 
-@router.get("", response_class=HTMLResponse)
-def teleoperation_page(
+@router.get("/keyboard", response_class=HTMLResponse)
+def teleoperation_keyboard_page(
     task_id: int,
     request: Request,
     session: SessionDep,
@@ -49,7 +54,7 @@ def teleoperation_page(
         raise NotAdmin()
     return templates.TemplateResponse(
         request,
-        "teleoperation.html",
+        "teleoperation/keyboard.html",
         {
             "site_name": settings.SITE_NAME,
             "current_user": current_user,
@@ -58,9 +63,42 @@ def teleoperation_page(
     )
 
 
-@router.post("/offers")
+# The WebXR page drives the robot from a VR headset. Its frontend is
+# vendored from dora-openarm-webxr (static/webxr/), whose node the
+# runner starts in WebRTC-only mode to answer the offer this page makes
+# through the same signaling endpoints as the keyboard page.
+@router.get("/webxr", response_class=HTMLResponse)
+def teleoperation_webxr_page(
+    task_id: int,
+    request: Request,
+    session: SessionDep,
+    current_user: CurrentUserOptional,
+):
+    task = crud.find_task(session=session, id=task_id)
+    if task is None:
+        return not_found(request, current_user)
+    if not may_teleoperate(task, current_user):
+        if current_user is None:
+            raise NotLoggedIn()
+        raise NotAdmin()
+    return templates.TemplateResponse(
+        request,
+        "teleoperation/webxr.html",
+        {
+            "site_name": settings.SITE_NAME,
+            "current_user": current_user,
+            "task": task,
+        },
+    )
+
+
+# The kind sits in the path, mirroring the page URLs, so the pages can
+# build these URLs from their own path and an offer always says which
+# dora node the runner should start to answer it.
+@router.post("/{kind}/offers")
 def create_webrtc_offer(
     task_id: int,
+    kind: TeleoperationKind,
     body: WebRTCOfferRequest,
     session: SessionDep,
     current_user: CurrentUserOptional,
@@ -75,21 +113,24 @@ def create_webrtc_offer(
     crud.delete_stale_webrtc_offers(
         session=session, ttl=timedelta(seconds=settings.WEBRTC_OFFER_TTL)
     )
-    offer = crud.create_webrtc_offer(session=session, task_id=task_id, sdp=body.sdp)
+    offer = crud.create_webrtc_offer(
+        session=session, task_id=task_id, sdp=body.sdp, kind=kind
+    )
     return WebRTCOfferResponse(id=offer.id)
 
 
 # This is not GET even though it retrieves the answer: retrieving also
 # deletes the offer and the answer, so it must not be a safe method.
-@router.post("/offers/{offer_id}/answer/claim")
+@router.post("/{kind}/offers/{offer_id}/answer/claim")
 def claim_webrtc_answer(
     task_id: int,
+    kind: TeleoperationKind,
     offer_id: int,
     session: SessionDep,
     current_user: CurrentUserOptional,
 ):
     offer = crud.find_webrtc_offer(session=session, id=offer_id)
-    if offer is None or offer.task_id != task_id:
+    if offer is None or offer.task_id != task_id or offer.kind != kind:
         raise HTTPException(status_code=404, detail="Offer not found")
     if not may_teleoperate(offer.task, current_user):
         raise HTTPException(

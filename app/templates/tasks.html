@@ -38,7 +38,9 @@
           </td>
           <td>
             {% if may_teleoperate(task, current_user) %}
-              <a href="{{ url_for('teleoperation_page', task_id=task.id) }}">Teleoperation</a>
+              <a href="{{ url_for('teleoperation_keyboard_page', task_id=task.id) }}">Keyboard</a>
+              /
+              <a href="{{ url_for('teleoperation_webxr_page', task_id=task.id) }}">VR</a>
             {% endif %}
           </td>
           {% if is_admin(current_user) %}
