@@ -18,34 +18,36 @@
       <button type="submit">Delete</button>
     </form>
   {% endif %}
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Prompt</th>
-        <th>Reset Docker tag</th>
-        <th>Runtime</th>
-        <th>Created</th>
-        <th>Submissions</th>
-        <th>Leaderboard</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ task.id }}</td>
-        <td>{{ task.name }}</td>
-        <td>{{ task.prompt }}</td>
-        <td>{{ task.reset_docker_tag or "-" }}</td>
-        <td>{{ task.runtime }}</td>
-        <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
-        <td>
-          <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
-        </td>
-        <td>
-          <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="overflow-auto">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Prompt</th>
+          <th>Reset Docker tag</th>
+          <th>Runtime</th>
+          <th>Created</th>
+          <th>Submissions</th>
+          <th>Leaderboard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ task.id }}</td>
+          <td>{{ task.name }}</td>
+          <td>{{ task.prompt }}</td>
+          <td>{{ task.reset_docker_tag or "-" }}</td>
+          <td>{{ task.runtime }}</td>
+          <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
+          <td>
+            <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
+          </td>
+          <td>
+            <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

@@ -2,53 +2,57 @@
 {% block title %}API key - {{ api_key.name }} - {{ site_name }}{% endblock %}
 {% block content %}
   <h1>API key</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Created</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ api_key.id }}</td>
-        <td>{{ api_key.name }}</td>
-        <td>{{ api_key.created_at.isoformat(timespec="seconds") }}</td>
-        <td>
-          <form method="post"
-                action="{{ url_for('delete_api_key_page', id=api_key.id) }}">
-            <button type="submit">Delete</button>
-          </form>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h2>Running jobs</h2>
-  {% if claimed_executions %}
+  <div class="overflow-auto">
     <table>
       <thead>
         <tr>
-          <th>Job ID</th>
-          <th>Task name</th>
-          <th>Submission</th>
-          <th>Claimed</th>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Created</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        {% for claimed_execution in claimed_executions %}
-          <tr>
-            <td>{{ claimed_execution.job_id }}</td>
-            <td>{{ claimed_execution.job.submission.task.name }}</td>
-            <td>
-              <a href="{{ url_for('submission_page', id=claimed_execution.job.submission_id) }}">{{ claimed_execution.job.submission_id }}</a>
-            </td>
-            <td>{{ claimed_execution.created_at.isoformat(timespec="seconds") }}</td>
-          </tr>
-        {% endfor %}
+        <tr>
+          <td>{{ api_key.id }}</td>
+          <td>{{ api_key.name }}</td>
+          <td>{{ api_key.created_at.isoformat(timespec="seconds") }}</td>
+          <td>
+            <form method="post"
+                  action="{{ url_for('delete_api_key_page', id=api_key.id) }}">
+              <button type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
       </tbody>
     </table>
+  </div>
+  <h2>Running jobs</h2>
+  {% if claimed_executions %}
+    <div class="overflow-auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Job ID</th>
+            <th>Task name</th>
+            <th>Submission</th>
+            <th>Claimed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for claimed_execution in claimed_executions %}
+            <tr>
+              <td>{{ claimed_execution.job_id }}</td>
+              <td>{{ claimed_execution.job.submission.task.name }}</td>
+              <td>
+                <a href="{{ url_for('submission_page', id=claimed_execution.job.submission_id) }}">{{ claimed_execution.job.submission_id }}</a>
+              </td>
+              <td>{{ claimed_execution.created_at.isoformat(timespec="seconds") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
     <p>No running jobs.</p>
   {% endif %}

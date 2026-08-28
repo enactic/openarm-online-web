@@ -12,30 +12,32 @@
     Task name: <a href="{{ url_for('task_page', id=submission.task.id) }}">{{ submission.task.name }}</a>
   </div>
   {% if paginator.items %}
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Created</th>
-          <th>Success</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for rollout in paginator.items %}
+    <div class="overflow-auto">
+      <table>
+        <thead>
           <tr>
-            <td>{{ rollout.id }}</td>
-            <td>{{ rollout.created_at.isoformat(timespec="seconds") }}</td>
-            <td>{{ rollout.success }}</td>
-            <td>
-              <a href="{{ rerun_viewer_url(rollout.s3_key) }}"
-                 target="_blank"
-                 rel="noopener">Rerun.io viewer</a>
-            </td>
+            <th>ID</th>
+            <th>Created</th>
+            <th>Success</th>
+            <th>Details</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for rollout in paginator.items %}
+            <tr>
+              <td>{{ rollout.id }}</td>
+              <td>{{ rollout.created_at.isoformat(timespec="seconds") }}</td>
+              <td>{{ rollout.success }}</td>
+              <td>
+                <a href="{{ rerun_viewer_url(rollout.s3_key) }}"
+                   target="_blank"
+                   rel="noopener">Rerun.io viewer</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {{ macro.pagination(paginator) }}
   {% else %}
     <p>No rollouts yet.</p>
@@ -43,39 +45,41 @@
   {% if is_owner %}
     <h2>Jobs</h2>
     {% if jobs %}
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Created</th>
-            <th>Status</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for job in jobs %}
+      <div class="overflow-auto">
+        <table>
+          <thead>
             <tr>
-              <td>{{ job.id }}</td>
-              <td>{{ job.created_at.isoformat(timespec="seconds") }}</td>
-              {% if job.failed_execution %}
-                <td>
-                  Failed
-                  <form method="post" action="{{ url_for('retry_job_page', id=job.id) }}">
-                    <button type="submit">Re-run</button>
-                  </form>
-                </td>
-                <td>{{ job.failed_execution.reason }}</td>
-              {% elif job.claimed_execution %}
-                <td>Running</td>
-                <td></td>
-              {% else %}
-                <td>Waiting</td>
-                <td></td>
-              {% endif %}
+              <th>ID</th>
+              <th>Created</th>
+              <th>Status</th>
+              <th>Reason</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for job in jobs %}
+              <tr>
+                <td>{{ job.id }}</td>
+                <td>{{ job.created_at.isoformat(timespec="seconds") }}</td>
+                {% if job.failed_execution %}
+                  <td>
+                    Failed
+                    <form method="post" action="{{ url_for('retry_job_page', id=job.id) }}">
+                      <button type="submit">Re-run</button>
+                    </form>
+                  </td>
+                  <td>{{ job.failed_execution.reason }}</td>
+                {% elif job.claimed_execution %}
+                  <td>Running</td>
+                  <td></td>
+                {% else %}
+                  <td>Waiting</td>
+                  <td></td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
       <p>No jobs.</p>
     {% endif %}

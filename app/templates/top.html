@@ -1,9 +1,28 @@
 {% extends "base.html" %}
 {% block title %}TOP - {{ site_name }}{% endblock %}
 {% block content %}
-  <h1>{{ site_name }}</h1>
-  <p>Welcome!</p>
-  <section>
-    <a href="{{ url_for('list_tasks_page') }}">Tasks</a>
+  <section class="openarm-hero">
+    <h1>{{ site_name }}</h1>
+    <p>
+      Submit your policy, run it against OpenArm tasks, and compare results
+      on the leaderboard.
+    </p>
+    <div class="openarm-hero-actions">
+      {% if current_user and is_admin(current_user) %}
+        <a href="{{ url_for('list_tasks_page') }}" role="button">Browse tasks</a>
+        <a href="{{ url_for('list_submissions_by_user_page', id=current_user.id) }}"
+           role="button"
+           class="secondary outline">My submissions</a>
+      {% else %}
+        <ul>
+          <li>
+            <a href="{{ url_for('teleoperation_keyboard_page', task_id=1) }}">MuJoCo Keyboard</a>
+          </li>
+          <li>
+            <a href="{{ url_for('teleoperation_webxr_page', task_id=1) }}">MuJoCo VR</a>
+          </li>
+        </ul>
+      {% endif %}
+    </div>
   </section>
 {% endblock %}

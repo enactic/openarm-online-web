@@ -6,24 +6,26 @@
     Store this API key now.
     It won't be shown again.
   </p>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>API key</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ api_key.id }}</td>
-        <td>{{ api_key.name }}</td>
-        <td>
-          <code>{{ key }}</code>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="overflow-auto">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>API key</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ api_key.id }}</td>
+          <td>{{ api_key.name }}</td>
+          <td>
+            <code>{{ key }}</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   <p>
     <a href="{{ url_for('list_api_keys_page') }}">Back to API keys</a>
   </p>

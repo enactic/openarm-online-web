@@ -1,0 +1,417 @@
+/*
+ * Copyright 2026 Enactic, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * OpenArm brand theme layered on top of Pico CSS.
+ *
+ * Colors, fonts and the logo come from https://openarm.dev and
+ * https://docs.openarm.dev:
+ *   - accent teal #5fbbc7 (docs light theme) / #73e0e4 (docs dark theme)
+ *   - Outfit for the wordmark and headings, Noto Sans for body text
+ *   - near-black #10191c / #000 surfaces (openarm.dev)
+ */
+
+:root {
+  --openarm-teal: #5fbbc7;
+  --openarm-teal-dark: #48919b;
+  --openarm-teal-light: #71dbe9;
+  --openarm-ink: #10191c;
+  --openarm-black: #000;
+  --openarm-gray: #cdd3d4;
+
+  --pico-font-family-sans-serif:
+    "Noto Sans", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --pico-font-family: var(--pico-font-family-sans-serif);
+  --pico-border-radius: 0.5rem;
+  --pico-font-weight: 400;
+  --pico-form-element-spacing-vertical: 0.6rem;
+  --pico-form-element-spacing-horizontal: 0.9rem;
+}
+
+/*
+ * Light theme (docs.openarm.dev).
+ *
+ * Pico defines its light palette on `:root:not([data-theme=dark])`, so the
+ * override needs the same specificity to win.
+ */
+:root:not([data-theme="dark"]),
+:root[data-theme="light"] {
+  --pico-primary: var(--openarm-teal-dark);
+  --pico-primary-hover: #3b7a83;
+  --pico-primary-underline: rgba(72, 145, 155, 0.5);
+  --pico-primary-focus: rgba(95, 187, 199, 0.4);
+  --pico-primary-background: var(--openarm-teal);
+  --pico-primary-hover-background: #52aebb;
+  --pico-primary-border: var(--openarm-teal);
+  --pico-primary-hover-border: #52aebb;
+  --pico-primary-inverse: var(--openarm-ink);
+  --pico-color: #1c2325;
+  --pico-h1-color: var(--openarm-ink);
+  --pico-h2-color: var(--openarm-ink);
+  --pico-h3-color: var(--openarm-ink);
+  --pico-background-color: #fff;
+  --pico-mark-background-color: #fff3cd;
+  --pico-mark-color: #4d3800;
+  --openarm-header-background: rgba(255, 255, 255, 0.85);
+  --openarm-header-border: rgba(16, 25, 28, 0.1);
+  --openarm-header-color: var(--openarm-ink);
+  --openarm-footer-background: var(--openarm-ink);
+  --openarm-footer-color: var(--openarm-gray);
+}
+
+/* Dark theme (openarm.dev). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pico-primary: #73e0e4;
+    --pico-primary-hover: #bafdff;
+    --pico-primary-underline: rgba(115, 224, 228, 0.5);
+    --pico-primary-focus: rgba(115, 224, 228, 0.35);
+    --pico-primary-background: var(--openarm-teal);
+    --pico-primary-hover-background: var(--openarm-teal-light);
+    --pico-primary-border: var(--openarm-teal);
+    --pico-primary-hover-border: var(--openarm-teal-light);
+    --pico-primary-inverse: var(--openarm-ink);
+    --pico-color: var(--openarm-gray);
+    --pico-h1-color: #fff;
+    --pico-h2-color: #fff;
+    --pico-h3-color: #fff;
+    --pico-background-color: var(--openarm-black);
+    --pico-card-background-color: var(--openarm-ink);
+    --pico-card-sectioning-background-color: #0b1214;
+    --pico-form-element-background-color: var(--openarm-ink);
+    --pico-form-element-border-color: #2a373b;
+    --pico-table-border-color: #1f2a2e;
+    --pico-muted-border-color: #1f2a2e;
+    --openarm-header-background: rgba(16, 25, 28, 0.75);
+    --openarm-header-border: rgba(255, 255, 255, 0.12);
+    --openarm-header-color: #fff;
+    --openarm-footer-background: var(--openarm-ink);
+    --openarm-footer-color: var(--openarm-gray);
+  }
+}
+
+:root[data-theme="dark"] {
+  --pico-primary: #73e0e4;
+  --pico-primary-hover: #bafdff;
+  --pico-primary-underline: rgba(115, 224, 228, 0.5);
+  --pico-primary-focus: rgba(115, 224, 228, 0.35);
+  --pico-primary-background: var(--openarm-teal);
+  --pico-primary-hover-background: var(--openarm-teal-light);
+  --pico-primary-border: var(--openarm-teal);
+  --pico-primary-hover-border: var(--openarm-teal-light);
+  --pico-primary-inverse: var(--openarm-ink);
+  --pico-color: var(--openarm-gray);
+  --pico-h1-color: #fff;
+  --pico-h2-color: #fff;
+  --pico-h3-color: #fff;
+  --pico-background-color: var(--openarm-black);
+  --pico-card-background-color: var(--openarm-ink);
+  --pico-card-sectioning-background-color: #0b1214;
+  --pico-form-element-background-color: var(--openarm-ink);
+  --pico-form-element-border-color: #2a373b;
+  --pico-table-border-color: #1f2a2e;
+  --pico-muted-border-color: #1f2a2e;
+  --openarm-header-background: rgba(16, 25, 28, 0.75);
+  --openarm-header-border: rgba(255, 255, 255, 0.12);
+  --openarm-header-color: #fff;
+  --openarm-footer-background: var(--openarm-ink);
+  --openarm-footer-color: var(--openarm-gray);
+}
+
+html {
+  font-feature-settings: "palt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body > main {
+  flex: 1 0 auto;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+h2 {
+  font-size: 1.375rem;
+  margin-top: 2rem;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.openarm-header {
+  padding-block: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--openarm-header-background);
+  border-bottom: 1px solid var(--openarm-header-border);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.openarm-header nav {
+  min-height: 4rem;
+  flex-wrap: wrap;
+}
+
+.openarm-header nav ul {
+  flex-wrap: wrap;
+}
+
+.openarm-header nav li {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.openarm-header nav a {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 300;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--openarm-header-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.openarm-header nav a:hover,
+.openarm-header nav a:focus-visible {
+  color: var(--openarm-teal);
+  background: none;
+}
+
+.openarm-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.openarm-brand .openarm-logo {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+}
+
+.openarm-brand span {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 400;
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--openarm-header-color);
+}
+
+.openarm-brand small {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 300;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  color: var(--openarm-teal);
+}
+
+.openarm-header nav .openarm-nav-external a::after {
+  content: "";
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.3em;
+  vertical-align: 0.05em;
+  background-color: currentColor;
+  -webkit-mask:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 19 18' fill='none' stroke='black' stroke-width='1.6'><path d='M4.7 13.8 13.9 4.5'/><path d='M5.9 4.1l8.1.4.4 8.1'/></svg>")
+    no-repeat center / contain;
+  mask:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 19 18' fill='none' stroke='black' stroke-width='1.6'><path d='M4.7 13.8 13.9 4.5'/><path d='M5.9 4.1l8.1.4.4 8.1'/></svg>")
+    no-repeat center / contain;
+}
+
+/* Footer ------------------------------------------------------------------ */
+
+.openarm-footer {
+  padding: 2.5rem 0 1.5rem;
+}
+
+.openarm-footer .openarm-footer-inner {
+  background: var(--openarm-footer-background);
+  color: var(--openarm-footer-color);
+  border-radius: 1rem;
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 300;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+
+.openarm-footer .openarm-brand span {
+  color: #fff;
+}
+
+.openarm-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.openarm-footer li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.openarm-footer a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.openarm-footer a:hover,
+.openarm-footer a:focus-visible {
+  color: var(--openarm-teal);
+}
+
+.openarm-footer-meta {
+  flex-basis: 100%;
+  border-top: 1px solid var(--openarm-teal);
+  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  color: var(--openarm-footer-color);
+}
+
+.openarm-footer-meta a {
+  color: var(--openarm-footer-color);
+}
+
+/* Content ----------------------------------------------------------------- */
+
+table {
+  font-size: 0.9375rem;
+}
+
+th {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+td form {
+  margin: 0;
+}
+
+td form button,
+td button {
+  width: auto;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+form button[type="submit"] {
+  width: auto;
+}
+
+[role="button"],
+button {
+  font-family: Outfit, var(--pico-font-family-sans-serif);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.openarm-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 1.5rem 0;
+}
+
+.openarm-pagination a,
+.openarm-pagination b {
+  display: inline-block;
+  min-width: 2.25rem;
+  padding: 0.35rem 0.6rem;
+  text-align: center;
+  border-radius: var(--pico-border-radius);
+  text-decoration: none;
+}
+
+.openarm-pagination b {
+  background: var(--pico-primary-background);
+  color: var(--pico-primary-inverse);
+}
+
+.openarm-pagination a:hover {
+  background: var(--pico-secondary-focus);
+}
+
+/* Top page hero. */
+.openarm-hero {
+  padding: 3rem 0 2rem;
+}
+
+.openarm-hero h1 {
+  font-size: 2.75rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.openarm-hero p {
+  max-width: 40rem;
+  font-size: 1.125rem;
+  color: var(--pico-muted-color);
+}
+
+.openarm-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.openarm-hero-actions [role="button"] {
+  width: auto;
+}

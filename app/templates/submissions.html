@@ -28,34 +28,36 @@
     <br />
   {% endif %}
   {% if paginator.items %}
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Task name</th>
-          <th>Docker tag</th>
-          <th>Created</th>
-          <th>Number of rollouts</th>
-          <th>Success rate</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for submission in paginator.items %}
+    <div class="overflow-auto">
+      <table>
+        <thead>
           <tr>
-            <td>{{ submission.id }}</td>
-            <td>{{ submission.task_name }}</td>
-            <td>{{ submission.docker_tag }}</td>
-            <td>{{ submission.created_at.isoformat(timespec="seconds") }}</td>
-            <td>{{ submission.count }}</td>
-            <td>{{ format_rate(submission.success_rate) }}</td>
-            <td>
-              <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Rollouts</a>
-            </td>
+            <th>ID</th>
+            <th>Task name</th>
+            <th>Docker tag</th>
+            <th>Created</th>
+            <th>Number of rollouts</th>
+            <th>Success rate</th>
+            <th></th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for submission in paginator.items %}
+            <tr>
+              <td>{{ submission.id }}</td>
+              <td>{{ submission.task_name }}</td>
+              <td>{{ submission.docker_tag }}</td>
+              <td>{{ submission.created_at.isoformat(timespec="seconds") }}</td>
+              <td>{{ submission.count }}</td>
+              <td>{{ format_rate(submission.success_rate) }}</td>
+              <td>
+                <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Rollouts</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {{ macro.pagination(paginator) }}
   {% else %}
     <p>No submissions yet.</p>
