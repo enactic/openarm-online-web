@@ -3,32 +3,34 @@
 {% block title %}Submission - {{ site_name }}{% endblock %}
 {% block content %}
   <h1>Submission</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Task name</th>
-        <th>Docker tag</th>
-        <th>Created by</th>
-        <th>Created</th>
-        <th>Number of rollouts</th>
-        <th>Success rate</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ submission.id }}</td>
-        <td>{{ submission.task_name }}</td>
-        <td>{{ submission.docker_tag }}</td>
-        <td>{{ macro.user_name(user, link=true) }}</td>
-        <td>{{ submission.created_at.isoformat(timespec="seconds") }}</td>
-        <td>{{ submission.count }}</td>
-        <td>{{ format_rate(submission.success_rate) }}</td>
-        <td>
-          <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Rollouts</a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="overflow-auto">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Task name</th>
+          <th>Docker tag</th>
+          <th>Created by</th>
+          <th>Created</th>
+          <th>Number of rollouts</th>
+          <th>Success rate</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ submission.id }}</td>
+          <td>{{ submission.task_name }}</td>
+          <td>{{ submission.docker_tag }}</td>
+          <td>{{ macro.user_name(user, link=true) }}</td>
+          <td>{{ submission.created_at.isoformat(timespec="seconds") }}</td>
+          <td>{{ submission.count }}</td>
+          <td>{{ format_rate(submission.success_rate) }}</td>
+          <td>
+            <a href="{{ url_for('list_rollouts_page').include_query_params(submission_id=submission.id) }}">Rollouts</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

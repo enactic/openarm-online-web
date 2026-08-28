@@ -4,18 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
+    <link rel="icon"
+          href="{{ url_for('static', path='images/favicon.ico') }}"
+          sizes="any">
+    <link rel="icon"
+          type="image/svg+xml"
+          href="{{ url_for('static', path='images/logo.svg') }}">
+    <link rel="apple-touch-icon"
+          sizes="180x180"
+          href="{{ url_for('static', path='images/apple-touch-icon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Noto+Sans:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet"
+          href="{{ url_for('static', path='css/openarm.css') }}">
     <title>
       {% block title %}{{ site_name }}{% endblock %}
     </title>
   </head>
   <body>
-    <header class="container">
-      <nav>
+    <header class="openarm-header">
+      <nav class="container">
         <ul>
           <li>
-            <a href="{{ url_for('top_page') }}">TOP</a>
+            <a href="{{ url_for('top_page') }}"
+               class="openarm-brand"
+               aria-label="{{ site_name }}">
+              {% include "logo.svg.html" %}
+              <span>OpenArm</span>
+              <small>Online</small>
+            </a>
           </li>
         </ul>
         <ul>
@@ -24,13 +45,16 @@
               <li>
                 <a href="{{ url_for('list_api_keys_page') }}">API keys</a>
               </li>
+              <li>
+                <a href="{{ url_for('list_tasks_page') }}">Tasks</a>
+              </li>
+              <li>
+                <a href="{{ url_for('list_submissions_by_user_page', id=current_user.id) }}">My Submissions</a>
+              </li>
+              <li>
+                <a href="{{ url_for('user_page', id=current_user.id) }}">Profile</a>
+              </li>
             {% endif %}
-            <li>
-              <a href="{{ url_for('user_page', id=current_user.id) }}">Profile</a>
-            </li>
-            <li>
-              <a href="{{ url_for('list_submissions_by_user_page', id=current_user.id) }}">My Submissions</a>
-            </li>
             <li>
               <a href="{{ url_for('logout') }}">Logout</a>
             </li>
@@ -45,10 +69,42 @@
     <main class="container">
       {% block content %}{% endblock %}
     </main>
-    {% if revision %}
-      <footer class="container">
-        <small>Revision: {{ revision }}</small>
-      </footer>
-    {% endif %}
+    <footer class="openarm-footer container">
+      <div class="openarm-footer-inner">
+        <a href="https://openarm.dev"
+           class="openarm-brand"
+           target="_blank"
+           rel="noopener noreferrer">
+          {% include "logo.svg.html" %}
+          <span>OpenArm</span>
+        </a>
+        <ul>
+          <li>
+            <a href="https://openarm.dev" target="_blank" rel="noopener noreferrer">Website</a>
+          </li>
+          <li>
+            <a href="https://docs.openarm.dev"
+               target="_blank"
+               rel="noopener noreferrer">Documentation</a>
+          </li>
+          <li>
+            <a href="https://github.com/enactic/OpenArm"
+               target="_blank"
+               rel="noopener noreferrer">GitHub</a>
+          </li>
+          <li>
+            <a href="https://discord.gg/UmrupEJUZH"
+               target="_blank"
+               rel="noopener noreferrer">Discord</a>
+          </li>
+        </ul>
+        <div class="openarm-footer-meta">
+          <span>
+            <a href="https://enactic.ai" target="_blank" rel="noopener noreferrer">©Enactic, Inc.</a>
+          </span>
+          {% if revision %}<span>Revision: {{ revision }}</span>{% endif %}
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

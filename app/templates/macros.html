@@ -13,10 +13,10 @@
   {{ user_label((user.github.name or user.github.login_name) if is_active_user(user) else none, user.id, link) }}
 {% endmacro %}
 {% macro pagination(pagenator) %}
-  <div>
+  <div class="openarm-pagination" role="navigation" aria-label="Pagination">
     {% if pagenator.page > 1 %}
       <span>
-        <a href="{{ update_query_params(page=pagenator.page - 1) }}">Next</a>
+        <a href="{{ update_query_params(page=pagenator.page - 1) }}">Prev</a>
       </span>
     {% endif %}
     {% for i in range(1, total_pages(pagenator) + 1) %}

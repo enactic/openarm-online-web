@@ -8,49 +8,51 @@
       <a href="{{ url_for('new_task_page') }}" role="button">New task</a>
     </p>
   {% endif %}
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Prompt</th>
-        <th>Runtime</th>
-        <th>Created</th>
-        <th>Submissions</th>
-        <th>Leaderboard</th>
-        <th>Teleoperation</th>
-        {% if is_admin(current_user) %}<th>Admin</th>{% endif %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for task in paginator.items %}
+  <div class="overflow-auto">
+    <table>
+      <thead>
         <tr>
-          <td>{{ task.id }}</td>
-          <td>{{ task.name }}</td>
-          <td>{{ task.prompt }}</td>
-          <td>{{ task.runtime }}</td>
-          <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
-          <td>
-            <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
-          </td>
-          <td>
-            <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
-          </td>
-          <td>
-            {% if may_teleoperate(task, current_user) %}
-              <a href="{{ url_for('teleoperation_keyboard_page', task_id=task.id) }}">Keyboard</a>
-              /
-              <a href="{{ url_for('teleoperation_webxr_page', task_id=task.id) }}">VR</a>
-            {% endif %}
-          </td>
-          {% if is_admin(current_user) %}
-            <td>
-              <a href="{{ url_for('edit_task_page', id=task.id) }}">Edit</a>
-            </td>
-          {% endif %}
+          <th>ID</th>
+          <th>Name</th>
+          <th>Prompt</th>
+          <th>Runtime</th>
+          <th>Created</th>
+          <th>Submissions</th>
+          <th>Leaderboard</th>
+          <th>Teleoperation</th>
+          {% if is_admin(current_user) %}<th>Admin</th>{% endif %}
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for task in paginator.items %}
+          <tr>
+            <td>{{ task.id }}</td>
+            <td>{{ task.name }}</td>
+            <td>{{ task.prompt }}</td>
+            <td>{{ task.runtime }}</td>
+            <td>{{ task.created_at.isoformat(timespec="seconds") }}</td>
+            <td>
+              <a href="{{ url_for('list_submissions_page').include_query_params(task_id=task.id) }}">Submissions</a>
+            </td>
+            <td>
+              <a href="{{ url_for('list_leaderboard_page').include_query_params(task_id=task.id) }}">Leaderboard</a>
+            </td>
+            <td>
+              {% if may_teleoperate(task, current_user) %}
+                <a href="{{ url_for('teleoperation_keyboard_page', task_id=task.id) }}">Keyboard</a>
+                /
+                <a href="{{ url_for('teleoperation_webxr_page', task_id=task.id) }}">VR</a>
+              {% endif %}
+            </td>
+            {% if is_admin(current_user) %}
+              <td>
+                <a href="{{ url_for('edit_task_page', id=task.id) }}">Edit</a>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {{ macro.pagination(paginator) }}
 {% endblock %}
