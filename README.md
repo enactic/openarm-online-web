@@ -1,5 +1,32 @@
 # OpenArm Online Web
 
+The web part of OpenArm Online, an evaluation service for
+[OpenArm](https://openarm.dev/) robot arms: submit your policy, run it
+against OpenArm tasks, and compare results with everyone else's. The
+production service runs at https://online.openarm.dev/ .
+
+## What you can do
+
+### Submit a policy
+
+Log in with your GitHub account, pick a task and register a
+submission: a Docker image that runs your policy. Runners connected to
+real or simulated OpenArm hardware pick up your submission, evaluate
+it against the task and report the results. Depending on the server's
+configuration, registration may be limited to specific GitHub users or
+organizations.
+
+### Watch and compare results
+
+Each evaluation run appears as a rollout with a
+[Rerun](https://rerun.io/) recording you can replay in the browser,
+and the leaderboard ranks submissions by their results per task.
+
+### Teleoperate a robot
+
+Some tasks can be driven live from the browser over WebRTC — with the
+keyboard, or in VR through WebXR on a headset.
+
 ## Web API
 
 Runners talk to the server through the Web API under `/api/v1/`. Its
@@ -13,128 +40,9 @@ via the "Authorize" button.
 
 ## Development
 
-### Setup
-
-#### 1. Clone the repository
-
-```bash
-git clone git@github.com:enactic/openarm-online-web.git
-cd openarm-online-web
-```
-
-From here on, work in the `openarm-online-web` directory.
-
-#### 2. Configure
-
-##### `.env`
-
-```bash
-cp .env.example .env
-```
-
-Please configure the following variables according to the comments in `.env`.
-
-* `GITHUB_CLIENT_ID`
-* `GITHUB_CLIENT_SECRET`
-* `SECRET_KEY`
-* `HMAC_KEY`
-
-To get the values for `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`,
-you need to [create a GitHub OAuth
-app](https://docs.github.com/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
-Here are the recommended OAuth app settings for the local environment:
-
-* Application name: `OpenArm Online local`
-* Homepage URL: `http://127.0.0.1:8000/`
-* Authorization callback URL: `http://127.0.0.1:8000/login/github/callback`
-
-For environments launched with Podman Compose, variables starting with `POSTGRES_` and `S3_` can remain unchanged.
-
-##### `config.yaml`
-
-Please copy the example file.
-
-```bash
-cp config.yaml.example config.yaml
-```
-
-By default, any logged-in user can register submissions.
-To restrict registration to specific GitHub users or organizations, edit `config.yaml` and fill in the allow lists.
-
-By default, nobody can use admin features.
-To use admin features, edit `config.yaml` and fill in the `admin` allow lists.
-
-#### 3. Initial Setup
-
-```bash
-scripts/setup.sh
-```
-
-```
-...
-openarm-online-key-xxx
-Configure 'OPENARM_ONLINE_API_KEY' in .env.runner and start it with 'podman-compose up -d'.
-```
-
-Finally, an API key will be displayed. Set it in the `.env.runner` file.
-
-```bash
-cp .env.runner.example .env.runner
-editor .env.runner
-```
-
-#### 4. Start up
-
-```bash
-podman-compose up -d
-```
-
-The server has started and can be accessed at http://127.0.0.1:8000/ .
-
-#### 5. Generate an API key
-
-```console
-$ podman-compose exec app /src/scripts/create_api_keys.py demo-key
-openarm-online-key-xxx
-```
-
-An API key is generated and displayed on stdout, use it when accessing the API.
-
-### HTTPS for WebXR testing
-
-WebXR only runs in a secure context, so testing the VR teleoperation
-page from a VR device needs HTTPS. An optional TLS-terminating reverse
-proxy is provided as the `https` compose service.
-
-Generate a self-signed certificate for a host name that the VR device
-can resolve. A `.local` host name configured automatically by Avahi is
-a convenient choice:
-
-```bash
-scripts/prepare_tls.sh $(hostname).local
-```
-
-Then start the proxy:
-
-```bash
-podman-compose --profile https up -d
-```
-
-The server can now be accessed at `https://$(hostname).local:8443/`
-from the VR device. The certificate is self-signed, so the browser
-shows a warning to step through once.
-
-Note that logging in over HTTPS needs the GitHub OAuth app's callback
-URL to match, so use a MuJoCo runtime task, whose teleoperation needs
-no login, unless you have set that up.
-
-### Before commit
-
-Run pre-commit before committing:
-
-```bash
-pre-commit run --show-diff-on-failure --color=always --all-files
-```
+Want to run the service locally or contribute? See
+[app/README.md](app/README.md) for the developer documentation,
+including setup, tests and database migrations.
 
 ## License
 

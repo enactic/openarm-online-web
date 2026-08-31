@@ -15,6 +15,9 @@ dependencies = [
     "sqlmodel>=0.0.33",
 ]
 
+[project.urls]
+Repository = "https://github.com/enactic/openarm-online-web"
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
