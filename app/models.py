@@ -114,6 +114,8 @@ class ApiKey(SQLModel, table=True):
 
 
 class Runtime(StrEnum):
+    """Where a task runs: on a real robot cell or in simulation."""
+
     OPENARM_CELL = "OpenArm Cell"
     MUJOCO = "MuJoCo"
 
@@ -127,9 +129,16 @@ def _check_reset_docker_tag(runtime: Runtime, reset_docker_tag: str | None):
 
 class Task(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(min_length=1, max_length=255)
-    prompt: str = Field(sa_type=Text)
-    reset_docker_tag: str | None = Field(default=None, max_length=255)
+    name: str = Field(min_length=1, max_length=255, description="Human-readable name")
+    prompt: str = Field(sa_type=Text, description="The instruction given to the policy")
+    reset_docker_tag: str | None = Field(
+        default=None,
+        max_length=255,
+        description=(
+            "Docker image that resets the environment between runs; "
+            "`null` for simulated runtimes"
+        ),
+    )
     runtime: Runtime = Field(
         default=Runtime.OPENARM_CELL,
         sa_column=Column(
@@ -159,9 +168,15 @@ class Task(SQLModel, table=True):
 
 class Submission(SQLModel, table=True):
     id: int = Field(primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
-    task_id: int = Field(foreign_key="task.id", index=True)
-    docker_tag: str = Field(max_length=255)
+    user_id: int = Field(
+        foreign_key="user.id", index=True, description="User who registered it"
+    )
+    task_id: int = Field(
+        foreign_key="task.id", index=True, description="Task it is evaluated against"
+    )
+    docker_tag: str = Field(
+        max_length=255, description="Docker image that runs the policy"
+    )
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
@@ -177,9 +192,20 @@ class Submission(SQLModel, table=True):
 
 
 class RolloutCreate(SQLModel):
-    submission_id: int = Field(foreign_key="submission.id", index=True, nullable=False)
-    success: bool = Field(nullable=False)
-    s3_key: str = Field(nullable=False, max_length=1024)
+    submission_id: int = Field(
+        foreign_key="submission.id",
+        index=True,
+        nullable=False,
+        description="Submission that was evaluated",
+    )
+    success: bool = Field(
+        nullable=False, description="Whether the policy accomplished the task"
+    )
+    s3_key: str = Field(
+        nullable=False,
+        max_length=1024,
+        description="Rerun recording of the run, uploaded via the upload URL",
+    )
 
 
 class Rollout(RolloutCreate, table=True):
@@ -277,8 +303,10 @@ class JobFailure(SQLModel, table=True):
     __tablename__ = "job_failure"
 
     id: int | None = Field(default=None, primary_key=True)
-    submission_id: int = Field(foreign_key="submission.id", index=True)
-    reason: str = Field(sa_type=Text)
+    submission_id: int = Field(
+        foreign_key="submission.id", index=True, description="Submission of the job"
+    )
+    reason: str = Field(sa_type=Text, description="Why the job couldn't be run")
     created_at: datetime = Field(
         sa_column=Column(
             DateTime(timezone=True),
@@ -288,9 +316,11 @@ class JobFailure(SQLModel, table=True):
     )
 
 
-# What kind of client made a teleoperation offer, so the runner can
-# start the matching dora node to answer it.
+# The runner uses the kind to start the matching dora node to answer
+# the offer.
 class TeleoperationKind(StrEnum):
+    """What kind of client made a teleoperation offer."""
+
     KEYBOARD = "keyboard"
     WEBXR = "webxr"
 
@@ -343,26 +373,34 @@ class WebRTCAnswer(SQLModel, table=True):
 
 
 class ClaimedJob(BaseModel):
-    job_id: int
+    job_id: int = Field(description="Use this ID to complete or fail the job")
     task_id: int
-    docker_tag: str
-    reset_docker_tag: str | None
-    prompt: str
+    docker_tag: str = Field(description="Docker image that runs the policy")
+    reset_docker_tag: str | None = Field(
+        description=(
+            "Docker image that resets the environment between runs; "
+            "`null` for simulated runtimes"
+        )
+    )
+    prompt: str = Field(description="The instruction given to the policy")
     runtime: str
 
 
 class CompleteJobRequest(BaseModel):
-    success: bool
-    s3_key: str = Field(max_length=1024)
+    success: bool = Field(description="Whether the policy accomplished the task")
+    s3_key: str = Field(
+        max_length=1024,
+        description="Rerun recording of the run, uploaded via the upload URL",
+    )
 
 
 class FailJobRequest(BaseModel):
-    reason: str
+    reason: str = Field(description="Why the job couldn't be run")
 
 
 class UploadUrlResponse(BaseModel):
-    url: str
-    s3_key: str
+    url: str = Field(description="Presigned URL to `PUT` the `.rrd` file to")
+    s3_key: str = Field(description="Key that references the upload afterwards")
 
 
 class TaskForm(BaseModel):
@@ -386,10 +424,10 @@ class TaskForm(BaseModel):
 
 
 class PendingWebRTCOffer(BaseModel):
-    id: int
+    id: int = Field(description="Use this ID to answer the offer")
     task_id: int
-    kind: str
-    sdp: str
+    kind: TeleoperationKind
+    sdp: str = Field(description="The offer's SDP")
     created_at: datetime
     runtime: str
 
@@ -398,7 +436,13 @@ class PendingWebRTCOffers(BaseModel):
     # Handed along with the offers so that the runner builds the node's
     # peer with the same servers (including short-lived TURN credentials
     # when a TURN key is configured) as the page.
-    ice_servers: list[dict]
+    ice_servers: list[dict] = Field(
+        description=(
+            "RTCIceServer-shaped entries to configure the answering "
+            "peer with, including short-lived TURN credentials when a "
+            "TURN server is configured"
+        )
+    )
     offers: list[PendingWebRTCOffer]
 
 
@@ -412,7 +456,7 @@ class WebRTCOfferResponse(BaseModel):
 
 
 class WebRTCAnswerRequest(BaseModel):
-    sdp: str
+    sdp: str = Field(description="The answer's SDP")
 
 
 class WebRTCAnswerResponse(BaseModel):

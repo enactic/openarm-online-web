@@ -1,5 +1,16 @@
 # OpenArm Online Web
 
+## Web API
+
+Runners talk to the server through the Web API under `/api/v1/`. Its
+reference, generated from the code, is served by the server itself at
+`/api/v1/reference` (also linked from the footer of every page): see
+https://online.openarm.dev/api/v1/reference for the production
+service, or [http://127.0.0.1:8000/api/v1/reference](http://127.0.0.1:8000/api/v1/reference)
+for a local one. It documents authentication, all endpoints, and their
+request/response schemas, and lets you try requests with your API key
+via the "Authorize" button.
+
 ## Development
 
 ### Setup
