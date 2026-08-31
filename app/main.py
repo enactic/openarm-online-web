@@ -60,7 +60,13 @@ async def lifespan(app: FastAPI):
             pass
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title=f"{settings.SITE_NAME} Web API",
+    description=api.DESCRIPTION,
+    version="v1",
+    openapi_tags=api.TAGS_METADATA,
+)
 app.include_router(api.router)
 app.include_router(api_key.router)
 app.include_router(job.router)
